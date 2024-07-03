@@ -6,12 +6,21 @@ import {
 } from 'react-router-dom'
 import Root from './routes/root.jsx'
 import './index.css'
+import ErrorPage from './routes/error-page.jsx'
+import ShortReporting from './routes/short-reporting.jsx'
 
-//TODO: Remove Appcss and Appjsx
+
 const router = createBrowserRouter([
 	{
 		path: "/",
-		element: <Root />
+		element: <Root />,
+		errorElement: <ErrorPage />,
+		children: [
+			{
+				path: 'short-reporting/',
+				element: <ShortReporting />
+			}
+		]
 	}
 ])
 

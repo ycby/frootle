@@ -39,6 +39,7 @@ body {
 
 #sidebar h1 {
   margin: 0;
+  padding: 10px;
 }
 
 #sidebar ul {
@@ -55,4 +56,10 @@ body {
   padding: 0.5rem;
   text-decoration: none;
   gap: 1rem;
+}
+
+#detail {
+  display: flex;
+  flex: 1;
+  padding: 20px;
 }
