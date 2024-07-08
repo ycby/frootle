@@ -11,7 +11,7 @@ export default function Root() {
 							<Link to={`/short-reporting`}>Short Reporting</Link>
 						</li>
 						<li>
-							<Link to={`/test/2`}>test2</Link>
+							<Link to={`/upload-data`}>Upload Data</Link>
 						</li>
 					</ul>
 				</nav>

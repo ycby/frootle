@@ -1,3 +1,5 @@
+import './TableGenerator.css'
+
 export default (headers, data, options) => {
 
 	//Expect:
@@ -7,16 +9,13 @@ export default (headers, data, options) => {
 	//Data = Array of Objects
 	//Options = Object of options
 
-	//preprocess the data so that
-	//	Headers not present in data is not shown
+	// if (options.matchHeadersWithData) {
 
-	if (options.matchHeadersWithData) {
-
-		headers = handleMatchHeadersWithData(headers, data)
-	}
+	// 	headers = handleMatchHeadersWithData(headers, data)
+	// }
 
 	return (
-		<table>
+		<table className='table-generator'>
 			{ createHeaders(headers) }
 			{ createBody(headers, data) }
 		</table>
@@ -65,8 +64,6 @@ function createRow(headers, data) {
 function handleMatchHeadersWithData(headers, data) {
 
 	if (data == undefined || data.length == 0) return headers
-
-	console.log(`What data am i: ${data}`)
 
 	return headers.filter((header) => data[0].hasOwnProperty(header.value))
 }
