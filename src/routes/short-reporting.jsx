@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Loading from '../helpers/Loading.jsx'
 import TableGenerator from '../helpers/TableGenerator.jsx'
 
 import { Chart, registerables } from 'chart.js'
 import { Chart as ReactChartJS } from 'react-chartjs-2'
+
+import { enGB } from 'date-fns/locale'
+import 'chartjs-adapter-date-fns'
 
 import './short-reporting.css'
 
@@ -67,6 +70,7 @@ export default function ShortReporting() {
 		}
 	]
 	const [data, setData] = useState([])
+	const ref = useRef()
 	const isLoaded = data.length !== 0
 
 	useEffect(() => {
@@ -88,6 +92,13 @@ export default function ShortReporting() {
 		getShortData()
 	}, [])
 
+	const chartData = data.map((d) => {
+		return {
+			x: d.reporting_date,
+			y: parseInt(d.shorted_shares.replaceAll(',', ''))
+		}
+	})
+	console.log(chartData)
 	Chart.register(...registerables)
 
 	return (
@@ -95,14 +106,24 @@ export default function ShortReporting() {
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
 			{
-				isLoaded ? <ReactChartJS id='short-reporting-chart' type='bar' data={{
-					labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-					datasets: [{
-						label: 'No of Votes',
-						data: [12, 4, 5, 13, 22, 10],
-						borderWidth: 1
-					}]
-				}} />
+				isLoaded ? 
+				<ReactChartJS
+					id='short-reporting-chart'
+					type='line'
+					data={{
+						datasets: [{
+							data: chartData
+						}]
+					}}
+					options={{
+						scales: {
+							xAxes: {
+								type: 'time',
+								distribution: 'linear'
+							}
+						}
+					}}
+				/>
 				:
 				Loading()
 			}
