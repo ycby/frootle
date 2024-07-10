@@ -1,14 +1,15 @@
-import { useState, useEffect, useRef } from 'react'
-import Loading from '../helpers/Loading.jsx'
-import TableGenerator from '../helpers/TableGenerator.jsx'
+import { useState, useEffect, useRef } from 'react';
+import Loading from '../helpers/Loading.jsx';
+import TableGenerator from '../helpers/TableGenerator.jsx';
+import FilterableSelect from '../helpers/FilterableSelect.jsx';
 
-import { Chart, registerables } from 'chart.js'
-import { Chart as ReactChartJS } from 'react-chartjs-2'
+import { Chart, registerables } from 'chart.js';
+import { Chart as ReactChartJS } from 'react-chartjs-2';
 
-import { enGB } from 'date-fns/locale'
-import 'chartjs-adapter-date-fns'
+import { enGB } from 'date-fns/locale';
+import 'chartjs-adapter-date-fns';
 
-import './short-reporting.css'
+import './short-reporting.css';
 
 export default function ShortReporting() {
 	
@@ -70,7 +71,6 @@ export default function ShortReporting() {
 		}
 	]
 	const [data, setData] = useState([])
-	const ref = useRef()
 	const isLoaded = data.length !== 0
 
 	useEffect(() => {
@@ -105,6 +105,7 @@ export default function ShortReporting() {
 		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
+			<FilterableSelect />
 			{
 				isLoaded ? 
 				<ReactChartJS
