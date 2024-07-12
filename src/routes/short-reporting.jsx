@@ -11,6 +11,25 @@ import 'chartjs-adapter-date-fns';
 
 import './short-reporting.css';
 
+//Test Data
+const dataList = [
+	{
+		label: 'Main Text 1',
+		value: 'uniqueid1',
+		subtext: 'Sub-Text 1 - a Brief description'
+	},
+	{
+		label: 'Main Text 2',
+		value: 'uniqueid2',
+		subtext: 'Sub-Text 2 - a Brief description'
+	},
+	{
+		label: 'Main Text 3',
+		value: 'uniqueid3',
+		subtext: 'Sub-Text 3 - a Brief description'
+	}
+];
+
 export default function ShortReporting() {
 	
 	const headers = [
@@ -70,14 +89,42 @@ export default function ShortReporting() {
 			type: 'Date'
 		}
 	]
-	const [data, setData] = useState([])
-	const isLoaded = data.length !== 0
+
+	const [data, setData] = useState([]);
+	const [stockData, setStockData] = useState([]);
+	const isLoaded = data.length !== 0;
+
+	useEffect(() => {
+
+		async function getStockData() {
+
+			const response = await fetch('http://localhost:3000/stock', {
+				method: 'GET'
+			})
+
+			if (!response.ok) throw new Error(`Response Status: ${response.status}`);
+
+			const jsonResponse = await response.json();
+			console.log(jsonResponse)
+
+			setStockData(jsonResponse.map((json) => {
+
+				return {
+					label: json.name,
+					value: json.code,
+					subtext: json.code
+				}
+			}));
+		}
+
+		getStockData();
+	}, [])
 
 	useEffect(() => {
 
 		async function getShortData() {
 
-			const response = await fetch('http://localhost:3000/shortdata', {
+			const response = await fetch(`http://localhost:3000/shortdata?stockcode=00001`, {
 				method: 'GET'
 			})
 
@@ -89,7 +136,7 @@ export default function ShortReporting() {
 			setData(jsonResponse.map((json) => processJSON(jsonMapping, json)))
 		}
 
-		getShortData()
+		getShortData();
 	}, [])
 
 	const chartData = data.map((d) => {
@@ -105,7 +152,7 @@ export default function ShortReporting() {
 		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
-			<FilterableSelect />
+			<FilterableSelect dataList={ stockData } />
 			{
 				isLoaded ? 
 				<ReactChartJS
@@ -120,7 +167,9 @@ export default function ShortReporting() {
 						scales: {
 							xAxes: {
 								type: 'time',
-								distribution: 'linear'
+								time: {
+									unit: 'month'
+								}
 							}
 						}
 					}}

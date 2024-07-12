@@ -1,77 +1,59 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import FilterableSelectItem from './FilterableSelectItem.jsx';
+import { MdOutlineSearch } from "react-icons/md";
 
 import './FilterableSelect.css'
 
 export default (props) => {
 
-	// const {
-	// 	dataList
-	// } = props;
+	const {
+		dataList = []
+	} = props;
 
-	const dataList = [
-		{
-			label: 'Main Text 1',
-			value: 'uniqueid1',
-			subtext: 'Sub-Text 1 - a Brief description'
-		},
-		{
-			label: 'Main Text 2',
-			value: 'uniqueid2',
-			subtext: 'Sub-Text 2 - a Brief description'
-		},
-		{
-			label: 'Main Text 3',
-			value: 'uniqueid3',
-			subtext: 'Sub-Text 3 - a Brief description'
-		}
-	];
-
-	const [value, setValue] = useState('');
+	const [selectedValue, setSelectedValue] = useState({});
+	const [searchTerm, setSearchTerm] = useState('');
 	const [isOpen, setIsOpen] = useState(false);
 
+	const filterableRef = useRef();
 
 	const filteredList = dataList.filter((item) => {
 		
-		return item.label.toLowerCase().startsWith(value.toLowerCase()) || item.subtext.toLowerCase().includes(value.toLowerCase())
+		return item.label.toLowerCase().startsWith(searchTerm.toLowerCase()) || item.subtext.toLowerCase().includes(searchTerm.toLowerCase())
 	});
 
 	return (
 		<div
+			ref={ filterableRef }
 			className='filterable-select'
-			onFocus={() => setIsOpen(true)}
-			onBlur={() => setIsOpen(false)}
+			onBlur={(e) => setIsOpen(false)}
 		>
 			<input
+				ref={ filterableRef }
 				type='text'
 				name='filterable_select'
 				placeholder='Search...'
-				onChange={(e) => setValue(e.target.value)}
+				onChange={(e) => setSearchTerm(e.target.value)}
+				value={ searchTerm }
+				onFocus={(e) => setIsOpen(true)}
 			/>
-			{true &&
-			<div
-				className='filterable-dropdown'
-			>
-				{ filteredList.map((item) => createDropdownItem(item, setValue)) }
-			</div>
+			{isOpen &&
+				<div
+					className='filterable-dropdown'
+				>
+					{ filteredList.map((item) =>
+						<FilterableSelectItem
+							key={ item.value }
+							data={ item }
+							setData={ (id) => {
+								const childItem = filteredList.find((item) => item.value == id);
+								setSelectedValue(childItem);
+								setIsOpen(false);
+								setSearchTerm(childItem.label);
+							}} 
+						/>
+					)}
+				</div>
 			}
-			<span>{ value }</span>
-		</div>
-	);
-}
-
-function createDropdownItem(data, setValue) {
-
-	return (
-		<div
-			key={data.value}
-			data-datavalue={data.value}
-			className='dropdown-item'
-			onClick={(e) => {
-				setValue(e.currentTarget.dataset.datavalue)
-			}}
-		>
-			<span className='main-text'>{ data.label }</span>
-			<span className='sub-text'>{ data.subtext }</span>
 		</div>
 	);
 }
