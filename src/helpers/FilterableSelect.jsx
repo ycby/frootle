@@ -40,7 +40,19 @@ export default (props) => {
 				onBlur={(e) => {
 					if(filterableRef.current !== e.currentTarget) setIsOpen(false);
 				}}
-				onKeyDown={(e) => keyDownController(e, filterableRef, filteredList, dropdownElements, selectedIndex)}
+				onKeyDown={(e) => {
+					keyDownController(e, filterableRef, filteredList, dropdownElements, selectedIndex)
+
+					//get search key
+					if (e.key == 'Enter' && filteredList.length != 0) {
+
+						const childItem = filteredList[0];
+						setIsOpen(false);
+						setSearchTerm(childItem.label);
+						onSelect(childItem);
+					}
+					
+				}}
 			/>
 			{isOpen &&
 				<div
@@ -59,6 +71,9 @@ export default (props) => {
 								onSelect(childItem);
 							}}
 							onKeyDown={(e) => keyDownController(e, filterableRef, filteredList, dropdownElements, selectedIndex)}
+							onMouseEnter={(e) => {
+								selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, e.currentTarget.tabIndex);
+							}}
 						/>
 					)}
 				</div>
@@ -72,39 +87,33 @@ function keyDownController(e, filterableRef, filteredList, dropdownElements, sel
 	switch (e.key) {
 	case 'ArrowDown':
 		e.preventDefault();
-		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current, 1);
+		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current + 1);
 		console.log('Down pressed');
 		break;
 	case 'ArrowUp':
 		e.preventDefault();
-		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current, -1);
+		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current - 1);
 		console.log('Up pressed');
 		break;
 	case 'Enter':
 		console.log('Enter Pressed');
-
 		break;
 	default:
 		console.log('No valid key');
 	}
 }
 
-function updateSelectedItem(inputRef, filteredList, dropdownElements, initialIndex, valueIncrement) {
+function updateSelectedItem(inputRef, filteredList, dropdownElements, desiredIndex) {
 
 	if (filteredList.length <= 0) return -1;
-	
-	if (initialIndex + valueIncrement < 0) {
+
+	if (desiredIndex < 0) {
 	
 		inputRef.focus();
 		return -1;
 	}
-
-	console.log(`filteredList: ${filteredList.length}`)
-	console.log(dropdownElements)
 	
-	console.log(`initialINdex: ${initialIndex}`)
-	const updatedIndex = clamp(initialIndex + valueIncrement, filteredList.length - 1, 0);
-	console.log(`updatedIndex: ${updatedIndex}`)
+	const updatedIndex = clamp(desiredIndex, filteredList.length - 1, 0);
 
 	dropdownElements[updatedIndex].focus();
 
@@ -113,7 +122,6 @@ function updateSelectedItem(inputRef, filteredList, dropdownElements, initialInd
 
 function clamp(index, upperBound, lowerBound) {
 
-	console.log(`${index}, ${upperBound}, ${lowerBound}`)
 	if (index > upperBound) return upperBound;
 	if (index < lowerBound) return lowerBound;
 	return index;

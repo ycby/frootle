@@ -6,7 +6,8 @@ export default forwardRef((props, ref) => {
 		data,
 		tabIndex = 0,
 		setData,
-		onKeyDown
+		onKeyDown,
+		onMouseEnter
 	} = props;
 
 	return (
@@ -16,7 +17,12 @@ export default forwardRef((props, ref) => {
 			tabIndex={ tabIndex }
 			className='dropdown-item'
 			onMouseDown={ (e) => setData(e.currentTarget.dataset.value) }
-			onKeyDown={ onKeyDown }
+			onKeyDown={ (e) => {
+				onKeyDown(e)
+
+				if (e.key == 'Enter') setData(e.currentTarget.dataset.value);
+			}}
+			onMouseEnter={ onMouseEnter }
 		>
 			<span className='main-text'>{ data.label }</span>
 			<span className='sub-text'>{ data.subtext }</span>
