@@ -92,6 +92,10 @@ export default function ShortReporting() {
 
 	const [data, setData] = useState([]);
 	const [stockData, setStockData] = useState([]);
+	const [chartData, setChartData] = useState([]);
+
+	const [selectedStock, setSelectedStock] = useState({});
+
 	const isLoaded = data.length !== 0;
 
 	useEffect(() => {
@@ -124,7 +128,7 @@ export default function ShortReporting() {
 
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:3000/shortdata?stockcode=00001`, {
+			const response = await fetch(`http://localhost:3000/shortdata?stockcode=${selectedStock.value}`, {
 				method: 'GET'
 			})
 
@@ -133,26 +137,25 @@ export default function ShortReporting() {
 			//TODO: custom set object json
 			const jsonResponse = await response.json()
 
-			setData(jsonResponse.map((json) => processJSON(jsonMapping, json)))
+			setData(jsonResponse.map((json) => processJSON(jsonMapping, json)));
+			setChartData(jsonResponse.map((d) => {
+				return {
+					x: d.reporting_date,
+					y: parseInt(d.shorted_shares.replaceAll(',', ''))
+				}
+			}).reverse());
 		}
 
 		getShortData();
-	}, [])
+	}, [selectedStock])
 
-	const chartData = data.map((d) => {
-		return {
-			x: d.reporting_date,
-			y: parseInt(d.shorted_shares.replaceAll(',', ''))
-		}
-	})
-	console.log(chartData)
 	Chart.register(...registerables)
 
 	return (
 		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
-			<FilterableSelect dataList={ stockData } />
+			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue) => setSelectedStock(selectedValue) } />
 			{
 				isLoaded ? 
 				<ReactChartJS
@@ -165,11 +168,14 @@ export default function ShortReporting() {
 					}}
 					options={{
 						scales: {
-							xAxes: {
+							x: {
 								type: 'time',
 								time: {
 									unit: 'month'
 								}
+							},
+							y: {
+								min: 0
 							}
 						}
 					}}
