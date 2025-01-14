@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import Loading from '../helpers/Loading.jsx';
-import TableGenerator from '../helpers/TableGenerator.jsx';
-import FilterableSelect from '../helpers/FilterableSelect.jsx';
+import Loading from '../../helpers/Loading.jsx';
+import TableGenerator from '../../helpers/TableGenerator.jsx';
+import FilterableSelect from '../../helpers/FilterableSelect.jsx';
 
 import { Chart, registerables } from 'chart.js';
 import { Chart as ReactChartJS } from 'react-chartjs-2';
@@ -35,27 +35,27 @@ export default function ShortReporting() {
 	const headers = [
 		{
 			label: 'Stock Code',
-			value: 'stock_code'
+			value: 'stockCode'
 		}, 
 		{
 			label: 'Reporting Date',
-			value: 'reporting_date'
+			value: 'reportingDate'
 		},
 		{
 			label: 'Shorted Shares',
-			value: 'shorted_shares'
+			value: 'shortedShares'
 		},
 		{
 			label: 'Shorted Amount',
-			value: 'shorted_amount'
+			value: 'shortedAmount'
 		},
 		{
 			label: 'Created Date',
-			value: 'created_datetime'
+			value: 'createdDateTime'
 		},
 		{
 			label: 'Last Modified Date',
-			value: 'last_modified_datetime'
+			value: 'lastModifiedDateTime'
 		}
 	]
 
@@ -65,27 +65,27 @@ export default function ShortReporting() {
 			type: 'String'
 		},
 		{
-			value: 'stock_code',
+			value: 'stockCode',
 			type: 'String'
 		}, 
 		{
-			value: 'reporting_date',
+			value: 'reportingDate',
 			type: 'Date'
 		},
 		{
-			value: 'shorted_shares',
-			type: 'BigInt'
+			value: 'shortedShares',
+			type: 'Long'
 		},
 		{
-			value: 'shorted_amount',
-			type: 'BigInt'
+			value: 'shortedAmount',
+			type: 'Long'
 		},
 		{
-			value: 'created_datetime',
+			value: 'createdDateTime',
 			type: 'Date'
 		},
 		{
-			value: 'last_modified_datetime',
+			value: 'lastModifiedDateTime',
 			type: 'Date'
 		}
 	]
@@ -102,7 +102,7 @@ export default function ShortReporting() {
 
 		async function getStockData() {
 
-			const response = await fetch('http://localhost:3000/stock', {
+			const response = await fetch('http://localhost:8080/stock/all', {
 				method: 'GET'
 			})
 
@@ -125,10 +125,10 @@ export default function ShortReporting() {
 	}, [])
 
 	useEffect(() => {
-
+		console.log(selectedStock)
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:3000/shortdata?stockcode=${selectedStock.value}`, {
+			const response = await fetch(`http://localhost:8080/short/${selectedStock.value}`, {
 				method: 'GET'
 			})
 
@@ -140,8 +140,8 @@ export default function ShortReporting() {
 			setData(jsonResponse.map((json) => processJSON(jsonMapping, json)));
 			setChartData(jsonResponse.map((d) => {
 				return {
-					x: d.reporting_date,
-					y: parseInt(d.shorted_shares.replaceAll(',', ''))
+					x: d.reportingDate,
+					y: d.shortedShares
 				}
 			}).reverse());
 		}
@@ -198,7 +198,8 @@ export default function ShortReporting() {
 function processJSON(mappings, json) {
 
 	let processedJSON = {}
-
+	console.log(mappings)
+	console.log(json)
 	for (const mapping of mappings) {
 
 		switch (mapping.type) {
@@ -208,8 +209,8 @@ function processJSON(mappings, json) {
 		case 'Date':
 			processedJSON[mapping.value] = new Date(json[mapping.value]).toLocaleDateString('en-HK')
 			break
-		case 'BigInt':
-			processedJSON[mapping.value] = BigInt(json[mapping.value]).toLocaleString()
+		case 'Long':
+			processedJSON[mapping.value] = json[mapping.value]
 			break
 		default:
 			console.log('Unexpected Type in Process JSON in Short Reporting')

@@ -7,8 +7,9 @@ import {
 import Root from './routes/root.jsx'
 import './index.css'
 import ErrorPage from './routes/error-page.jsx'
-import ShortReporting from './routes/short-reporting.jsx'
-import UploadData from './routes/upload-data.jsx'
+import ShortReporting from './routes/short-reporting/short-reporting.jsx'
+import UploadData from './routes/upload-data/upload-data.jsx'
+import Greeting from './routes/greeting/greeting.jsx'
 
 
 const router = createBrowserRouter([
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
 		element: <Root />,
 		errorElement: <ErrorPage />,
 		children: [
+			{
+				path: 'greeting/',
+				element: <Greeting />
+			},
 			{
 				path: 'short-reporting/',
 				element: <ShortReporting />
