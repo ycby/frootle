@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ShortReporting() {
 
@@ -8,7 +8,7 @@ export default function ShortReporting() {
 
 		async function getEnvironment() {
 
-			const response = await fetch('http://localhost:8080/greeting',
+			const response = await fetch('http://localhost:3000/greeting',
 			{
 				method: 'GET'
 			})

@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react';
+import Papa from 'papaparse';
 
 export default () => {
 
-	const [isFileUploaded, setIsFileUploaded] = useState(false)
+	const [isFileUploaded, setIsFileUploaded] = useState(false);
+	const inputRef = useRef(null);
 
 	const mapping = [
 		{
@@ -36,10 +38,9 @@ export default () => {
 			<h2>Short Data</h2>
 
 			<form
-				onSubmit={(e) => submitData(e, setIsFileUploaded)}
+				onSubmit={(e) => submitData(e, inputRef.current.files[0], setIsFileUploaded)}
 			>
-				<input type='file' id='upload-short-data' accept='text/csv' name='shortdata' />
-				<input type='hidden' name='mapping' value={JSON.stringify(mapping)} />
+				<input ref={inputRef} type='file' id='upload-short-data' accept='text/csv' name='shortdata' />
 				<input type='submit' value='Upload' />
 			</form>
 			{isFileUploaded && <span>File Uploaded Successfully!</span>}
@@ -47,20 +48,41 @@ export default () => {
 	)
 }
 
-async function submitData(event, setIsFileUploaded) {
+async function submitData(e, fileData, setIsFileUploaded) {
 
-	event.preventDefault()
+	e.preventDefault();
 
-	//create multipart formdata
-	const formData = new FormData(event.target)
+	console.log(fileData)
+	//Prepare JSON
+	Papa.parse(fileData, {
+		complete: function(results) {
+			console.log(results);
+		},
+		header: true,
+		transformHeader: function(header, index) {
 
-	const response = await fetch('http://localhost:3000/shortdata/upload', {
-		method: 'POST',
-		body: formData
+			switch (header) {
+				case 'Date':
+					return 'reporting_date';
+				case 'Stock Code':
+					return 'stock_code';
+				case 'Aggregated Reportable Short Positions (Shares)':
+					return 'shorted_shares';
+				case 'Aggregated Reportable Short Positions (HK$)':
+					return 'shorted_amount';
+				default:
+					return header;
+			}
+		}
 	})
+
+	// const response = await fetch('http://localhost:8080/shortdata/upload', {
+	// 	method: 'POST',
+	// 	body: formData
+	// })
 
 	if (response.status == 200) {
 
-		setIsFileUploaded(true)
+		setIsFileUploaded(true);
 	}
 }

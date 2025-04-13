@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Loading from '../../helpers/Loading.jsx';
 import TableGenerator from '../../helpers/TableGenerator.jsx';
 import FilterableSelect from '../../helpers/FilterableSelect.jsx';
@@ -12,83 +12,65 @@ import 'chartjs-adapter-date-fns';
 import './short-reporting.css';
 
 //Test Data
-const dataList = [
+
+const headers = [
 	{
-		label: 'Main Text 1',
-		value: 'uniqueid1',
-		subtext: 'Sub-Text 1 - a Brief description'
+		label: 'Stock Code',
+		value: 'stock_code'
 	},
 	{
-		label: 'Main Text 2',
-		value: 'uniqueid2',
-		subtext: 'Sub-Text 2 - a Brief description'
+		label: 'Reporting Date',
+		value: 'reporting_date'
 	},
 	{
-		label: 'Main Text 3',
-		value: 'uniqueid3',
-		subtext: 'Sub-Text 3 - a Brief description'
+		label: 'Shorted Shares',
+		value: 'shorted_shares'
+	},
+	{
+		label: 'Shorted Amount',
+		value: 'shorted_amount'
+	},
+	{
+		label: 'Created Date',
+		value: 'created_datetime'
+	},
+	{
+		label: 'Last Modified Date',
+		value: 'last_modified_datetime'
 	}
-];
+]
 
+const jsonMapping = [
+	{
+		value: 'id',
+		type: 'String'
+	},
+	{
+		value: 'stock_code',
+		type: 'String'
+	},
+	{
+		value: 'reporting_date',
+		type: 'Date'
+	},
+	{
+		value: 'shorted_shares',
+		type: 'Long'
+	},
+	{
+		value: 'shorted_amount',
+		type: 'Long'
+	},
+	{
+		value: 'created_datetime',
+		type: 'Date'
+	},
+	{
+		value: 'last_modified_datetime',
+		type: 'Date'
+	}
+]
 export default function ShortReporting() {
-	
-	const headers = [
-		{
-			label: 'Stock Code',
-			value: 'stockCode'
-		}, 
-		{
-			label: 'Reporting Date',
-			value: 'reportingDate'
-		},
-		{
-			label: 'Shorted Shares',
-			value: 'shortedShares'
-		},
-		{
-			label: 'Shorted Amount',
-			value: 'shortedAmount'
-		},
-		{
-			label: 'Created Date',
-			value: 'createdDateTime'
-		},
-		{
-			label: 'Last Modified Date',
-			value: 'lastModifiedDateTime'
-		}
-	]
-
-	const jsonMapping = [
-		{
-			value: 'id',
-			type: 'String'
-		},
-		{
-			value: 'stockCode',
-			type: 'String'
-		}, 
-		{
-			value: 'reportingDate',
-			type: 'Date'
-		},
-		{
-			value: 'shortedShares',
-			type: 'Long'
-		},
-		{
-			value: 'shortedAmount',
-			type: 'Long'
-		},
-		{
-			value: 'createdDateTime',
-			type: 'Date'
-		},
-		{
-			value: 'lastModifiedDateTime',
-			type: 'Date'
-		}
-	]
 
 	const [data, setData] = useState([]);
 	const [stockData, setStockData] = useState([]);
@@ -97,12 +79,13 @@ export default function ShortReporting() {
 	const [selectedStock, setSelectedStock] = useState({});
 
 	const isLoaded = data.length !== 0;
+	console.log(data)
 
 	useEffect(() => {
 
 		async function getStockData() {
 
-			const response = await fetch('http://localhost:8080/stock/all', {
+			const response = await fetch('http://localhost:3000/stock', {
 				method: 'GET'
 			})
 
@@ -111,7 +94,7 @@ export default function ShortReporting() {
 			const jsonResponse = await response.json();
 			console.log(jsonResponse)
 
-			setStockData(jsonResponse.map((json) => {
+			setStockData(jsonResponse.data.map((json) => {
 
 				return {
 					label: json.name,
@@ -125,10 +108,10 @@ export default function ShortReporting() {
 	}, [])
 
 	useEffect(() => {
-		console.log(selectedStock)
+
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:8080/short/${selectedStock.value}`, {
+			const response = await fetch(`http://localhost:3000/short?stock_code=${selectedStock.value}`, {
 				method: 'GET'
 			})
 
@@ -137,11 +120,11 @@ export default function ShortReporting() {
 			//TODO: custom set object json
 			const jsonResponse = await response.json()
 
-			setData(jsonResponse.map((json) => processJSON(jsonMapping, json)));
-			setChartData(jsonResponse.map((d) => {
+			setData(jsonResponse.data.map((json) => processJSON(jsonMapping, json)));
+			setChartData(jsonResponse.data.map((d) => {
 				return {
-					x: d.reportingDate,
-					y: d.shortedShares
+					x: d.reporting_date,
+					y: d.shorted_shares
 				}
 			}).reverse());
 		}
@@ -198,8 +181,8 @@ export default function ShortReporting() {
 function processJSON(mappings, json) {
 
 	let processedJSON = {}
-	console.log(mappings)
-	console.log(json)
+	// console.log(mappings)
+	// console.log(json)
 	for (const mapping of mappings) {
 
 		switch (mapping.type) {
@@ -217,5 +200,5 @@ function processJSON(mappings, json) {
 		}
 	}
 
-	return processedJSON
+	return processedJSON;
 }

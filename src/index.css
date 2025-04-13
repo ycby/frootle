@@ -61,6 +61,6 @@ body {
 #detail {
   display: flex;
   flex: 1;
-  padding: 20px;
+  padding: 20px max(20px, 8%);
   overflow: scroll;
 }
