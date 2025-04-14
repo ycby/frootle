@@ -1,11 +1,26 @@
 import './TableGenerator.css'
 
-export default function TableGenerator(props) {
+interface TableGeneratorProps {
+	headers: Header[],
+	data: any[],
+	options?: {
+		hiddenColumns?: string[];
+	}
+}
+
+type TableData = {
+	id: string;
+	[p: string]: any
+};
+type Header = {
+	label: string;
+	value: string;
+}
+
+export default function TableGenerator(props: TableGeneratorProps) {
 
 	//Expect:
-	//Headers = Array of Objects containing:
-	//	Label
-	//	Value
+	//Headers = Array of Objects
 	//Data = Array of Objects
 	//Options = Object of options
 
@@ -18,8 +33,9 @@ export default function TableGenerator(props) {
 		options = {}
 	} = props;
 
-	const validHeaders = Object.hasOwn(options, 'hiddenColumns') ? headers.filter(header => !options.hiddenColumns.includes(header.value)) : headers;
+	const validHeaders = Object.hasOwn(options, 'hiddenColumns') ? headers.filter(header => !options?.hiddenColumns?.includes(header.value)) : headers;
 	console.log(validHeaders)
+
 	return (
 		<table className='table-generator'>
 			{ createHeaders(validHeaders) }
@@ -28,7 +44,7 @@ export default function TableGenerator(props) {
 	)
 }
 
-function createHeaders(headers) {
+function createHeaders(headers: Header[]) {
 
 	return (
 		<thead>
@@ -39,7 +55,7 @@ function createHeaders(headers) {
 	)
 }
 
-function createBody(headers, data) {
+function createBody(headers: Header[], data: any[]) {
 
 	return (
 		<tbody>
@@ -48,7 +64,7 @@ function createBody(headers, data) {
 	)
 }
 
-function createRow(headers, data) {
+function createRow(headers: Header[], data: TableData) {
 
 	return (
 		<tr key={data.id}>

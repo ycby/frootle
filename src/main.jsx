@@ -4,11 +4,11 @@ import {
 	createBrowserRouter,
 	RouterProvider
 } from 'react-router-dom'
-import Root from './routes/root.jsx'
+import Root from './routes/root.tsx'
 import './index.css'
-import ErrorPage from './routes/error-page.jsx'
-import ShortReporting from './routes/short-reporting/short-reporting.jsx'
-import UploadData from './routes/upload-data/upload-data.jsx'
+import ErrorPage from './routes/error-page.tsx'
+import ShortReporting from './routes/short-reporting/short-reporting.tsx'
+import UploadData from './routes/upload-data/upload-data.tsx'
 import Greeting from './routes/greeting/greeting.jsx'
 
 

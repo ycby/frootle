@@ -1,8 +1,18 @@
-import { useState, useRef } from 'react';
-import Papa from 'papaparse';
-import TableGenerator from "../../helpers/TableGenerator.jsx";
+import {useState, useRef, FormEvent,} from 'react';
+import Papa, {LocalFile} from 'papaparse';
+import TableGenerator from "../../helpers/TableGenerator.tsx";
 
-const mapping = {
+type UploadDataMapping = { [p: string]: UploadDataMappingElement };
+type UploadDataMappingElement = { label: string; value: string };
+
+type ShortData = {
+	'Stock Code': string;
+	'Date': Date;
+	'Aggregated Reportable Short Positions (Shares)': number;
+	'Aggregated Reportable Short Positions (HK$)': number;
+}
+
+const mapping: UploadDataMapping = {
 	'id': {
 		label: 'id',
 		value: 'id'
@@ -28,11 +38,11 @@ const mapping = {
 export default function UploadData() {
 
 	//const [isFileUploaded, setIsFileUploaded] = useState(false);
-	const [isFileParsed, setIsFileParsed] = useState(false);
-	const [fileAsArray, setFileAsArray] = useState([]);
-	const inputRef = useRef(null);
+	const [isFileParsed, setIsFileParsed] = useState<boolean>(false);
+	const [fileAsArray, setFileAsArray] = useState<Array<any>>([]);
+	const inputRef = useRef<HTMLInputElement>(null);
 
-	const setFileResult = (data) => {
+	const setFileResult: (data: any[]) => void = (data: any[]): void => {
 
 		console.log('hello')
 		console.log(data);
@@ -41,7 +51,7 @@ export default function UploadData() {
 	}
 
 	//Put in tabs here
-	//but just provide a upload file button first
+	//but just provide an upload file button first
 	return (
 		<div>
 			<h1>We Upload Data Here</h1>
@@ -49,7 +59,11 @@ export default function UploadData() {
 			<h2>Short Data</h2>
 
 			<form
-				onSubmit={(e) => processData(e, inputRef.current.files[0], setFileResult)}
+				onSubmit={(e: FormEvent<HTMLFormElement>): Promise<void> => {
+					//do some validation on uploaded file
+
+					return processData(e, inputRef.current?.files?.[0] as LocalFile, setFileResult);
+				}}
 			>
 				<input ref={inputRef} type='file' id='upload-short-data' accept='text/csv' name='shortdata' />
 				<input type='submit' value='Upload' />
@@ -68,15 +82,15 @@ export default function UploadData() {
 	)
 }
 
-async function processData(e, fileData, setFileResult) {
+async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, setFileResult: (data: any[]) => void) {
 
 	console.log('Upload Data Submitted');
 	e.preventDefault();
 	//Prepare JSON
-	Papa.parse(fileData, {
-		complete: (results) => {
+	Papa.parse<ShortData>(fileData, {
+		complete: (results: Papa.ParseResult<ShortData>): void => {
 
-			setFileResult(results.data.map((data, index) => {
+			setFileResult(results.data.map((data: any, index: number) => {
 
 				data.id = index;
 
@@ -84,13 +98,13 @@ async function processData(e, fileData, setFileResult) {
 			}));
 		},
 		header: true,
-		transformHeader: (header) => {
+		transformHeader: (header: any) => {
 
-			if (mapping[header] === undefined) return header;
+			if (!Object.hasOwn(mapping, header)) return header;
 
-			return mapping[header].value;
+			return mapping[header as keyof UploadDataMapping].value;
 		},
-		error: (err) => {
+		error: (err: any) => {
 
 			console.error(err);
 		},

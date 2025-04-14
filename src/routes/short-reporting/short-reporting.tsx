@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
-import Loading from '../../helpers/Loading.jsx';
-import TableGenerator from '../../helpers/TableGenerator.jsx';
-import FilterableSelect from '../../helpers/FilterableSelect.jsx';
+import Loading from '../../helpers/Loading.tsx';
+import TableGenerator from '../../helpers/TableGenerator.tsx';
+import { FilterableSelect, FilterableSelectData } from '../../helpers/FilterableSelect.tsx';
 
 import { Chart, registerables } from 'chart.js';
 import { Chart as ReactChartJS } from 'react-chartjs-2';
 
-import { enGB } from 'date-fns/locale';
 import 'chartjs-adapter-date-fns';
 
 import './short-reporting.css';
 
-//Test Data
+type ShortReportingMapping = {
+	value: string;
+	type: string;
+}
+
+type ChartPoint = {
+	x: number;
+	y: number;
+}
 
 const headers = [
 	{
@@ -40,7 +47,7 @@ const headers = [
 	}
 ]
 
-const jsonMapping = [
+const jsonMapping: ShortReportingMapping[] = [
 	{
 		value: 'id',
 		type: 'String'
@@ -70,13 +77,14 @@ const jsonMapping = [
 		type: 'Date'
 	}
 ]
+
 export default function ShortReporting() {
 
 	const [data, setData] = useState([]);
-	const [stockData, setStockData] = useState([]);
-	const [chartData, setChartData] = useState([]);
+	const [stockData, setStockData] = useState<FilterableSelectData[]>([]);
+	const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
-	const [selectedStock, setSelectedStock] = useState({});
+	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
 
 	const isLoaded = data.length !== 0;
 	console.log(data)
@@ -94,7 +102,7 @@ export default function ShortReporting() {
 			const jsonResponse = await response.json();
 			console.log(jsonResponse)
 
-			setStockData(jsonResponse.data.map((json) => {
+			setStockData(jsonResponse.data.map((json: any): FilterableSelectData => {
 
 				return {
 					label: json.name,
@@ -120,8 +128,8 @@ export default function ShortReporting() {
 			//TODO: custom set object json
 			const jsonResponse = await response.json()
 
-			setData(jsonResponse.data.map((json) => processJSON(jsonMapping, json)));
-			setChartData(jsonResponse.data.map((d) => {
+			setData(jsonResponse.data.map((json: any) => processJSON(jsonMapping, json)));
+			setChartData(jsonResponse.data.map((d: any): ChartPoint => {
 				return {
 					x: d.reporting_date,
 					y: d.shorted_shares
@@ -138,7 +146,7 @@ export default function ShortReporting() {
 		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
-			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue) => setSelectedStock(selectedValue) } />
+			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) } />
 			{
 				isLoaded ? 
 				<ReactChartJS
@@ -167,20 +175,17 @@ export default function ShortReporting() {
 				Loading()
 			}
 			{
-				isLoaded ? <TableGenerator headers={headers} data={data} options={{
-					matchHeadersWithData: true
-				}}></TableGenerator> :
+				isLoaded ? <TableGenerator headers={headers} data={data}></TableGenerator> :
 				Loading()
 			}
 		</div>
 	)
 }
 
-function processJSON(mappings, json) {
+const processJSON = (mappings: ShortReportingMapping[], json: any) => {
 
-	let processedJSON = {}
-	// console.log(mappings)
-	// console.log(json)
+	let processedJSON: any = {}
+
 	for (const mapping of mappings) {
 
 		switch (mapping.type) {
