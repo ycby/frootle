@@ -167,11 +167,9 @@ export default function ShortReporting() {
 				Loading()
 			}
 			{
-				isLoaded ? TableGenerator(headers, 
-				data, 
-				{
+				isLoaded ? <TableGenerator headers={headers} data={data} options={{
 					matchHeadersWithData: true
-				}) :
+				}}></TableGenerator> :
 				Loading()
 			}
 		</div>

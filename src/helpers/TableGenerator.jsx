@@ -1,6 +1,6 @@
 import './TableGenerator.css'
 
-export default (headers, data, options) => {
+export default function TableGenerator(props) {
 
 	//Expect:
 	//Headers = Array of Objects containing:
@@ -9,15 +9,21 @@ export default (headers, data, options) => {
 	//Data = Array of Objects
 	//Options = Object of options
 
-	// if (options.matchHeadersWithData) {
+	//Options:
+	//hidden-columns: array of string = columns which should be not shown on ui
 
-	// 	headers = handleMatchHeadersWithData(headers, data)
-	// }
+	const {
+		headers = [],
+		data = [],
+		options = {}
+	} = props;
 
+	const validHeaders = Object.hasOwn(options, 'hiddenColumns') ? headers.filter(header => !options.hiddenColumns.includes(header.value)) : headers;
+	console.log(validHeaders)
 	return (
 		<table className='table-generator'>
-			{ createHeaders(headers) }
-			{ createBody(headers, data) }
+			{ createHeaders(validHeaders) }
+			{ createBody(validHeaders, data) }
 		</table>
 	)
 }
@@ -44,12 +50,9 @@ function createBody(headers, data) {
 
 function createRow(headers, data) {
 
-	//only create cell for data which has header
-	let validHeaders = headers.filter((header) => data.hasOwnProperty(header.value))
-
 	return (
 		<tr key={data.id}>
-			{ validHeaders.map((header) => {
+			{ headers.map((header) => {
 					return (
 						<td key={`${data.id}_${header.value}`}>
 							{ data[header.value] }
@@ -59,11 +62,4 @@ function createRow(headers, data) {
 			}
 		</tr>
 	)
-}
-
-function handleMatchHeadersWithData(headers, data) {
-
-	if (data == undefined || data.length == 0) return headers
-
-	return headers.filter((header) => data[0].hasOwnProperty(header.value))
 }
