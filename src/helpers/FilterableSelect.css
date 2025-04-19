@@ -6,17 +6,19 @@
 	width: 100%;
 	font-size: 1.25rem;
 	padding: 4px 5px;
+	z-index: 2;
 }
 
 
 .filterable-select .filterable-dropdown {
-
 	position: absolute;
 	width: 100%;
 	max-height: 200px;
 	border: #999999 1px solid;
 	background: #ffffff;
 	overflow-y: scroll;
+	margin: -2px 0 0 0;
+	z-index: 1;
 }
 
 .filterable-select .filterable-dropdown > *:not(:last-child) {
@@ -29,7 +31,7 @@
 	padding: 4px 10px;
 }
 
-.filterable-select .filterable-dropdown .dropdown-item:focus {
+.filterable-select .filterable-dropdown .focused-item {
 
 	background-color: #f0f0f0;
 }

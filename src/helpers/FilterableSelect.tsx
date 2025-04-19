@@ -1,4 +1,4 @@
-import {useState, useRef, MutableRefObject} from 'react';
+import {useState, useRef} from 'react';
 import FilterableSelectItem from './FilterableSelectItem.tsx';
 //import { MdOutlineSearch } from "react-icons/md";
 
@@ -26,7 +26,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const filterableRef = useRef<HTMLInputElement | null>(null);
-	const dropdownElements = useRef<any>([]);
+	const dropdownElements = useRef<HTMLDivElement[]>([]);
 	const selectedIndex = useRef<number>(-1);
 
 	const filteredList: FilterableSelectData[] = dataList.filter((item: FilterableSelectData) => {
@@ -35,6 +35,9 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 
 		return item.label.toLowerCase().startsWith(searchTerm.toLowerCase()) || item.subtext.toLowerCase().includes(searchTerm.toLowerCase());
 	});
+
+	//add no items found element
+	if (filteredList.length === 0) filteredList.push({label: 'No results found...', value: null, subtext: null});
 
 	return (
 		<div
@@ -49,17 +52,18 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 					setSearchTerm(e.target.value)
 				}}
 				value={ searchTerm }
-				onFocus={() => setIsOpen(true)}
-				onBlur={(e) => {
-					if(filterableRef.current !== e.currentTarget) setIsOpen(false);
+				onFocus={() => {
+					setIsOpen(true)
+					selectedIndex.current = -1;
 				}}
+				onBlur={() => setIsOpen(false)}
 				onKeyDown={(e) => {
-					keyDownController(e, filterableRef as MutableRefObject<HTMLInputElement>, filteredList, dropdownElements, selectedIndex)
+					selectedIndex.current = keyDownController(e, filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current)
 
 					//get search key
 					if (e.key == 'Enter' && filteredList.length != 0) {
 
-						const childItem = filteredList[0];
+						const childItem = filteredList[selectedIndex.current];
 						setIsOpen(false);
 						setSearchTerm(childItem?.label !== null ? childItem.label : '');
 						onSelect(childItem);
@@ -85,9 +89,10 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 								setSearchTerm(currentSearchTerm);
 								if (childItem != null) onSelect(childItem);
 							}}
-							onKeyDown={(e) => keyDownController(e, filterableRef as MutableRefObject<HTMLInputElement>, filteredList, dropdownElements, selectedIndex)}
+							onKeyDown={(e) =>
+								selectedIndex.current = keyDownController(e, filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current)}
 							onMouseEnter={(e) => {
-								selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, e.currentTarget.tabIndex);
+								selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current, e.currentTarget.tabIndex);
 							}}
 						/>
 					)}
@@ -100,22 +105,23 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 //TODO: Clean up this signature
 function keyDownController(
 	e: React.KeyboardEvent,
-	filterableRef: React.MutableRefObject<HTMLInputElement>,
+	filterableRef: HTMLInputElement | null,
 	filteredList: FilterableSelectData[],
-	dropdownElements: React.MutableRefObject<HTMLDivElement[]>,
-	selectedIndex: React.MutableRefObject<number>
-) {
+	dropdownList: HTMLDivElement[],
+	selectedIndex: number
+): number {
 
+	let returnVal = selectedIndex;
 	switch (e.key) {
 	case 'ArrowDown':
 		e.preventDefault();
-		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current + 1);
 		console.log('Down pressed');
+		returnVal = updateSelectedItem(filterableRef, filteredList, dropdownList, selectedIndex, selectedIndex + 1);
 		break;
 	case 'ArrowUp':
 		e.preventDefault();
-		selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current - 1);
 		console.log('Up pressed');
+		returnVal = updateSelectedItem(filterableRef, filteredList, dropdownList, selectedIndex, selectedIndex - 1);
 		break;
 	case 'Enter':
 		console.log('Enter Pressed');
@@ -123,12 +129,15 @@ function keyDownController(
 	default:
 		console.log('No valid key');
 	}
+
+	return returnVal;
 }
 
 function updateSelectedItem(
 	inputRef: HTMLInputElement | null,
 	filteredList: FilterableSelectData[],
-	dropdownElements: HTMLDivElement[],
+	dropdownList: HTMLDivElement[],
+	currentIndex: number,
 	desiredIndex: number
 ) {
 
@@ -139,12 +148,15 @@ function updateSelectedItem(
 		if (inputRef !== null) inputRef.focus();
 		return -1;
 	}
-	
-	const updatedIndex = clamp(desiredIndex, filteredList.length - 1, 0);
 
-	dropdownElements[updatedIndex].focus();
+	const newIndex = clamp(desiredIndex, filteredList.length - 1, 0);
+	console.log(currentIndex)
+	console.log(newIndex)
+	if (currentIndex >= 0 && currentIndex < filteredList.length) dropdownList[currentIndex].classList.remove('focused-item');
+	dropdownList[newIndex].classList.add('focused-item');
+	dropdownList[newIndex].scrollIntoView({block: 'nearest'});
 
-	return updatedIndex;
+	return newIndex;
 }
 
 function clamp(

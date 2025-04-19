@@ -31,7 +31,10 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 
 				if (e.key == 'Enter') setData(e.currentTarget.dataset.value);
 			}}
-			onMouseEnter={ onMouseEnter }
+			onMouseEnter={ (e) => {
+
+				onMouseEnter(e);
+			}}
 		>
 			<span className='main-text'>{ data.label }</span>
 			<span className='sub-text'>{ data.subtext }</span>
