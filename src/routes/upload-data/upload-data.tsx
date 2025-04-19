@@ -35,12 +35,16 @@ const mapping: UploadDataMapping = {
 	}
 }
 
+
+//Pending making it a multi-step page
 export default function UploadData() {
 
-	//const [isFileUploaded, setIsFileUploaded] = useState(false);
+	const [isFileUploaded, setIsFileUploaded] = useState<boolean>(false);
 	const [isFileParsed, setIsFileParsed] = useState<boolean>(false);
 	const [fileAsArray, setFileAsArray] = useState<Array<any>>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	const [hasError, setHasError] = useState<boolean>(false);
 
 	const setFileResult: (data: any[]) => void = (data: any[]): void => {
 
@@ -53,7 +57,7 @@ export default function UploadData() {
 	//Put in tabs here
 	//but just provide an upload file button first
 	return (
-		<div>
+		<div style={{width:'100%'}}>
 			<h1>We Upload Data Here</h1>
 
 			<h2>Short Data</h2>
@@ -66,18 +70,61 @@ export default function UploadData() {
 				}}
 			>
 				<input ref={inputRef} type='file' id='upload-short-data' accept='text/csv' name='shortdata' />
-				<input type='submit' value='Upload' />
+				<input type='submit' value='Process' />
 			</form>
 			{isFileParsed && <span>File Uploaded Successfully!</span>}
 
 			{isFileParsed &&
 				<TableGenerator
+					style={{width:'100%'}}
 					headers={Object.values(mapping)}
 					data={fileAsArray.slice(0, 3)}
 					options={{
 						hiddenColumns: ['id']
 					}}
-				></TableGenerator>}
+				></TableGenerator>
+			}
+			{
+				isFileParsed &&
+				<button
+					onClick={async () => {
+
+						try {
+							console.log(JSON.stringify(fileAsArray))
+							const response = await fetch('http://localhost:3000/short', {
+								method: 'POST',
+								mode: 'cors',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(fileAsArray),
+							});
+
+							if (response.ok) {
+
+								const responseJSON = await response.json();
+
+								setIsFileUploaded(true);
+
+								if (responseJSON.status !== 1) setHasError(true);
+							}
+						} catch (e) {
+
+							console.error(e);
+							setIsFileUploaded(false);
+						}
+					}}
+				>
+					Upload
+				</button>
+			}
+
+			{isFileUploaded && !hasError &&
+				<span>The data was uploaded successfully!</span>
+			}
+			{isFileUploaded && hasError &&
+				<span>There was an error uploading the data!</span>
+			}
 		</div>
 	)
 }
@@ -104,19 +151,20 @@ async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, s
 
 			return mapping[header as keyof UploadDataMapping].value;
 		},
+		transform: (value, field) => {
+
+			if (field === 'reporting_date') {
+
+				const dateString = value.split('/');
+				return new Date(parseInt(dateString[2]), parseInt(dateString[1]) - 1, parseInt(dateString[0]));
+			}
+
+			return value;
+		},
 		error: (err: any) => {
 
 			console.error(err);
 		},
 		skipEmptyLines: true
 	});
-
-	// const response = await fetch('http://localhost:8080/shortdata/upload', {
-	// 	method: 'POST',
-	// 	body: formData
-	// })
-
-	//if (response.status == 200) {
-
-	//}
 }

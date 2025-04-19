@@ -3,6 +3,7 @@ import './TableGenerator.css'
 interface TableGeneratorProps {
 	headers: Header[],
 	data: any[],
+	style: any,
 	options?: {
 		hiddenColumns?: string[];
 	}
@@ -30,14 +31,14 @@ export default function TableGenerator(props: TableGeneratorProps) {
 	const {
 		headers = [],
 		data = [],
+		style = {},
 		options = {}
 	} = props;
 
 	const validHeaders = Object.hasOwn(options, 'hiddenColumns') ? headers.filter(header => !options?.hiddenColumns?.includes(header.value)) : headers;
-	console.log(validHeaders)
 
 	return (
-		<table className='table-generator'>
+		<table style={style} className='table-generator'>
 			{ createHeaders(validHeaders) }
 			{ createBody(validHeaders, data) }
 		</table>
@@ -71,7 +72,7 @@ function createRow(headers: Header[], data: TableData) {
 			{ headers.map((header) => {
 					return (
 						<td key={`${data.id}_${header.value}`}>
-							{ data[header.value] }
+							{ data[header.value].toString() }
 						</td>
 					)
 				})
