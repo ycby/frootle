@@ -3,7 +3,7 @@ import './TableGenerator.css'
 interface TableGeneratorProps {
 	headers: Header[],
 	data: any[],
-	style: any,
+	style?: any,
 	options?: {
 		hiddenColumns?: string[];
 	}
