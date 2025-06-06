@@ -4,12 +4,11 @@ import {
 	createBrowserRouter,
 	RouterProvider
 } from 'react-router-dom'
-import Root from './routes/root.tsx'
+import Root from './routes/sidebar/root.tsx'
 import './index.css'
 import ErrorPage from './routes/error-page.tsx'
 import ShortReporting from './routes/short-reporting/short-reporting.tsx'
 import UploadData from './routes/upload-data/upload-data.tsx'
-import Greeting from './routes/greeting/greeting.jsx'
 
 
 const router = createBrowserRouter([
@@ -18,10 +17,6 @@ const router = createBrowserRouter([
 		element: <Root />,
 		errorElement: <ErrorPage />,
 		children: [
-			{
-				path: 'greeting/',
-				element: <Greeting />
-			},
 			{
 				path: 'short-reporting/',
 				element: <ShortReporting />
