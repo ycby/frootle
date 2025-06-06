@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Inconsolata';
+  src: local('Inconsolata'), url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
+}
+
 html {
   box-sizing: border-box;
 }
@@ -17,7 +22,7 @@ body {
 }
 
 #root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inconsolata', monospace;
   background-color: #ffffff;
 
   font-synthesis: none;
@@ -25,42 +30,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  display:flex;
   height: 100%;
   width: 100%;
-}
-
-#sidebar {
-  display: flex;
-  flex-direction: column;
-  border-right: #d0d0d0 1px solid;
-  background-color: #f0f0f0;
-}
-
-#sidebar h1 {
-  margin: 0;
-  padding: 10px;
-}
-
-#sidebar ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-#sidebar nav a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 0.5rem;
-  text-decoration: none;
-  gap: 1rem;
 }
 
 #detail {
   display: flex;
   flex: 1;
-  padding: 20px max(20px, 8%);
+  padding: 5rem max(20px, 15rem);
   overflow: scroll;
 }

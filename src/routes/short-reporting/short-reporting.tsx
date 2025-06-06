@@ -154,6 +154,7 @@ export default function ShortReporting() {
 					type='line'
 					data={{
 						datasets: [{
+							label: 'Shorted Quantity',
 							data: chartData
 						}]
 					}}
@@ -167,6 +168,11 @@ export default function ShortReporting() {
 							},
 							y: {
 								min: 0
+							}
+						},
+						plugins: {
+							legend: {
+								position: 'right'
 							}
 						}
 					}}
