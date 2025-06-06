@@ -86,8 +86,14 @@ export default function ShortReporting() {
 
 	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
 
-	const isLoaded = data.length !== 0;
-	console.log(data)
+	let currentStatus = '';
+	if (selectedStock == null || selectedStock.value == null) {
+		currentStatus = 'UNLOADED';
+	} else if (data.length === 0) {
+		currentStatus = 'LOADING';
+	} else {
+		currentStatus = 'LOADED';
+	}
 
 	useEffect(() => {
 
@@ -148,7 +154,10 @@ export default function ShortReporting() {
 			<h1>This is the Short Reporting Page</h1>
 			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) } />
 			{
-				isLoaded ? 
+				currentStatus === 'UNLOADED' ?
+				<div></div> :
+				currentStatus === 'LOADING' ?
+				<Loading /> :
 				<ReactChartJS
 					id='short-reporting-chart'
 					type='line'
@@ -177,12 +186,13 @@ export default function ShortReporting() {
 						}
 					}}
 				/>
-				:
-				Loading()
 			}
 			{
-				isLoaded ? <TableGenerator headers={headers} data={data}></TableGenerator> :
-				Loading()
+				currentStatus === 'UNLOADED' ?
+				<div></div> :
+				currentStatus === 'LOADING' ?
+				<Loading /> :
+				<TableGenerator headers={headers} data={data}></TableGenerator>
 			}
 		</div>
 	)
