@@ -1,3 +1,23 @@
 #short-reporting {
 	flex: 1;
 }
+
+#filter-group {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin: 25px 0;
+	padding: 15px 0 25px;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+}
+
+#filter-group .filter-element {
+	width: 40%;
+	min-width: 125px;
+}
+
+.chart {
+	margin: 20px 0;
+}
