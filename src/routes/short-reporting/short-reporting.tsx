@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Loading from '../../helpers/Loading.tsx';
-import TableGenerator from '../../helpers/TableGenerator.tsx';
-import { FilterableSelect, FilterableSelectData } from '../../helpers/FilterableSelect.tsx';
+import TableGenerator from '../../helpers/table-generator/TableGenerator.tsx';
+import { FilterableSelect, FilterableSelectData } from '../../helpers/filterable-select/FilterableSelect.tsx';
 
 import { Chart, registerables } from 'chart.js';
 import { Chart as ReactChartJS } from 'react-chartjs-2';
@@ -9,6 +9,8 @@ import { Chart as ReactChartJS } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
 import './short-reporting.css';
+import {DatePicker} from "../../helpers/date-picker/DatePicker.tsx";
+import {dateToStringConverter} from "../../helpers/DateHelpers.ts";
 
 type ShortReportingMapping = {
 	value: string;
@@ -86,6 +88,10 @@ export default function ShortReporting() {
 
 	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
 
+	const dateToday = new Date();
+	const [startDate, setStartDate] = useState<Date | null>(new Date(dateToday.getFullYear() - 1, dateToday.getMonth(), dateToday.getDate()));
+	const [endDate, setEndDate] = useState<Date | null>(dateToday);
+
 	let currentStatus = '';
 	if (selectedStock == null || selectedStock.value == null) {
 		currentStatus = 'UNLOADED';
@@ -125,7 +131,7 @@ export default function ShortReporting() {
 
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:3000/short?stock_code=${selectedStock.value}`, {
+			const response = await fetch(`http://localhost:3000/short?stock_code=${selectedStock.value}&start_date=${dateToStringConverter(startDate)}&end_date=${dateToStringConverter(endDate)}`, {
 				method: 'GET'
 			})
 
@@ -144,7 +150,7 @@ export default function ShortReporting() {
 		}
 
 		getShortData();
-	}, [selectedStock])
+	}, [selectedStock, startDate, endDate])
 
 	Chart.register(...registerables)
 
@@ -153,40 +159,51 @@ export default function ShortReporting() {
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
 			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) } />
-			{
-				currentStatus === 'UNLOADED' ?
-				<div></div> :
-				currentStatus === 'LOADING' ?
-				<Loading /> :
-				<ReactChartJS
-					id='short-reporting-chart'
-					type='line'
-					data={{
-						datasets: [{
-							label: 'Shorted Quantity',
-							data: chartData
-						}]
-					}}
-					options={{
-						scales: {
-							x: {
-								type: 'time',
-								time: {
-									unit: 'month'
-								}
-							},
-							y: {
-								min: 0
-							}
-						},
-						plugins: {
-							legend: {
-								position: 'right'
-							}
-						}
-					}}
-				/>
-			}
+			<div id='filter-group'>
+				<div className='filter-element'>
+					<DatePicker label='Start Date' value={startDate} onChange={(date) => setStartDate(date)} />
+				</div>
+				<div className='filter-element'>
+					<DatePicker label='End Date' value={endDate} onChange={(date) => setEndDate(date)} />
+				</div>
+			</div>
+			<div className='chart'>
+				{
+					currentStatus === 'UNLOADED' ?
+						<div></div> :
+						currentStatus === 'LOADING' ?
+							<Loading /> :
+							<ReactChartJS
+								id='short-reporting-chart'
+								type='line'
+								data={{
+									datasets: [{
+										label: 'Shorted Quantity',
+										data: chartData
+									}]
+								}}
+								options={{
+									scales: {
+										x: {
+											type: 'time',
+											time: {
+												unit: 'month'
+											}
+										},
+										y: {
+											min: 0
+										}
+									},
+									plugins: {
+										legend: {
+											position: 'right'
+										}
+									}
+								}}
+							/>
+				}
+			</div>
+
 			{
 				currentStatus === 'UNLOADED' ?
 				<div></div> :
