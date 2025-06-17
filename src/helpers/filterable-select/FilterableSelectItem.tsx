@@ -25,6 +25,7 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 			data-value={ data.value }
 			tabIndex={ tabIndex }
 			className='dropdown-item'
+			role='listitem'
 			onMouseDown={ (e) => setData(e.currentTarget?.dataset?.value) }
 			onKeyDown={ (e) => {
 				onKeyDown(e)

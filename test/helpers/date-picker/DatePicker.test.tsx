@@ -1,5 +1,4 @@
 import {render, screen, cleanup } from '@testing-library/react';
-import { describe, test, expect, afterEach } from 'vitest';
 import '@vitest/browser/context';
 import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
 import "@vitest/browser/context";
