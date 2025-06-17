@@ -6,6 +6,11 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
+    coverage: {
+      enabled: true,
+      provider: 'istanbul',
+      reporter: ['text', 'json', 'html']
+    },
     browser: {
       provider: 'playwright',
       enabled: true,

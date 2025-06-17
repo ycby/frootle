@@ -1,5 +1,5 @@
 import {FilterableSelect, FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {render} from "@testing-library/react";
+import {render, waitFor} from "@testing-library/react";
 import {page, userEvent} from "@vitest/browser/context";
 
 const dataList: FilterableSelectData[] = [
@@ -36,9 +36,12 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        await userEvent.keyboard('{Shift>}L{/Shift}abel 1');
+            await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{Shift>}L{/Shift}abel 1');
+        });
 
         await expect.element(page.getByRole('listitem')
             .filter({
@@ -67,9 +70,12 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        await userEvent.keyboard('{Shift>}L{/Shift}abel z');
+            await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{Shift>}L{/Shift}abel z');
+        });
 
         await expect.element(page.getByRole('listitem')
             .filter({
@@ -100,14 +106,17 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        const filterableItem1 = page.getByRole('listitem')
-            .filter({
-                hasText: 'Label 1'
-            });
+            await userEvent.click(filterableSelect);
 
-        await userEvent.click(filterableItem1);
+            const filterableItem1 = page.getByRole('listitem')
+                .filter({
+                    hasText: 'Label 1'
+                });
+
+            await userEvent.click(filterableItem1);
+        });
 
         // @ts-ignore
         expect(result !== null && result.label === 'Label 1');
@@ -130,9 +139,12 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        await userEvent.keyboard('{ArrowDown>2/}{Enter}');
+            await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{ArrowDown>2/}{Enter}');
+        })
 
         // @ts-ignore
         expect(result !== null && result.label === 'Label 2');
@@ -155,9 +167,12 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        await userEvent.keyboard('{ArrowDown>4/}{Enter}');
+            await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{ArrowDown>4/}{Enter}');
+        })
 
         // @ts-ignore
         expect(result !== null && result.label === 'Label 3');
@@ -180,11 +195,14 @@ describe('FilterableSelect', () => {
 
         const filterableSelect = page.getByPlaceholder('Search...' );
 
-        await userEvent.click(filterableSelect);
+        await waitFor(async () => {
 
-        await userEvent.keyboard('{ArrowDown>4/}');
-        await userEvent.keyboard('{ArrowUp>3/}');
-        await userEvent.keyboard('{Shift>}L{/Shift}ab');
+            await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{ArrowDown>4/}');
+            await userEvent.keyboard('{ArrowUp>3/}');
+            await userEvent.keyboard('{Shift>}L{/Shift}ab');
+        })
 
         expect(result === null);
         await expect.element(filterableSelect).toHaveValue('Lab');
