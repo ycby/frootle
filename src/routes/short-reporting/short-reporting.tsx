@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Loading from '../../helpers/Loading.tsx';
-import TableGenerator from '../../helpers/table-generator/TableGenerator.tsx';
-import { FilterableSelect, FilterableSelectData } from '../../helpers/filterable-select/FilterableSelect.tsx';
+import Loading from '#root/src/helpers/Loading.tsx';
+import {TableGenerator} from '#root/src/helpers/table-generator/TableGenerator.tsx';
+import { FilterableSelect, FilterableSelectData } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
 
 import { Chart, registerables } from 'chart.js';
 import { Chart as ReactChartJS } from 'react-chartjs-2';
