@@ -1,6 +1,6 @@
 import {useState, useRef, FormEvent,} from 'react';
 import Papa, {LocalFile} from 'papaparse';
-import TableGenerator from "../../helpers/table-generator/TableGenerator.tsx";
+import {TableGenerator} from "#root/src/helpers/table-generator/TableGenerator.tsx";
 
 type UploadDataMapping = { [p: string]: UploadDataMappingElement };
 type UploadDataMappingElement = { label: string; value: string };
