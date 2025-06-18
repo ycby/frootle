@@ -1,6 +1,6 @@
 import './TableGenerator.css'
 
-interface TableGeneratorProps {
+export interface TableGeneratorProps {
 	headers: Header[],
 	data: any[],
 	style?: any,
@@ -9,16 +9,16 @@ interface TableGeneratorProps {
 	}
 }
 
-type TableData = {
+export type TableData = {
 	id: string;
 	[p: string]: any
 };
-type Header = {
+export type Header = {
 	label: string;
 	value: string;
 }
 
-export default function TableGenerator(props: TableGeneratorProps) {
+export const TableGenerator = (props: TableGeneratorProps) => {
 
 	//Expect:
 	//Headers = Array of Objects

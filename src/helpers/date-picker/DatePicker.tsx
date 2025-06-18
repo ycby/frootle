@@ -1,4 +1,4 @@
-
+import { useId } from 'react';
 import './DatePicker.css';
 
 type DatePickerParams = {
@@ -15,16 +15,18 @@ const DatePicker = (props:DatePickerParams) => {
         onChange
     } = props;
 
+    const id = useId();
+
     return (
         <div className='date-picker'>
-            <label>
+            <label htmlFor={id}>
                 {label}
             </label>
             <input
+                id={id}
                 type='date'
                 value={dateToStringConverter(value)}
                 onChange={(e) => {
-
                     onChange(stringToDateConverter(e.target.value));
                 }}
             />

@@ -89,8 +89,6 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 								setSearchTerm(currentSearchTerm);
 								if (childItem != null) onSelect(childItem);
 							}}
-							onKeyDown={(e) =>
-								selectedIndex.current = keyDownController(e, filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current)}
 							onMouseEnter={(e) => {
 								selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current, e.currentTarget.tabIndex);
 							}}

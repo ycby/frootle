@@ -1,11 +1,11 @@
 import {ForwardedRef, forwardRef} from 'react';
 import {FilterableSelectData} from "./FilterableSelect.tsx";
+import * as React from "react";
 
 interface FilterableSelectItemProps {
 	data: FilterableSelectData;
 	tabIndex: number;
 	setData: (data: string | undefined) => void;
-	onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 	onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
@@ -15,7 +15,6 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 		data,
 		tabIndex = 0,
 		setData,
-		onKeyDown,
 		onMouseEnter
 	} = props;
 
@@ -25,12 +24,8 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 			data-value={ data.value }
 			tabIndex={ tabIndex }
 			className='dropdown-item'
+			role='listitem'
 			onMouseDown={ (e) => setData(e.currentTarget?.dataset?.value) }
-			onKeyDown={ (e) => {
-				onKeyDown(e)
-
-				if (e.key == 'Enter') setData(e.currentTarget.dataset.value);
-			}}
 			onMouseEnter={ (e) => {
 
 				onMouseEnter(e);
