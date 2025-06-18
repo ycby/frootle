@@ -27,7 +27,6 @@ const DatePicker = (props:DatePickerParams) => {
                 type='date'
                 value={dateToStringConverter(value)}
                 onChange={(e) => {
-
                     onChange(stringToDateConverter(e.target.value));
                 }}
             />
