@@ -148,8 +148,6 @@ function updateSelectedItem(
 	}
 
 	const newIndex = clamp(desiredIndex, filteredList.length - 1, 0);
-	console.log(currentIndex)
-	console.log(newIndex)
 	if (currentIndex >= 0 && currentIndex < filteredList.length) dropdownList[currentIndex].classList.remove('focused-item');
 	dropdownList[newIndex].classList.add('focused-item');
 	dropdownList[newIndex].scrollIntoView({block: 'nearest'});

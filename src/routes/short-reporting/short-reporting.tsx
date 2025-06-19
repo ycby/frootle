@@ -112,7 +112,6 @@ export default function ShortReporting() {
 			if (!response.ok) throw new Error(`Response Status: ${response.status}`);
 
 			const jsonResponse = await response.json();
-			console.log(jsonResponse)
 
 			setStockData(jsonResponse.data.map((json: any): FilterableSelectData => {
 
@@ -152,7 +151,27 @@ export default function ShortReporting() {
 		getShortData();
 	}, [selectedStock, startDate, endDate])
 
-	Chart.register(...registerables)
+	Chart.register(...registerables,
+		{
+			id: 'vertical-line',
+			afterDraw: (chart) => {
+
+				if (chart.tooltip?.getActiveElements().length) {
+
+					let ctx = chart.ctx;
+
+					ctx.save();
+					ctx.beginPath();
+					ctx.moveTo(chart.tooltip?.getActiveElements()[0].element.x, chart.scales.y.bottom);
+					ctx.lineTo(chart.tooltip?.getActiveElements()[0].element.x, chart.scales.y.top);
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = 'rgb(255, 0, 0)';
+					ctx.stroke();
+					ctx.restore();
+				}
+			}
+		}
+	);
 
 	return (
 		
@@ -170,37 +189,41 @@ export default function ShortReporting() {
 			<div className='chart'>
 				{
 					currentStatus === 'UNLOADED' ?
-						<div></div> :
-						currentStatus === 'LOADING' ?
-							<Loading /> :
-							<ReactChartJS
-								id='short-reporting-chart'
-								type='line'
-								data={{
-									datasets: [{
-										label: 'Shorted Quantity',
-										data: chartData
-									}]
-								}}
-								options={{
-									scales: {
-										x: {
-											type: 'time',
-											time: {
-												unit: 'month'
-											}
-										},
-										y: {
-											min: 0
-										}
-									},
-									plugins: {
-										legend: {
-											position: 'right'
-										}
+					<div></div> :
+					currentStatus === 'LOADING' ?
+					<Loading /> :
+					<ReactChartJS
+						id='short-reporting-chart'
+						type='line'
+						data={{
+							datasets: [{
+								label: 'Shorted Quantity',
+								data: chartData
+							}]
+						}}
+						options={{
+							scales: {
+								x: {
+									type: 'time',
+									time: {
+										unit: 'month'
 									}
-								}}
-							/>
+								},
+								y: {
+									min: 0
+								}
+							},
+							plugins: {
+								legend: {
+									position: 'right'
+								}
+							},
+							interaction: {
+								intersect: false,
+								mode: 'x',
+							}
+						}}
+					/>
 				}
 			</div>
 
