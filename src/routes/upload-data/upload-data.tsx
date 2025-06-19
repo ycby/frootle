@@ -48,8 +48,6 @@ export default function UploadData() {
 
 	const setFileResult: (data: any[]) => void = (data: any[]): void => {
 
-		console.log('hello')
-		console.log(data);
 		setIsFileParsed(true);
 		setFileAsArray(data);
 	}
@@ -90,9 +88,6 @@ export default function UploadData() {
 					onClick={async () => {
 
 						try {
-							console.log(new Uint16Array(fileAsArray).buffer.byteLength);
-							console.log(JSON.stringify(fileAsArray));
-							console.log(new TextEncoder().encode(JSON.stringify(fileAsArray)).byteLength);
 							const response = await fetch('http://localhost:3000/short', {
 								method: 'POST',
 								mode: 'cors',
