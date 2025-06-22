@@ -1,10 +1,12 @@
 import './Section.css';
-import Loading from "#root/src/helpers/loading/Loading.tsx";
+import {ReactNode} from "react";
 
 type SectionContainerProps = {
     items: SectionContainerItems[];
+    children: ReactNode;
 }
-type SectionContainerItems = {
+
+export interface SectionContainerItems {
     name: string;
     id: string;
 }
@@ -19,7 +21,7 @@ const SectionContainer = (props: SectionContainerProps) => {
                 </ul>
             </div>
             <div className='section-container__content'>
-                <Loading />
+                {props.children}
             </div>
         </div>
     );
