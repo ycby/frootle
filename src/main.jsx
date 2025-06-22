@@ -9,6 +9,7 @@ import './index.css'
 import ErrorPage from './routes/error-page.tsx'
 import ShortReporting from './routes/short-reporting/short-reporting.tsx'
 import UploadData from './routes/upload-data/upload-data.tsx'
+import Loading from "#root/src/helpers/loading/Loading.tsx";
 
 
 const router = createBrowserRouter([
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
+		<Loading />
 		<RouterProvider router={router} />
 	</React.StrictMode>,
 )

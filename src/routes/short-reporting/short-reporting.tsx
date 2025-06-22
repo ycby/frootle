@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Loading from '#root/src/helpers/Loading.tsx';
+import Loading from '#root/src/helpers/loading/Loading.tsx';
 import {TableGenerator} from '#root/src/helpers/table-generator/TableGenerator.tsx';
 import { FilterableSelect, FilterableSelectData } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
 
