@@ -1,0 +1,9 @@
+#portfolio-diary {
+    width: 100%;
+    height: 100%;
+}
+
+#portfolio-diary > h1 {
+    margin: 0;
+    padding: 0.4em 0;
+}

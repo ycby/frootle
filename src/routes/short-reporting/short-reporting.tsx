@@ -9,8 +9,8 @@ import { Chart as ReactChartJS } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
 import './short-reporting.css';
-import {DatePicker} from "../../helpers/date-picker/DatePicker.tsx";
-import {dateToStringConverter} from "../../helpers/DateHelpers.ts";
+import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 
 type ShortReportingMapping = {
 	value: string;

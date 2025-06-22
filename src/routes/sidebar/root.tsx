@@ -11,11 +11,20 @@ export default function Root() {
 					<h1>Contents</h1>
 					<nav>
 						<NavLink
+							to={'portfolio-diary'}
+						>
+							Portfolio Diary
+						</NavLink>
+						<NavLink
 							to={'/short-reporting'}
-						>Short Reporting</NavLink>
+						>
+							Short Reporting
+						</NavLink>
 						<NavLink
 							to={'upload-data'}
-						>Upload Data</NavLink>
+						>
+							Upload Data
+						</NavLink>
 					</nav>
 				</div>
 				<div id='sidebar-thumbnail'>
