@@ -17,23 +17,6 @@
     padding: 5px 10px;
 }
 
-.list-container__header .add {
-    width: 48px;
-    height: 40px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #252422;
-    color: #FFFCF2;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.list-container__header .add:hover {
-    background-color: #403D39;
-}
-
 .list-container__header > h3 {
     margin: 0;
     font-size: 1.25em;
@@ -42,6 +25,7 @@
 .list-container__container {
     width: 100%;
     flex: 1;
+    position: relative;
 }
 
 .list-container__item {
@@ -49,4 +33,29 @@
     flex-direction: row;
     width: 100%;
     border-bottom: 1px solid #252422;
+}
+
+.list-container__add-item-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    width: 100%;
+    height: 0;
+    padding: 0 10px;
+    overflow: hidden;
+    transition: height 0.5s ease-out;
+}
+
+.list-container__add-item-container.opened {
+    transition: height 0.5s ease-out;
+    height: 100%;
+}
+
+.list-container__footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 0;
 }

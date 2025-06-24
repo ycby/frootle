@@ -1,19 +1,12 @@
 import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItems} from "#root/src/helpers/section-container/SectionContainer.tsx";
-import ListContainer, {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
-import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
+import ListContainer from "#root/src/helpers/list-container/ListContainer.tsx";
+import TransactionComponent, {TransactionData} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
+import {useEffect, useState} from "react";
+import NewTransactionComponent
+    from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 
-type StockData = SectionContainerItems & {
-
-}
-
-type TransactionData = ListItem & {
-    type: string;
-    amountPerShare: number;
-    quantity: number;
-    fee: number;
-    transactionDate: Date;
-}
+type StockData = SectionContainerItems & {}
 
 const exampleStocks: StockData[] = [
     {
@@ -59,6 +52,17 @@ const exampleTransactions: TransactionData[] = [
 
 const PortfolioDiary = () => {
 
+    const [stockData, setStockData] = useState<StockData[]>(exampleStocks);
+    const [transactionData, setTransactionData] = useState<TransactionData[]>(exampleTransactions);
+
+    useEffect(() => {
+
+        //TODO: fetch transaction data for selected stock data
+        //skip while making templates
+
+
+    }, [stockData]);
+
     return (
         <div id="portfolio-diary">
             <h1>Portfolio Diary</h1>
@@ -68,47 +72,26 @@ const PortfolioDiary = () => {
                 padding: '0 0 80px'
             }}>
                 <SectionContainer
-                    items={exampleStocks}
+                    items={stockData}
                 >
                     <ListContainer
                         name='Transactions'
-                        items={exampleTransactions}
-                        itemRenderer={(item: TransactionData) => {
-                            return (
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'row'
-                                    }}
-                                >
-                                    <div
-                                        className='classification-strip'
-                                        style={{
-                                            backgroundColor: item.type === 'Buy' ? "green" : item.type === 'Sell' ? "red" : "yellow"
-                                        }}
-                                    ></div>
-                                    <div className='data-container'>
-                                        <div>
-                                            {dateToStringConverter(item.transactionDate)}
-                                        </div>
-                                        <div>
-                                            {item.quantity} @ ${item.amountPerShare} - ${item.fee}<br/>
-                                            ${item.amountPerShare * item.quantity - item.fee}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
+                        items={transactionData}
+                        itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
+                        onAdd={(item: TransactionData) => {
+
+                            //temp because should send to back end and only add on receive success message
+                            let newArray = [...transactionData];
+                            newArray.push(item);
+                            setTransactionData(newArray);
                         }}
+                        onAddRenderer={NewTransactionComponent}
                     />
                 </SectionContainer>
             </div>
         </div>
     );
 }
-//TODO: split off the itemrenderer into its own component
-//Problem is cannot control alignment
-//{item.quantity} @ ${item.amountPerShare} - ${item.fee} = ${item.amountPerShare * item.quantity - item.fee}
-
 
 export {
     PortfolioDiary

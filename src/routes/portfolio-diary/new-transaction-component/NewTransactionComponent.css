@@ -1,0 +1,31 @@
+.new-transaction-component {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0.5em;
+}
+
+.new-transaction-component__item-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5em 0;
+    gap: 20px;
+}
+
+.new-transaction-component__items {
+    padding: 1em 0;
+}
+
+.new-transaction-component__preview {
+    border-top: 1px solid #252422;
+    border-bottom: 1px solid #252422;
+    padding: 1em 0;
+}
+
+.new-transaction-component input {
+    display: flex;
+    flex: 1;
+    min-width: 60px;
+    max-width: 80px;
+}
