@@ -3,8 +3,7 @@ import SectionContainer, {SectionContainerItems} from "#root/src/helpers/section
 import ListContainer from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent, {TransactionData} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
-import NewTransactionComponent
-    from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+import NewTransactionComponent from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 
 type StockData = SectionContainerItems & {}
 

@@ -4,7 +4,7 @@ import {
 	createBrowserRouter,
 	RouterProvider
 } from 'react-router-dom';
-import Root from './routes/sidebar/root.tsx';
+import Root from './Root.tsx';
 import './index.css';
 import ErrorPage from '#root/src/routes/error-page.tsx';
 import ShortReporting from '#root/src/routes/short-reporting/short-reporting.tsx';
@@ -19,8 +19,8 @@ const router = createBrowserRouter([
 		errorElement: <ErrorPage />,
 		children: [
 			{
-				path: "/portfolio-diary",
-				element: <PortfolioDiary />
+				element: <PortfolioDiary />,
+				index: true
 			},
 			{
 				path: 'short-reporting/',
