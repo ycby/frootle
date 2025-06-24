@@ -8,13 +8,8 @@ const Sidebar = () => {
     return (
         <div id='sidebar'>
             <div id='sidebar-main'>
-                <h1>Contents</h1>
+                <h1><NavLink to='/'>Home</NavLink></h1>
                 <nav>
-                    <NavLink
-                        to={'portfolio-diary'}
-                    >
-                        Portfolio Diary
-                    </NavLink>
                     <NavLink
                         to={'/short-reporting'}
                     >
