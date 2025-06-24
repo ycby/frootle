@@ -23,9 +23,20 @@
     padding: 1em 0;
 }
 
-.new-transaction-component input {
+.new-transaction-component__item-input {
     display: flex;
     flex: 1;
     min-width: 60px;
     max-width: 80px;
+    text-align: right;
+}
+
+.new-transaction-component [type=number] {
+    -moz-appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
