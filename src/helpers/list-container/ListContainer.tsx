@@ -1,6 +1,6 @@
 import './ListContainer.css';
 import {MdAdd} from "react-icons/md";
-import {ReactElement, useState} from "react";
+import {ReactElement, ReactNode, useState} from "react";
 import Button from "#root/src/helpers/button/Button.tsx";
 
 export interface ListItem {
@@ -12,7 +12,7 @@ type ListContainerProps = {
     items: any[];
     itemRenderer: (item: any) => ReactElement;
     onAdd: (item: any) => void;
-    onAddRenderer: () => ReactElement;
+    children: ReactNode;
 }
 
 const ListContainer = (props: ListContainerProps) => {
@@ -22,7 +22,7 @@ const ListContainer = (props: ListContainerProps) => {
         items,
         itemRenderer,
         onAdd,
-        onAddRenderer,
+        children
     } = props;
 
     const [isAddItemComponentOpen, setIsAddItemComponentOpen] = useState(false);
@@ -45,7 +45,7 @@ const ListContainer = (props: ListContainerProps) => {
                 {generateItems(items, itemRenderer)}
                 <div className={`list-container__add-item-container ${addItemContainerClassName}`}>
                     <form>
-                        {onAddRenderer()}
+                        {children}
                         <div className='list-container__footer'>
                             <Button onClick={() => {
                                 setIsAddItemComponentOpen(false);

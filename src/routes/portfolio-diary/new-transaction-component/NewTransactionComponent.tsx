@@ -1,13 +1,24 @@
 import './NewTransactionComponent.css';
-import {useId, useState} from "react";
+import {useId} from "react";
 import NumberInput from "#root/src/helpers/number-input/NumberInput.tsx";
 
-const NewTransactionComponent = () => {
+type NewTransactionInputs = {
+    type: string;
+    amtWFee: string;
+    amtWOFee: string;
+    quantity: string;
+}
+type NewTransactionComponentProps = {
+    sourceObject: NewTransactionInputs;
+    updateSource: (sourceObject: NewTransactionInputs) => void;
+}
 
-    const [transactionType, setTransactionType] = useState<string>('Buy');
-    const [amtWFee, setAmtWFee] = useState('');
-    const [amtWOFee, setAmtWOFee] = useState('');
-    const [quantity, setQuantity] = useState('');
+const NewTransactionComponent = (props: NewTransactionComponentProps) => {
+
+    const {
+        sourceObject,
+        updateSource
+    } = props;
 
     const transactionTypeId = useId();
     const amtWFeeId = useId();
@@ -16,11 +27,11 @@ const NewTransactionComponent = () => {
 
     let preview: string;
 
-    const amtWFeeNum = Number(amtWFee);
-    const amtWOFeeNum = Number(amtWOFee);
-    const quantityNum = Number(quantity);
+    const amtWFeeNum = Number(sourceObject.amtWFee);
+    const amtWOFeeNum = Number(sourceObject.amtWOFee);
+    const quantityNum = Number(sourceObject.quantity);
 
-    switch (transactionType) {
+    switch (sourceObject.type) {
         case 'Buy':
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? amtWOFeeNum / quantityNum : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? amtWFeeNum - amtWOFeeNum : 'FEE'}`;
             break;
@@ -31,7 +42,7 @@ const NewTransactionComponent = () => {
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? amtWOFeeNum / quantityNum : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? amtWFeeNum - amtWOFeeNum : 'FEE'}`;
             break;
         default:
-            preview = `An error occurred...`;
+            preview = `Select a transaction type`;
     }
 
     return(
@@ -42,9 +53,12 @@ const NewTransactionComponent = () => {
                     <select
                         id={transactionTypeId}
                         name="type"
-                        value={transactionType}
-                        onChange={(e) => setTransactionType(e.target.value)}
+                        value={sourceObject.type}
+                        onChange={(e) => {
+                            updateSource({...sourceObject, type: e.target.value});
+                        }}
                     >
+                        <option value='Select Type'>Select Type</option>
                         <option value='Buy'>Buy</option>
                         <option value='Sell'>Sell</option>
                         <option value='Dividend'>Dividend</option>
@@ -57,8 +71,11 @@ const NewTransactionComponent = () => {
                             id={amtWFeeId}
                             type='currency'
                             name='totalAmountWFee'
-                            value={amtWFee}
-                            onChange={setAmtWFee} />
+                            value={sourceObject.amtWFee}
+                            onChange={(newValue) => {
+                                updateSource({...sourceObject, amtWFee: newValue});
+                            }}
+                        />
                     </div>
                 </div>
                 <div className='new-transaction-component__item-container'>
@@ -68,8 +85,10 @@ const NewTransactionComponent = () => {
                             id={amtWOFeeId}
                             type='currency'
                             name='totalAmountWOFee'
-                            value={amtWOFee}
-                            onChange={setAmtWOFee}
+                            value={sourceObject.amtWOFee}
+                            onChange={(newValue) =>  {
+                                updateSource({...sourceObject, amtWOFee: newValue});
+                            }}
                         />
                     </div>
                 </div>
@@ -79,8 +98,10 @@ const NewTransactionComponent = () => {
                         <NumberInput
                             id={quantityId}
                             name='quantity'
-                            value={quantity}
-                            onChange={setQuantity}
+                            value={sourceObject.quantity}
+                            onChange={(newValue) => {
+                                updateSource({...sourceObject, quantity: newValue});
+                            }}
                             type='integer'
                         />
                     </div>

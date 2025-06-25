@@ -53,6 +53,7 @@ const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockData[]>(exampleStocks);
     const [transactionData, setTransactionData] = useState<TransactionData[]>(exampleTransactions);
+    const [tdBaseFields, setTDBaseFields] = useState<any>({});
 
     useEffect(() => {
 
@@ -84,8 +85,9 @@ const PortfolioDiary = () => {
                             newArray.push(item);
                             setTransactionData(newArray);
                         }}
-                        onAddRenderer={NewTransactionComponent}
-                    />
+                    >
+                        <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                    </ListContainer>
                 </SectionContainer>
             </div>
         </div>
