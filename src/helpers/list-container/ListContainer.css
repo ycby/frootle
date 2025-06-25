@@ -35,7 +35,7 @@
     border-bottom: 1px solid #252422;
 }
 
-.list-container__add-item-container {
+.list-container__overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -47,7 +47,7 @@
     transition: height 0.5s ease-out;
 }
 
-.list-container__add-item-container.opened {
+.list-container__overlay.opened {
     transition: height 0.5s ease-out;
     height: 100%;
 }

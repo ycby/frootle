@@ -1,6 +1,5 @@
 //Implements interface of ListItem from ListContainer
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 
 import './TransactionComponent.css';
 
@@ -8,7 +7,7 @@ type TransactionComponentProps = {
     item: TransactionData
 }
 
-export type TransactionData = ListItem & {
+export type TransactionData = {
     type: string;
     amountPerShare: number;
     quantity: number;

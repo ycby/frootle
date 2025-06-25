@@ -2,7 +2,7 @@ import './NewTransactionComponent.css';
 import {useId} from "react";
 import NumberInput from "#root/src/helpers/number-input/NumberInput.tsx";
 
-type NewTransactionInputs = {
+export type NewTransactionInputs = {
     type: string;
     amtWFee: string;
     amtWOFee: string;

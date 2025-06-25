@@ -1,11 +1,16 @@
 import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItems} from "#root/src/helpers/section-container/SectionContainer.tsx";
-import ListContainer from "#root/src/helpers/list-container/ListContainer.tsx";
+import ListContainer, {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent, {TransactionData} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
-import NewTransactionComponent from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+import NewTransactionComponent, {
+    NewTransactionInputs
+} from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+import Button from "#root/src/helpers/button/Button.tsx";
+import {MdAdd} from "react-icons/md";
 
 type StockData = SectionContainerItems & {}
+type TransactionDataListItem = ListItem & TransactionData
 
 const exampleStocks: StockData[] = [
     {
@@ -22,7 +27,7 @@ const exampleStocks: StockData[] = [
     }
 ]
 
-const exampleTransactions: TransactionData[] = [
+const exampleTransactions: TransactionDataListItem[] = [
     {
         id: '00001',
         type: 'Buy',
@@ -55,6 +60,8 @@ const PortfolioDiary = () => {
     const [transactionData, setTransactionData] = useState<TransactionData[]>(exampleTransactions);
     const [tdBaseFields, setTDBaseFields] = useState<any>({});
 
+    const [isOverlayOpened, setIsOverlayOpened] = useState<boolean>(false);
+
     useEffect(() => {
 
         //TODO: fetch transaction data for selected stock data
@@ -74,24 +81,73 @@ const PortfolioDiary = () => {
                 <SectionContainer
                     items={stockData}
                 >
-                    <ListContainer
-                        name='Transactions'
-                        items={transactionData}
-                        itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
-                        onAdd={(item: TransactionData) => {
+                    <ListContainer>
+                        <ListContainer.Header>
+                            <h3>Transactions</h3>
+                            <Button
+                                onClick={() => {
+                                    setIsOverlayOpened(true);
+                                }}
+                            >
+                                <MdAdd size='24px' />
+                            </Button>
+                        </ListContainer.Header>
+                        <ListContainer.Body
+                            items={transactionData}
+                            itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
+                            isOverlayOpened={isOverlayOpened}
+                        >
+                            <form>
+                                <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                                <div className='list-container__footer'>
+                                    <Button onClick={() => {
+                                        setIsOverlayOpened(false);
+                                    }}>
+                                        Back
+                                    </Button>
+                                    <Button onClick={() => {
 
-                            //temp because should send to back end and only add on receive success message
-                            let newArray = [...transactionData];
-                            newArray.push(item);
-                            setTransactionData(newArray);
-                        }}
-                    >
-                        <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                                        //validate input and generate correct values
+
+                                        //generate the value
+                                        const td = inputToNewTransactionConverter(tdBaseFields);
+
+                                        //send to back end
+                                        //TODO: just mock first
+                                        const response = {...td, id: '00005'}
+
+                                        //parse response and append to list
+                                        let newArray: TransactionData[] = [...transactionData];
+                                        newArray.unshift(response);
+                                        setTransactionData(newArray);
+                                        setIsOverlayOpened(false);
+                                    }}>
+                                        Save
+                                    </Button>
+                                </div>
+                            </form>
+                        </ListContainer.Body>
                     </ListContainer>
                 </SectionContainer>
             </div>
         </div>
     );
+}
+
+const inputToNewTransactionConverter:(sourceObj: NewTransactionInputs) => TransactionData = (sourceObj: NewTransactionInputs) => {
+
+    const type = sourceObj.type;
+    const amountPerShare = Number(sourceObj.amtWOFee) / Number(sourceObj.quantity);
+    const quantity = Number(sourceObj.quantity);
+    const fee = Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee);
+
+    return {
+        type: type,
+        amountPerShare: amountPerShare,
+        quantity: quantity,
+        fee: fee,
+        transactionDate: new Date()
+    };
 }
 
 export {
