@@ -1,15 +1,12 @@
 import './ListContainer.css';
 import {ReactElement, ReactNode} from "react";
+import ListContainerProps = ListContainer.ListContainerProps;
 
 export interface ListItem {
     id: string;
 }
 
-type ListContainerProps = {
-    children: ReactNode;
-}
-
-const ListContainer = (props: ListContainerProps) => {
+export function ListContainer(props: ListContainerProps) {
 
     const {
         children
@@ -21,25 +18,68 @@ const ListContainer = (props: ListContainerProps) => {
         </div>
     );
 }
+export namespace ListContainer {
 
-ListContainer.Header = (props) => <div className='list-container__header'>{props.children}</div>
-ListContainer.Body = (props) => {
+    type ListContainerHeaderProps = {
+        children: ReactNode;
+    }
 
-    const {
-        items,
-        itemRenderer,
-        isOverlayOpened,
-        children,
-    } = props;
+    type ListContainerBodyProps = {
+        children: ReactNode
+    }
 
-    return(
-        <div className='list-container__container'>
-            {generateItems(items, itemRenderer)}
-            <div className={`list-container__overlay ${isOverlayOpened ? 'opened' : ''}`}>
-                {children}
+    type ListContainerBodyContentProps = {
+        items: any[],
+        itemRenderer: (item: any) => ReactElement,
+    }
+
+    type ListContainerBodyOverlayProps = {
+        isOverlayOpened: boolean,
+        children: ReactNode
+    }
+
+    export type ListContainerProps = {
+        children: ReactNode;
+    }
+
+    export const Header = (props: ListContainerHeaderProps) => {
+
+        return (
+            <div className='list-container__header'>
+                {props.children}
             </div>
-        </div>
-    );
+        );
+    }
+
+    export function Body(props: ListContainerBodyProps) {
+
+        return (
+            <div className='list-container__container'>
+                {props.children}
+            </div>
+        );
+    }
+
+    export namespace Body {
+        export const Content = (props: ListContainerBodyContentProps) => {
+
+            return (generateItems(props.items, props.itemRenderer));
+        }
+
+        export const Overlay = (props: ListContainerBodyOverlayProps) => {
+
+            const {
+                isOverlayOpened,
+                children
+            } = props;
+
+            return (
+                <div className={`list-container__overlay ${isOverlayOpened ? 'opened' : ''}`}>
+                    {children}
+                </div>
+            );
+        }
+    }
 }
 
 const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement) => {
@@ -52,5 +92,3 @@ const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement) 
         );
     }));
 }
-
-export default ListContainer;

@@ -1,6 +1,6 @@
 import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItems} from "#root/src/helpers/section-container/SectionContainer.tsx";
-import ListContainer, {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
+import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent, {TransactionData} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
 import NewTransactionComponent, {
@@ -92,40 +92,44 @@ const PortfolioDiary = () => {
                                 <MdAdd size='24px' />
                             </Button>
                         </ListContainer.Header>
-                        <ListContainer.Body
-                            items={transactionData}
-                            itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
-                            isOverlayOpened={isOverlayOpened}
-                        >
-                            <form>
-                                <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
-                                <div className='list-container__footer'>
-                                    <Button onClick={() => {
-                                        setIsOverlayOpened(false);
-                                    }}>
-                                        Back
-                                    </Button>
-                                    <Button onClick={() => {
+                        <ListContainer.Body>
+                            <ListContainer.Body.Content
+                                items={transactionData}
+                                itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
+                            />
+                            <ListContainer.Body.Overlay
+                                isOverlayOpened={isOverlayOpened}
+                            >
+                                <form>
+                                    <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                                    <div className='list-container__footer'>
+                                        <Button onClick={() => {
+                                            setIsOverlayOpened(false);
+                                        }}>
+                                            Back
+                                        </Button>
+                                        <Button onClick={() => {
 
-                                        //validate input and generate correct values
+                                            //validate input and generate correct values
 
-                                        //generate the value
-                                        const td = inputToNewTransactionConverter(tdBaseFields);
+                                            //generate the value
+                                            const td = inputToNewTransactionConverter(tdBaseFields);
 
-                                        //send to back end
-                                        //TODO: just mock first
-                                        const response = {...td, id: '00005'}
+                                            //send to back end
+                                            //TODO: just mock first
+                                            const response = {...td, id: '00005'}
 
-                                        //parse response and append to list
-                                        let newArray: TransactionData[] = [...transactionData];
-                                        newArray.unshift(response);
-                                        setTransactionData(newArray);
-                                        setIsOverlayOpened(false);
-                                    }}>
-                                        Save
-                                    </Button>
-                                </div>
-                            </form>
+                                            //parse response and append to list
+                                            let newArray: TransactionData[] = [...transactionData];
+                                            newArray.unshift(response);
+                                            setTransactionData(newArray);
+                                            setIsOverlayOpened(false);
+                                        }}>
+                                            Save
+                                        </Button>
+                                    </div>
+                                </form>
+                            </ListContainer.Body.Overlay>
                         </ListContainer.Body>
                     </ListContainer>
                 </SectionContainer>
