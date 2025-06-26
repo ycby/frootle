@@ -7,3 +7,19 @@
     margin: 0;
     padding: 0.4em 0;
 }
+
+#portfolio-diary .thesis {
+    height: 100px;
+    max-height: 200px;
+    border: solid 1px black;
+    margin: 20px;
+}
+
+#portfolio-diary .diary-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 20px;
+    padding: 10px;
+    border: solid 1px black;
+}

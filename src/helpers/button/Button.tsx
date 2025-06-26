@@ -2,6 +2,7 @@ import './Button.css';
 import * as React from "react";
 
 type ButtonProps = {
+    style?: React.CSSProperties;
     onClick: (event: React.MouseEvent) => void;
     children: React.ReactNode;
 }
@@ -9,6 +10,7 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
 
     const {
+        style,
         onClick,
         children
     } = props;
@@ -16,6 +18,7 @@ const Button = (props: ButtonProps) => {
     return (
         <div
             className='button'
+            style={style}
             onClick={onClick}
         >
             {children}
