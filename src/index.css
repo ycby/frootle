@@ -1,7 +1,9 @@
-@font-face {
-  font-family: 'Inconsolata';
-  src: local('Inconsolata'), url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
-}
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900');
+
+/*@font-face {*/
+/*  font-family: 'Inconsolata';*/
+/*  src: local('Inconsolata'), url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900');*/
+/*}*/
 
 html {
   box-sizing: border-box;

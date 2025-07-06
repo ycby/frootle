@@ -27,6 +27,12 @@
 
 .section-container__sidebar > ul > li:hover {
     background-color: #CCC5B9;
+    color: #252422;
+}
+
+.section-container__item.selected {
+    background-color: #252422;
+    color: #FFFCF2;
 }
 
 .section-container__content {

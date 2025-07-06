@@ -1,5 +1,5 @@
 import './PortfolioDiary.css';
-import SectionContainer, {SectionContainerItems} from "#root/src/helpers/section-container/SectionContainer.tsx";
+import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent, {TransactionData} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
@@ -8,7 +8,7 @@ import NewTransactionComponent, {
 } from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 import Button from "#root/src/helpers/button/Button.tsx";
 
-type StockData = SectionContainerItems & {}
+type StockData = SectionContainerItem & {}
 type TransactionDataListItem = ListItem & TransactionData
 type DiaryEntryListItem = ListItem & {
     entry: string
@@ -74,11 +74,12 @@ const PortfolioDiary = () => {
     const [tdBaseFields, setTDBaseFields] = useState<any>({});
     const [diaryEntries, setDiaryEntries] = useState<any>(exampleDiaryEntry);
 
+    const [currentStock, setCurrentStock] = useState<number>(0);
+
     useEffect(() => {
 
         //TODO: fetch transaction data for selected stock data
         //skip while making templates
-
 
     }, [stockData]);
 
@@ -92,6 +93,10 @@ const PortfolioDiary = () => {
             }}>
                 <SectionContainer
                     items={stockData}
+                    onClick={(selected: number) => {
+                        setCurrentStock(selected);
+                    }}
+                    selected={currentStock}
                 >
                     <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', height: '100%'}}>
                         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%'}}>
