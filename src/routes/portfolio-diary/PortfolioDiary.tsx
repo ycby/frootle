@@ -9,7 +9,10 @@ import {NewTransactionInputs, TransactionData, TransactionDataBE} from "#root/sr
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 
-type StockData = SectionContainerItem & {}
+type StockData = SectionContainerItem & {
+    name: string;
+    full_name?: string;
+}
 type TransactionDataListItem = ListItem & TransactionData
 type DiaryEntryListItem = ListItem & {
     content: string
@@ -17,42 +20,45 @@ type DiaryEntryListItem = ListItem & {
 
 const exampleStocks: StockData[] = [
     {
-        name: 'Stock 1',
-        id: 1
+        id: 1,
+        ticker_no: '00001',
+        name: 'Stock 1'
     },
     {
+        id: 2,
+        ticker_no: '00002',
         name: 'Stock 2',
-        id: 2
     },
     {
+        id: 3,
+        ticker_no: '00003',
         name: 'Stock 3',
-        id: 3
     }
 ]
 
 const exampleTransactions: TransactionDataListItem[] = [
     {
-        id: '00001',
+        id: 1,
         amount: 100,
-        type: 'Buy',
+        type: 'buy',
         amountPerShare: 10,
         quantity: 5,
         fee: 0.1,
         transactionDate: new Date(2025, 1, 1)
     },
     {
-        id: '00002',
+        id: 2,
         amount: 200,
-        type: 'Dividend',
+        type: 'dividend',
         amountPerShare: 1,
         quantity: 5,
         fee: 0.1,
         transactionDate: new Date(2025, 4, 13)
     },
     {
-        id: '00003',
+        id: 3,
         amount: 300,
-        type: 'Sell',
+        type: 'sell',
         amountPerShare: 10,
         quantity: 5,
         fee: 0.1,
@@ -90,7 +96,26 @@ const PortfolioDiary = () => {
     });
     const [diaryEntries, setDiaryEntries] = useState<any>(exampleDiaryEntry);
 
-    const [currentStock, setCurrentStock] = useState<number>(0);
+    const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
+
+    useEffect(() => {
+
+        const getStocksWithTransactions = async () => {
+
+            const stocksWithTransactionsResponse = await fetch('http://localhost:3000/transaction/stocks');
+
+            if (!stocksWithTransactionsResponse.ok) {
+                console.error('Failed to retrieve stocks with transactions!');
+            }
+
+            const stocksWithTransactionsJSON = await stocksWithTransactionsResponse.json();
+
+            setStockData(stocksWithTransactionsJSON.data);
+            setCurrentStockIndex(0);
+        }
+
+        getStocksWithTransactions();
+    }, []);
 
     useEffect(() => {
 
@@ -98,7 +123,8 @@ const PortfolioDiary = () => {
         //skip while making templates
         const getTransactions = async () => {
 
-            const transactionsResponse = await fetch('http://localhost:3000/transaction', {
+            console.log(stockData[currentStockIndex].id);
+            const transactionsResponse = await fetch('http://localhost:3000/transaction?stock_id=' + stockData[currentStockIndex].id, {
                 method: 'GET'
             });
 
@@ -115,7 +141,7 @@ const PortfolioDiary = () => {
 
         getTransactions()
 
-    }, [stockData]);
+    }, [currentStockIndex]);
 
     return (
         <div id="portfolio-diary">
@@ -128,9 +154,9 @@ const PortfolioDiary = () => {
                 <SectionContainer
                     items={stockData}
                     onClick={(selected: number) => {
-                        setCurrentStock(selected);
+                        setCurrentStockIndex(selected);
                     }}
-                    selected={currentStock}
+                    selected={currentStockIndex}
                 >
                     <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', height: '100%'}}>
                         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%'}}>
