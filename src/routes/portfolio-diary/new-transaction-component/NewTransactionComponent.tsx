@@ -1,13 +1,10 @@
 import './NewTransactionComponent.css';
 import {useId} from "react";
 import NumberInput from "#root/src/helpers/number-input/NumberInput.tsx";
+import {Currency, CurrencyKeys, TransactionType, TransactionTypeKeys} from "#root/src/types.ts";
+import {capitaliseWord} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
+import {NewTransactionInputs} from "#root/src/routes/portfolio-diary/types.ts";
 
-export type NewTransactionInputs = {
-    type: string;
-    amtWFee: string;
-    amtWOFee: string;
-    quantity: string;
-}
 type NewTransactionComponentProps = {
     sourceObject: NewTransactionInputs;
     updateSource: (sourceObject: NewTransactionInputs) => void;
@@ -20,10 +17,12 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
         updateSource
     } = props;
 
+    const transactionDateId = useId();
     const transactionTypeId = useId();
     const amtWFeeId = useId();
     const amtWOFeeId = useId();
     const quantityId = useId();
+    const currencyId = useId();
 
     let preview: string;
 
@@ -32,13 +31,13 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
     const quantityNum = Number(sourceObject.quantity);
 
     switch (sourceObject.type) {
-        case 'Buy':
+        case TransactionType.BUY:
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? amtWOFeeNum / quantityNum : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? amtWFeeNum - amtWOFeeNum : 'FEE'}`;
             break;
-        case 'Sell':
+        case TransactionType.SELL:
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? amtWOFeeNum / quantityNum : 'PPS'} - ${amtWFeeNum && amtWOFeeNum ? amtWFeeNum - amtWOFeeNum : 'FEE'}`;
             break;
-        case 'Dividend':
+        case TransactionType.DIVIDEND:
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? amtWOFeeNum / quantityNum : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? amtWFeeNum - amtWOFeeNum : 'FEE'}`;
             break;
         default:
@@ -49,19 +48,36 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
         <div className='new-transaction-component'>
             <div className='new-transaction-component__items'>
                 <div className='new-transaction-component__item-container'>
+                    <label htmlFor={transactionDateId}>Date</label>
+                    <div className='new-transaction-component__item-input'>
+                        <input
+                            type='date'
+                            id={transactionDateId}
+                            name='transactionDate'
+                            value={sourceObject.transactionDate}
+                            onChange={(e) => {
+                                updateSource({...sourceObject, transactionDate: e.target.value});
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className='new-transaction-component__item-container'>
                     <label htmlFor={transactionTypeId}>Type</label>
                     <select
                         id={transactionTypeId}
                         name="type"
                         value={sourceObject.type}
                         onChange={(e) => {
-                            updateSource({...sourceObject, type: e.target.value});
+
+                            updateSource({...sourceObject, type: e.target.value as TransactionTypeKeys});
                         }}
                     >
-                        <option value='Select Type'>Select Type</option>
-                        <option value='Buy'>Buy</option>
-                        <option value='Sell'>Sell</option>
-                        <option value='Dividend'>Dividend</option>
+                        {
+                            Object.values(TransactionType).map((transactionType: TransactionTypeKeys) => {
+
+                                return(<option value={capitaliseWord(transactionType)}>{capitaliseWord(transactionType)}</option>)
+                            })
+                        }
                     </select>
                 </div>
                 <div className='new-transaction-component__item-container'>
@@ -104,6 +120,25 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
                             }}
                             type='integer'
                         />
+                    </div>
+                </div>
+                <div className='new-transaction-component__item-container'>
+                    <label htmlFor={currencyId}>Currency</label>
+                    <div className='new-transaction-component__item-input'>
+                        <select
+                            id={currencyId}
+                            name="currency"
+                            value={sourceObject.currency}
+                            onChange={(e) => {
+
+                                updateSource({...sourceObject, currency: e.target.value as CurrencyKeys});
+                            }}>
+                            {
+                                Object.values(Currency).map((currency: CurrencyKeys) => {
+                                    return (<option value={capitaliseWord(currency)}>{capitaliseWord(currency)}</option>)
+                                })
+                            }
+                        </select>
                     </div>
                 </div>
             </div>

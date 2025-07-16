@@ -1,18 +1,11 @@
 //Implements interface of ListItem from ListContainer
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-
+import {TransactionType} from "#root/src/types.ts";
 import './TransactionComponent.css';
+import {TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
 
 type TransactionComponentProps = {
     item: TransactionData
-}
-
-export type TransactionData = {
-    type: string;
-    amountPerShare: number;
-    quantity: number;
-    fee: number;
-    transactionDate: Date;
 }
 
 const TransactionComponent = (props: TransactionComponentProps) => {
@@ -26,20 +19,20 @@ const TransactionComponent = (props: TransactionComponentProps) => {
     let totalAmount = 0;
 
     switch (item.type) {
-        case 'Buy':
+        case TransactionType.BUY:
             bgColour = '#77DD77';
             calculationString = `Buy ${item.quantity} @ $${item.amountPerShare} + $${item.fee}`;
-            totalAmount = item.amountPerShare * item.quantity + item.fee;
+            totalAmount = Number(item.amount) + Number(item.fee);
             break;
-        case 'Sell':
+        case TransactionType.SELL:
             bgColour = '#FF6961';
             calculationString = `Sell ${item.quantity} @ $${item.amountPerShare} - $${item.fee}`;
-            totalAmount = item.amountPerShare * item.quantity - item.fee;
+            totalAmount = Number(item.amount) - Number(item.fee);
             break;
-        case 'Dividend':
+        case TransactionType.DIVIDEND:
             bgColour = '#FDFD96';
             calculationString = `Dividend ${item.quantity} @ $${item.amountPerShare} - $${item.fee}`;
-            totalAmount = item.amountPerShare * item.quantity - item.fee;
+            totalAmount = Number(item.amount) - Number(item.fee);
             break;
         default:
             calculationString = 'An error has occurred';

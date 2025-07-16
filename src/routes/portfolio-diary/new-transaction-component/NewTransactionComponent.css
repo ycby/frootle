@@ -29,6 +29,7 @@
     min-width: 60px;
     max-width: 80px;
     text-align: right;
+    justify-content: end;
 }
 
 .new-transaction-component [type=number] {
