@@ -70,6 +70,14 @@ const transactionComponentView = (item: TransactionDataListItem, calculatedDetai
             return (
                 <div className='transaction-component__data-container'>
                     {editView}
+                    <div className='transaction-component__button-container'>
+                        <Button
+                            onClick={() => onBack(item.index)}
+                        >Back</Button>
+                        <Button
+                            onClick={() => console.log('todo')}
+                        >Save</Button>
+                    </div>
                 </div>
             );
         case ComponentStatus.DELETE:
@@ -78,7 +86,7 @@ const transactionComponentView = (item: TransactionDataListItem, calculatedDetai
                     <div>
                         Are you sure?
                     </div>
-                    <div>
+                    <div className='transaction-component__button-container'>
                         <Button
                             onClick={() => onBack(item.index)}
                         >Back</Button>

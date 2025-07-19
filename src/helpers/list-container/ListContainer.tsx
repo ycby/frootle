@@ -3,7 +3,7 @@ import {ReactElement, ReactNode, useState} from "react";
 import {IoFilter} from "react-icons/io5";
 import Button from "#root/src/helpers/button/Button.tsx";
 import {MdAdd, MdDelete, MdEdit} from "react-icons/md";
-import {ComponentStatusKeys} from "#root/src/types.ts";
+import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 
 export interface ListItem {
     id: number;
@@ -90,8 +90,8 @@ const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement, 
 
     return (items.map((item) => {
         return (
-            <div className='list-container__item' key={item.id}>
-                <div className='list-container__item-controls'>
+            <div className={'list-container__item'} key={item.id}>
+                <div className={`list-container__item-controls ${item.status !== ComponentStatus.VIEW ? 'display-none' : ''}`}>
                     <MdEdit
                         style={{margin: '4px 2px', cursor: 'pointer'}}
                         onClick={() => {
