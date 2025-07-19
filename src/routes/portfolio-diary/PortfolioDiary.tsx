@@ -1,9 +1,7 @@
 import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
-import TransactionComponent, {
-    TransactionDataListItem
-} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
+import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
 import Button from "#root/src/helpers/button/Button.tsx";
 import {convertBEtoFE, convertFEtoBE} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
@@ -20,6 +18,9 @@ type StockData = SectionContainerItem & {
 type DiaryEntryListItem = ListItem & {
     content: string
 }
+export type TransactionDataListItem = ListItem & TransactionData & {
+    editObject: NewTransactionInputs;
+};
 
 const exampleStocks: StockData[] = [
     {
@@ -215,20 +216,26 @@ const PortfolioDiary = () => {
                                         item={item}
                                         editView={NewTransactionComponent(
                                             {
-                                                sourceObject: {
-                                                    stockId: stockData[currentStockIndex].id,
-                                                    type: item.type,
-                                                    amtWFee: (item.amount + item.fee).toString(),
-                                                    amtWOFee: (item.amount).toString(),
-                                                    quantity: (item.quantity).toString(),
-                                                    transactionDate: dateToStringConverter(item.transactionDate),
-                                                    currency: item.currency
-                                                },
-                                                updateSource: setTDBaseFields
+                                                sourceObject: item.editObject,
+                                                updateSource: (obj) => {
+
+                                                    let newTransactionListItems = [...transactionData];
+
+                                                    newTransactionListItems[item.index].editObject = obj;
+
+                                                    setTransactionData(newTransactionListItems);
+                                                }
                                             }
                                         )}
-                                        onEdit={(index) => {
-                                            console.log('hi')
+                                        onEdit={(index: number) => {
+                                            console.log('onEdit')
+                                            let newTransactionListItems = [...transactionData];
+
+                                            //temp just update list - would need to call api
+                                            const updatedTransactionEditObject = newTransactionListItems[index].editObject;
+                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFE(convertFEtoBE(updatedTransactionEditObject)));
+
+                                            setTransactionData(processTransactionData(newTransactionListItems))
                                         }}
                                         onDelete={(index) => {
                                             console.log('onDelete');
@@ -302,9 +309,36 @@ const processTransactionData: (transactionData: TransactionData[]) => Transactio
         return ({
             ...element,
             index: index,
-            status: ComponentStatus.VIEW as ComponentStatusKeys
+            status: ComponentStatus.VIEW as ComponentStatusKeys,
+            editObject: {
+                stockId: element.stockId,
+                type: element.type,
+                amtWFee: (element.amount + element.fee).toString(),
+                amtWOFee: (element.amount).toString(),
+                quantity: (element.quantity).toString(),
+                transactionDate: dateToStringConverter(element.transactionDate),
+                currency: element.currency
+            }
         }) as TransactionDataListItem;
     });
+}
+
+const replaceTransactionData: (original: TransactionDataListItem, transactionData: TransactionData) => TransactionDataListItem = (original: TransactionDataListItem, transactionData: TransactionData): TransactionDataListItem => {
+
+    return ({
+        ...transactionData,
+        index: original.index,
+        status: original.status,
+        editObject: {
+            stockId: transactionData.stockId,
+            type: transactionData.type,
+            amtWFee: (transactionData.amount + transactionData.fee).toString(),
+            amtWOFee: (transactionData.amount).toString(),
+            quantity: (transactionData.quantity).toString(),
+            transactionDate: dateToStringConverter(transactionData.transactionDate),
+            currency: transactionData.currency
+        }
+    } as TransactionDataListItem);
 }
 
 export {

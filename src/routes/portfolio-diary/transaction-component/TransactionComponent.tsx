@@ -2,9 +2,9 @@
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import {ComponentStatus, TransactionType} from "#root/src/types.ts";
 import './TransactionComponent.css';
-import {TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
-import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
+import {NewTransactionInputs, TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
 import Button from "#root/src/helpers/button/Button.tsx";
+import {TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 
 type TransactionComponentProps = {
     item: TransactionDataListItem,
@@ -13,8 +13,6 @@ type TransactionComponentProps = {
     onDelete: (index: number) => void,
     onBack: (index: number) => void,
 }
-
-export type TransactionDataListItem = ListItem & TransactionData;
 
 type TransactionCalculatedDetails = {
     bgColor: string;
@@ -50,7 +48,7 @@ const TransactionComponent = (props: TransactionComponentProps) => {
     );
 }
 
-const transactionComponentView = (item: TransactionDataListItem, calculatedDetails: TransactionCalculatedDetails, editView, onEdit: (index: number) => void, onDelete: (index: number) => void, onBack: (index: number) => void) => {
+const transactionComponentView = (item: TransactionDataListItem, calculatedDetails: TransactionCalculatedDetails, editView, onEdit: (index: number, newData: NewTransactionInputs) => void, onDelete: (index: number) => void, onBack: (index: number) => void) => {
 
     switch (item.status) {
         case ComponentStatus.VIEW:
@@ -75,7 +73,7 @@ const transactionComponentView = (item: TransactionDataListItem, calculatedDetai
                             onClick={() => onBack(item.index)}
                         >Back</Button>
                         <Button
-                            onClick={() => console.log('todo')}
+                            onClick={() => onEdit(item.index)}
                         >Save</Button>
                     </div>
                 </div>
