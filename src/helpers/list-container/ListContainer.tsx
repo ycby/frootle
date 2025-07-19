@@ -2,10 +2,13 @@ import './ListContainer.css';
 import {ReactElement, ReactNode, useState} from "react";
 import {IoFilter} from "react-icons/io5";
 import Button from "#root/src/helpers/button/Button.tsx";
-import {MdAdd} from "react-icons/md";
+import {MdAdd, MdDelete, MdEdit} from "react-icons/md";
+import {ComponentStatusKeys} from "#root/src/types.ts";
 
 export interface ListItem {
-    id: string;
+    id: number;
+    index: number;
+    status: ComponentStatusKeys;
 }
 
 type ListContainerProps = {
@@ -15,6 +18,8 @@ type ListContainerProps = {
     newItemRenderer: ReactNode;
     filterRenderer: ReactNode;
     onNew: () => void;
+    onEdit: (index: number) => void;
+    onDelete: (index: number) => void;
 }
 
 export function ListContainer(props: ListContainerProps) {
@@ -25,7 +30,9 @@ export function ListContainer(props: ListContainerProps) {
         itemRenderer,
         newItemRenderer,
         filterRenderer,
-        onNew
+        onNew,
+        onEdit,
+        onDelete
     } = props;
 
     const [isNewOverlayOpened, setIsNewOverlayOpened] = useState(false);
@@ -35,11 +42,7 @@ export function ListContainer(props: ListContainerProps) {
         <div className='list-container'>
             <div className='list-container__header'>
                 <h3>{name}</h3>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
+                <div className='list-container__header-item'>
                     <div
                         onClick={() => {
                             setIsFilterOverlayOpened(!isFilterOverlayOpened);
@@ -59,7 +62,7 @@ export function ListContainer(props: ListContainerProps) {
                 </div>
             </div>
             <div className='list-container__container'>
-                {generateItems(items, itemRenderer)}
+                {generateItems(items, itemRenderer, onEdit, onDelete)}
                 <div className={`list-container__overlay ${isNewOverlayOpened ? 'opened' : ''}`}>
                     <form>
                         {newItemRenderer}
@@ -83,11 +86,25 @@ export function ListContainer(props: ListContainerProps) {
 }
 
 
-const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement) => {
+const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement, onEdit: (index: number) => void, onDelete: (index: number) => void) => {
 
-    return (items.map(item => {
+    return (items.map((item) => {
         return (
             <div className='list-container__item' key={item.id}>
+                <div className='list-container__item-controls'>
+                    <MdEdit
+                        style={{margin: '4px 2px', cursor: 'pointer'}}
+                        onClick={() => {
+                            onEdit(item.index);
+                        }}
+                    />
+                    <MdDelete
+                        style={{margin: '4px 2px', cursor: 'pointer'}}
+                        onClick={() => {
+                            onDelete(item.index);
+                        }}
+                    />
+                </div>
                 {itemRenderer(item)}
             </div>
         );

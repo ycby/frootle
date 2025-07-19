@@ -13,11 +13,18 @@ export type CurrencyKeys = typeof Currency[keyof typeof Currency];
 export type TransactionTypeKeys = typeof TransactionType[keyof typeof TransactionType];
 
 //=====================================================================================
-//I/O
+//General
 //=====================================================================================
+const ComponentStatus = {
+    VIEW: 'view',
+    EDIT: 'edit',
+    DELETE: 'delete'
+} as const;
 
+export type ComponentStatusKeys = typeof ComponentStatus[keyof typeof ComponentStatus];
 
 export {
     Currency,
     TransactionType,
+    ComponentStatus,
 }

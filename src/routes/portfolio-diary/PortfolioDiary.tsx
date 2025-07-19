@@ -1,19 +1,22 @@
 import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
-import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
+import TransactionComponent, {
+    TransactionDataListItem
+} from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
 import Button from "#root/src/helpers/button/Button.tsx";
 import {convertBEtoFE, convertFEtoBE} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {NewTransactionInputs, TransactionData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 
 type StockData = SectionContainerItem & {
     name: string;
     full_name?: string;
 }
-type TransactionDataListItem = ListItem & TransactionData
 type DiaryEntryListItem = ListItem & {
     content: string
 }
@@ -36,33 +39,39 @@ const exampleStocks: StockData[] = [
     }
 ]
 
-const exampleTransactions: TransactionDataListItem[] = [
+const exampleTransactions: TransactionData[] = [
     {
         id: 1,
+        stockId: 1,
         amount: 100,
         type: 'buy',
         amountPerShare: 10,
         quantity: 5,
         fee: 0.1,
-        transactionDate: new Date(2025, 1, 1)
+        transactionDate: new Date(2025, 1, 1),
+        currency: 'HKD',
     },
     {
         id: 2,
+        stockId: 1,
         amount: 200,
         type: 'dividend',
         amountPerShare: 1,
         quantity: 5,
         fee: 0.1,
-        transactionDate: new Date(2025, 4, 13)
+        transactionDate: new Date(2025, 4, 13),
+        currency: "HKD",
     },
     {
         id: 3,
+        stockId: 1,
         amount: 300,
         type: 'sell',
         amountPerShare: 10,
         quantity: 5,
         fee: 0.1,
-        transactionDate: new Date(2025, 6, 21)
+        transactionDate: new Date(2025, 6, 21),
+        currency: 'HKD',
     }
 ]
 
@@ -84,7 +93,7 @@ const exampleDiaryEntry: DiaryEntryListItem[] = [
 const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockData[]>(exampleStocks);
-    const [transactionData, setTransactionData] = useState<TransactionData[]>(exampleTransactions);
+    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(processTransactionData(exampleTransactions));
     const [tdBaseFields, setTDBaseFields] = useState<NewTransactionInputs>({
         stockId: 3007,
         type: 'buy',
@@ -135,7 +144,7 @@ const PortfolioDiary = () => {
                 //TODO: make a mapping function for backend objects to front end
                 const transactionData = transactionJson.data.map((data: TransactionDataBE) => convertBEtoFE(data));
 
-                setTransactionData(transactionData);
+                setTransactionData(processTransactionData(transactionData));
             }
         }
 
@@ -146,101 +155,156 @@ const PortfolioDiary = () => {
     return (
         <div id="portfolio-diary">
             <h1>Portfolio Diary</h1>
-            <div style={{
-                width: '100%',
-                height: '100%',
-                padding: '0 0 80px'
-            }}>
-                <SectionContainer
-                    items={stockData}
-                    onClick={(selected: number) => {
-                        setCurrentStockIndex(selected);
-                    }}
-                    selected={currentStockIndex}
-                >
-                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', height: '100%'}}>
-                        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%'}}>
-                            <div className='thesis'>
-                                Thesis
-                            </div>
-                            <div className='diary-list'>
-                                <div style={{alignSelf: 'end'}}>
-                                    <Button
-                                        style={{fontSize: '0.75em'}}
-                                        onClick={() => {
-
-                                        }}
-                                    >
-                                        New
-                                    </Button>
-                                </div>
-                                <div style={{margin: '12px 0', overflow: "scroll"}}>
-                                    {diaryEntries.map((entry: DiaryEntryListItem, index: number) => {
-
-                                        return (
-                                            <div key={entry.id} style={{
-                                                border: 'solid 1px black',
-                                                height: '150px',
-                                                padding: '8px',
-                                                margin: '8px 0'
-                                            }}>
-                                                <h3 style={{margin: '0'}}>#{index + 1}</h3>
-                                                <div style={{
-                                                    fontSize: '0.75em',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    height: '5lh',
-                                                    margin: '12px',
-                                                }}>
-                                                    {entry.content}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+            <SectionContainer
+                className='portfolio-diary__container'
+                items={stockData}
+                onClick={(selected: number) => {
+                    setCurrentStockIndex(selected);
+                }}
+                selected={currentStockIndex}
+            >
+                <div className='portfolio-diary__main'>
+                    <div className='portfolio-diary__content'>
+                        <div className='thesis'>
+                            Thesis
                         </div>
-                        <div style={{margin: '20px'}}>
-                            <ListContainer
-                                name='Transactions'
-                                items={transactionData}
-                                itemRenderer={(item: TransactionData) => <TransactionComponent item={item} />}
-                                newItemRenderer={NewTransactionComponent({sourceObject:tdBaseFields, updateSource:setTDBaseFields})}
-                                filterRenderer={<div>Test Filter</div>}
-                                onNew={async () => {
+                        <div className='diary-list'>
+                            <div style={{alignSelf: 'end'}}>
+                                <Button
+                                    style={{fontSize: '0.75em'}}
+                                    onClick={() => {
 
-                                    //validate input and generate correct values
+                                    }}
+                                >
+                                    New
+                                </Button>
+                            </div>
+                            <div style={{margin: '12px 0', overflow: "scroll"}}>
+                                {diaryEntries.map((entry: DiaryEntryListItem, index: number) => {
 
-                                    //generate the value
-                                    const td = convertFEtoBE(tdBaseFields);
-
-                                    //send to back end
-                                    const newTransactionResponse = await fetch('http://localhost:3000/transaction', {
-                                        method: 'POST',
-                                        body: JSON.stringify([td]),
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        }
-                                    });
-
-                                    if (!newTransactionResponse.ok) {
-
-                                        console.error('Failed to create transaction');
-                                    }
-
-                                    //parse response and append to list
-                                    let newArray: TransactionData[] = [...transactionData];
-                                    newArray.unshift(convertBEtoFE(td));
-                                    setTransactionData(newArray);
-                                }}
-                            >
-                            </ListContainer>
+                                    return (
+                                        <div key={entry.id} style={{
+                                            border: 'solid 1px black',
+                                            height: '150px',
+                                            padding: '8px',
+                                            margin: '8px 0'
+                                        }}>
+                                            <h3 style={{margin: '0'}}>#{index + 1}</h3>
+                                            <div style={{
+                                                fontSize: '0.75em',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                height: '5lh',
+                                                margin: '12px',
+                                            }}>
+                                                {entry.content}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </SectionContainer>
-            </div>
+                    <div style={{margin: '20px'}}>
+                        <ListContainer
+                            name='Transactions'
+                            items={transactionData}
+                            itemRenderer={(item: TransactionDataListItem) => {
+                                return (
+                                    <TransactionComponent
+                                        item={item}
+                                        editView={NewTransactionComponent(
+                                            {
+                                                sourceObject: {
+                                                    stockId: stockData[currentStockIndex].id,
+                                                    type: item.type,
+                                                    amtWFee: (item.amount + item.fee).toString(),
+                                                    amtWOFee: (item.amount).toString(),
+                                                    quantity: (item.quantity).toString(),
+                                                    transactionDate: dateToStringConverter(item.transactionDate),
+                                                    currency: item.currency
+                                                },
+                                                updateSource: setTDBaseFields
+                                            }
+                                        )}
+                                        onEdit={(index) => {
+                                            console.log('hi')
+                                        }}
+                                        onDelete={(index) => {
+                                            console.log('onDelete');
+                                            let newTransactionListItems = [...transactionData];
+
+                                            //temp just remove from list
+                                            newTransactionListItems.splice(index, 1);
+
+                                            setTransactionData(newTransactionListItems);
+                                        }}
+                                        onBack={(index) => {
+                                            let newTransactionListItems = [...transactionData];
+                                            newTransactionListItems[index].status = ComponentStatus.VIEW;
+                                            setTransactionData(newTransactionListItems);
+                                        }}
+                                    />
+                                )
+                            }}
+                            newItemRenderer={NewTransactionComponent({sourceObject:tdBaseFields, updateSource:setTDBaseFields})}
+                            filterRenderer={<div>Test Filter</div>}
+                            onNew={async () => {
+
+                                //validate input and generate correct values
+
+                                //generate the value
+                                const td = convertFEtoBE(tdBaseFields);
+
+                                //send to back end
+                                const newTransactionResponse = await fetch('http://localhost:3000/transaction', {
+                                    method: 'POST',
+                                    body: JSON.stringify([td]),
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+
+                                if (!newTransactionResponse.ok) {
+
+                                    console.error('Failed to create transaction');
+                                }
+
+                                //parse response and append to list
+                                let newArray: TransactionData[] = [...transactionData];
+                                newArray.unshift(convertBEtoFE(td));
+                                setTransactionData(processTransactionData(newArray));
+                            }}
+                            onEdit={(index: number) => {
+                                console.log('onEdit');
+                                let newTransactionListItems = [...transactionData];
+                                newTransactionListItems[index].status = ComponentStatus.EDIT;
+                                setTransactionData(newTransactionListItems);
+                            }}
+                            onDelete={(index: number) => {
+                                console.log('onDelete');
+                                let newTransactionListItems = [...transactionData];
+                                newTransactionListItems[index].status = ComponentStatus.DELETE;
+                                setTransactionData(newTransactionListItems);
+                            }}
+                        >
+                        </ListContainer>
+                    </div>
+                </div>
+            </SectionContainer>
         </div>
     );
+}
+
+const processTransactionData: (transactionData: TransactionData[]) => TransactionDataListItem[] = (transactionData: TransactionData[]): TransactionDataListItem[] => {
+
+    return transactionData.map((element: TransactionData, index: number): TransactionDataListItem => {
+        return ({
+            ...element,
+            index: index,
+            status: ComponentStatus.VIEW as ComponentStatusKeys
+        }) as TransactionDataListItem;
+    });
 }
 
 export {

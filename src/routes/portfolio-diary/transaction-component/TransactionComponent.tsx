@@ -1,43 +1,38 @@
 //Implements interface of ListItem from ListContainer
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {TransactionType} from "#root/src/types.ts";
+import {ComponentStatus, TransactionType} from "#root/src/types.ts";
 import './TransactionComponent.css';
 import {TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
+import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
+import Button from "#root/src/helpers/button/Button.tsx";
 
 type TransactionComponentProps = {
-    item: TransactionData
+    item: TransactionDataListItem,
+    editView: any,
+    onEdit: (index: number) => void,
+    onDelete: (index: number) => void,
+    onBack: (index: number) => void,
+}
+
+export type TransactionDataListItem = ListItem & TransactionData;
+
+type TransactionCalculatedDetails = {
+    bgColor: string;
+    calculationString: string;
+    totalAmount: number;
 }
 
 const TransactionComponent = (props: TransactionComponentProps) => {
 
     const {
-        item
+        item,
+        editView,
+        onEdit,
+        onDelete,
+        onBack,
     } = props;
 
-    let bgColour = 'black';
-    let calculationString = '';
-    let totalAmount = 0;
-
-    switch (item.type) {
-        case TransactionType.BUY:
-            bgColour = '#77DD77';
-            calculationString = `Buy ${item.quantity} @ $${item.amountPerShare} + $${item.fee}`;
-            totalAmount = Number(item.amount) + Number(item.fee);
-            break;
-        case TransactionType.SELL:
-            bgColour = '#FF6961';
-            calculationString = `Sell ${item.quantity} @ $${item.amountPerShare} - $${item.fee}`;
-            totalAmount = Number(item.amount) - Number(item.fee);
-            break;
-        case TransactionType.DIVIDEND:
-            bgColour = '#FDFD96';
-            calculationString = `Dividend ${item.quantity} @ $${item.amountPerShare} - $${item.fee}`;
-            totalAmount = Number(item.amount) - Number(item.fee);
-            break;
-        default:
-            calculationString = 'An error has occurred';
-            break;
-    }
+    const componentDetails: TransactionCalculatedDetails = getTransactionDetails(item);
 
     return (
         <div
@@ -47,21 +42,93 @@ const TransactionComponent = (props: TransactionComponentProps) => {
             <div
                 className='transaction-component__classification-strip'
                 style={{
-                    backgroundColor: bgColour
+                    backgroundColor: componentDetails.bgColor
                 }}
             ></div>
-            <div className='transaction-component__data-container'>
-                <div>
-                    <span className='transaction-component__date'>{dateToStringConverter(item.transactionDate)}</span>
-                </div>
-                <div>
-                    <span className='transaction-component__calculation'>{calculationString}</span>
-                    <br/>
-                    <span className='transaction-component__amount'>${totalAmount}</span>
-                </div>
-            </div>
+            {transactionComponentView(item, componentDetails, editView, onEdit, onDelete, onBack)}
         </div>
     );
+}
+
+const transactionComponentView = (item: TransactionDataListItem, calculatedDetails: TransactionCalculatedDetails, editView, onEdit: (index: number) => void, onDelete: (index: number) => void, onBack: (index: number) => void) => {
+
+    switch (item.status) {
+        case ComponentStatus.VIEW:
+            return (
+                <div className='transaction-component__data-container'>
+                    <div>
+                        <span className='transaction-component__date'>{dateToStringConverter(item.transactionDate)}</span>
+                    </div>
+                    <div>
+                        <span className='transaction-component__calculation'>{calculatedDetails.calculationString}</span>
+                        <br/>
+                        <span className='transaction-component__amount'>${calculatedDetails.totalAmount.toFixed(2)}</span>
+                    </div>
+                </div>
+            );
+        case ComponentStatus.EDIT:
+            return (
+                <div className='transaction-component__data-container'>
+                    {editView}
+                </div>
+            );
+        case ComponentStatus.DELETE:
+            return (
+                <div className='transaction-component__data-container'>
+                    <div>
+                        Are you sure?
+                    </div>
+                    <div>
+                        <Button
+                            onClick={() => onBack(item.index)}
+                        >Back</Button>
+                        <Button
+                            onClick={() => onDelete(item.index)}
+                        >Delete</Button>
+                    </div>
+                </div>
+            );
+        default:
+            return (
+                <div>
+                    Unknown Status... An error occurred in the component
+                </div>
+            );
+    }
+}
+
+const getTransactionDetails = (transaction: TransactionData): TransactionCalculatedDetails => {
+
+    let bgColour = 'black';
+    let calculationString = '';
+    let totalAmount = 0;
+
+    switch (transaction.type) {
+        case TransactionType.BUY:
+            bgColour = '#77DD77';
+            calculationString = `Buy ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} + $${transaction.fee.toFixed(2)}`;
+            totalAmount = Number(transaction.amount) + Number(transaction.fee);
+            break;
+        case TransactionType.SELL:
+            bgColour = '#FF6961';
+            calculationString = `Sell ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} - $${transaction.fee.toFixed(2)}`;
+            totalAmount = Number(transaction.amount) - Number(transaction.fee);
+            break;
+        case TransactionType.DIVIDEND:
+            bgColour = '#FDFD96';
+            calculationString = `Dividend ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} - $${transaction.fee.toFixed(2)}`;
+            totalAmount = Number(transaction.amount) - Number(transaction.fee);
+            break;
+        default:
+            calculationString = 'An error has occurred';
+            break;
+    }
+
+    return {
+        bgColor: bgColour,
+        calculationString: calculationString,
+        totalAmount: totalAmount
+    };
 }
 
 export default TransactionComponent;

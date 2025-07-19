@@ -17,6 +17,12 @@
     padding: 5px 10px;
 }
 
+.list-container__header-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .list-container__header > h3 {
     margin: 0;
     font-size: 1.25em;
@@ -32,8 +38,15 @@
 .list-container__item {
     display: flex;
     flex-direction: row;
+    position: relative;
     width: 100%;
     border-bottom: 1px solid #252422;
+}
+
+.list-container__item-controls {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .list-container__overlay {

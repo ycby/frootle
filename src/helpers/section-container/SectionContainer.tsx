@@ -2,6 +2,7 @@ import './Section.css';
 import {ReactNode} from "react";
 
 type SectionContainerProps = {
+    className?: string;
     items: SectionContainerItem[];
     onClick: (selected: number) => void;
     selected: number;
@@ -16,6 +17,7 @@ export interface SectionContainerItem {
 const SectionContainer = (props: SectionContainerProps) => {
 
     const {
+        className,
         items,
         onClick,
         selected,
@@ -23,7 +25,7 @@ const SectionContainer = (props: SectionContainerProps) => {
     } = props;
 
     return (
-        <div className='section-container'>
+        <div className={`section-container ${className ?? ''}`}>
             <div className='section-container__sidebar'>
                 <ul>
                     {generateSidebarItems(items, onClick, selected)}
