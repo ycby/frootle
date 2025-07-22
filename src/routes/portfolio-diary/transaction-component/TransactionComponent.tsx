@@ -2,13 +2,14 @@
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import {ComponentStatus, TransactionType} from "#root/src/types.ts";
 import './TransactionComponent.css';
-import {NewTransactionInputs, TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
+import {TransactionData} from "#root/src/routes/portfolio-diary/types.ts";
 import Button from "#root/src/helpers/button/Button.tsx";
 import {TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
+import {ReactElement} from "react";
 
 type TransactionComponentProps = {
     item: TransactionDataListItem,
-    editView: any,
+    editView: ReactElement,
     onEdit: (index: number) => void,
     onDelete: (index: number) => void,
     onBack: (index: number) => void,
@@ -48,7 +49,7 @@ const TransactionComponent = (props: TransactionComponentProps) => {
     );
 }
 
-const transactionComponentView = (item: TransactionDataListItem, calculatedDetails: TransactionCalculatedDetails, editView, onEdit: (index: number, newData: NewTransactionInputs) => void, onDelete: (index: number) => void, onBack: (index: number) => void) => {
+const transactionComponentView = (item: TransactionDataListItem, calculatedDetails: TransactionCalculatedDetails, editView: ReactElement, onEdit: (index: number) => void, onDelete: (index: number) => void, onBack: (index: number) => void) => {
 
     switch (item.status) {
         case ComponentStatus.VIEW:
@@ -112,17 +113,17 @@ const getTransactionDetails = (transaction: TransactionData): TransactionCalcula
     switch (transaction.type) {
         case TransactionType.BUY:
             bgColour = '#77DD77';
-            calculationString = `Buy ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} + $${transaction.fee.toFixed(2)}`;
+            calculationString = `Buy ${transaction.quantity} @ $${Number(transaction.amountPerShare).toFixed(2)} + $${Number(transaction.fee).toFixed(2)}`;
             totalAmount = Number(transaction.amount) + Number(transaction.fee);
             break;
         case TransactionType.SELL:
             bgColour = '#FF6961';
-            calculationString = `Sell ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} - $${transaction.fee.toFixed(2)}`;
+            calculationString = `Sell ${transaction.quantity} @ $${Number(transaction.amountPerShare).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
             totalAmount = Number(transaction.amount) - Number(transaction.fee);
             break;
         case TransactionType.DIVIDEND:
             bgColour = '#FDFD96';
-            calculationString = `Dividend ${transaction.quantity} @ $${transaction.amountPerShare.toFixed(2)} - $${transaction.fee.toFixed(2)}`;
+            calculationString = `Dividend ${transaction.quantity} @ $${Number(transaction.amountPerShare).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
             totalAmount = Number(transaction.amount) - Number(transaction.fee);
             break;
         default:

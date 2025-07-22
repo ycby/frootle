@@ -10,6 +10,7 @@ import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
+import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
 
 type StockData = SectionContainerItem & {
     name: string;
@@ -94,7 +95,7 @@ const exampleDiaryEntry: DiaryEntryListItem[] = [
 const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockData[]>(exampleStocks);
-    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(processTransactionData(exampleTransactions));
+    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
     const [tdBaseFields, setTDBaseFields] = useState<NewTransactionInputs>({
         stockId: 3007,
         type: 'buy',
@@ -112,15 +113,14 @@ const PortfolioDiary = () => {
 
         const getStocksWithTransactions = async () => {
 
-            const stocksWithTransactionsResponse = await fetch('http://localhost:3000/transaction/stocks');
+            const data = await StockTransactionAPI.getStocksWithTransactions();
 
-            if (!stocksWithTransactionsResponse.ok) {
-                console.error('Failed to retrieve stocks with transactions!');
+            if (data.length === 0) {
+
+                console.error('No stocks with transactions found');
             }
 
-            const stocksWithTransactionsJSON = await stocksWithTransactionsResponse.json();
-
-            setStockData(stocksWithTransactionsJSON.data);
+            setStockData(data);
             setCurrentStockIndex(0);
         }
 
@@ -133,25 +133,20 @@ const PortfolioDiary = () => {
         //skip while making templates
         const getTransactions = async () => {
 
-            console.log(stockData[currentStockIndex].id);
-            const transactionsResponse = await fetch('http://localhost:3000/transaction?stock_id=' + stockData[currentStockIndex].id, {
-                method: 'GET'
-            });
+            const response = await StockTransactionAPI.getStockTransactions(stockData[currentStockIndex].id);
 
-            //do the error handling later
-            if (transactionsResponse.ok) {
+            //TODO: make a mapping function for backend objects to front end
+            const transactionData = response.map((data: TransactionDataBE) => convertBEtoFE(data));
 
-                const transactionJson = await transactionsResponse.json();
-                //TODO: make a mapping function for backend objects to front end
-                const transactionData = transactionJson.data.map((data: TransactionDataBE) => convertBEtoFE(data));
-
-                setTransactionData(processTransactionData(transactionData));
-            }
+            const transactionDataLineItems = processTransactionData(transactionData);
+            setTransactionData(transactionDataLineItems);
         }
 
-        getTransactions()
+        if (currentStockIndex >= 0 && currentStockIndex < stockData.length) {
 
-    }, [currentStockIndex]);
+            getTransactions();
+        }
+    }, [currentStockIndex, stockData]);
 
     return (
         <div id="portfolio-diary">
@@ -211,13 +206,14 @@ const PortfolioDiary = () => {
                             name='Transactions'
                             items={transactionData}
                             itemRenderer={(item: TransactionDataListItem) => {
+
                                 return (
                                     <TransactionComponent
                                         item={item}
-                                        editView={NewTransactionComponent(
-                                            {
-                                                sourceObject: item.editObject,
-                                                updateSource: (obj) => {
+                                        editView={
+                                        <NewTransactionComponent
+                                            sourceObject={item.editObject}
+                                            updateSource={(obj) => {
 
                                                     let newTransactionListItems = [...transactionData];
 
@@ -226,25 +222,45 @@ const PortfolioDiary = () => {
                                                     setTransactionData(newTransactionListItems);
                                                 }
                                             }
-                                        )}
-                                        onEdit={(index: number) => {
+                                        />
+                                        }
+                                        onEdit={async (index: number) => {
                                             console.log('onEdit')
+
                                             let newTransactionListItems = [...transactionData];
 
-                                            //temp just update list - would need to call api
                                             const updatedTransactionEditObject = newTransactionListItems[index].editObject;
-                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFE(convertFEtoBE(updatedTransactionEditObject)));
+                                            const transactionToBE = convertFEtoBE(updatedTransactionEditObject);
+
+                                            if (!(await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE))) {
+
+                                                console.error('Failed to update transaction');
+                                                return;
+                                            }
+
+                                            //if success, update the front end
+                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFE(transactionToBE));
 
                                             setTransactionData(processTransactionData(newTransactionListItems))
                                         }}
-                                        onDelete={(index) => {
+                                        onDelete={async (index) => {
                                             console.log('onDelete');
                                             let newTransactionListItems = [...transactionData];
 
-                                            //temp just remove from list
-                                            newTransactionListItems.splice(index, 1);
+                                            //perform the api call
+                                            const transactionToDelete = transactionData[index];
 
-                                            setTransactionData(newTransactionListItems);
+                                            const completed = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
+                                            if (!completed) {
+
+                                                console.error('Failed to delete transaction');
+                                            } else {
+
+                                                //on successful delete, remove from frontend list
+                                                newTransactionListItems.splice(index, 1);
+
+                                                setTransactionData(newTransactionListItems);
+                                            }
                                         }}
                                         onBack={(index) => {
                                             let newTransactionListItems = [...transactionData];
@@ -254,7 +270,9 @@ const PortfolioDiary = () => {
                                     />
                                 )
                             }}
-                            newItemRenderer={NewTransactionComponent({sourceObject:tdBaseFields, updateSource:setTDBaseFields})}
+                            newItemRenderer={
+                                <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                            }
                             filterRenderer={<div>Test Filter</div>}
                             onNew={async () => {
 
@@ -264,17 +282,9 @@ const PortfolioDiary = () => {
                                 const td = convertFEtoBE(tdBaseFields);
 
                                 //send to back end
-                                const newTransactionResponse = await fetch('http://localhost:3000/transaction', {
-                                    method: 'POST',
-                                    body: JSON.stringify([td]),
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    }
-                                });
-
-                                if (!newTransactionResponse.ok) {
-
+                                if (!(await StockTransactionAPI.postStockTransactions(td))) {
                                     console.error('Failed to create transaction');
+                                    return;
                                 }
 
                                 //parse response and append to list
@@ -283,13 +293,13 @@ const PortfolioDiary = () => {
                                 setTransactionData(processTransactionData(newArray));
                             }}
                             onEdit={(index: number) => {
-                                console.log('onEdit');
+                                console.log('onEdit icon');
                                 let newTransactionListItems = [...transactionData];
                                 newTransactionListItems[index].status = ComponentStatus.EDIT;
                                 setTransactionData(newTransactionListItems);
                             }}
                             onDelete={(index: number) => {
-                                console.log('onDelete');
+                                console.log('onDelete icon');
                                 let newTransactionListItems = [...transactionData];
                                 newTransactionListItems[index].status = ComponentStatus.DELETE;
                                 setTransactionData(newTransactionListItems);
