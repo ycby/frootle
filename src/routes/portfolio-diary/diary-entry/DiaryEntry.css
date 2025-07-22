@@ -1,0 +1,14 @@
+.diary-entry__container {
+    border: solid 1px black;
+    height: 150px;
+    padding: 8px;
+    margin: 8px
+}
+
+.diary-entry__content {
+    font-size: 0.75em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 5lh;
+    margin: 12px;
+}

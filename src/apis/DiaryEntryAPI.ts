@@ -1,8 +1,8 @@
-import {TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
+import {DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
 
-const baseUrl = 'http://localhost:3000/transaction';
+const baseUrl = 'http://localhost:3000/diary-entry';
 
-const getStockTransactions = async (stockId: number): Promise<any[]> => {
+const getDiaryEntries = async (stockId: number) => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'
@@ -18,22 +18,7 @@ const getStockTransactions = async (stockId: number): Promise<any[]> => {
     return responseJSON.data;
 }
 
-const getStocksWithTransactions = async (): Promise<any[]> => {
-
-    const response = await fetch(`${baseUrl}/stocks`, {
-        method: 'GET'
-    });
-
-    if (!response.ok) return [];
-
-    const responseJSON = await response.json();
-
-    if (responseJSON.status !== 1) return [];
-
-    return responseJSON.data;
-}
-
-const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE[]) => {
+const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]) => {
 
     const processedData = data instanceof Array ? data : [data];
 
@@ -41,7 +26,7 @@ const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE
         method: 'POST',
         body: JSON.stringify(processedData),
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         }
     });
 
@@ -52,9 +37,9 @@ const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE
     return responseJSON.status === 1;
 }
 
-const putStockTransaction = async (id: number, data: TransactionDataBE) => {
+const putDiaryEntry = async (id: number, data: DiaryEntryData) => {
 
-    const processedData = {...data, id: id}
+    const processedData = {...data, id: id};
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'PUT',
@@ -71,7 +56,7 @@ const putStockTransaction = async (id: number, data: TransactionDataBE) => {
     return responseJSON.status === 1;
 }
 
-const deleteStockTransaction = async (id: number):Promise<Boolean> => {
+const deleteDiaryEntry = async (id: number) => {
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'DELETE'
@@ -81,13 +66,12 @@ const deleteStockTransaction = async (id: number):Promise<Boolean> => {
 
     const responseJSON = await response.json();
 
-    return responseJSON.data.status === 'success';
+    return responseJSON.status === 'success';
 }
 
 export {
-    getStockTransactions,
-    getStocksWithTransactions,
-    postStockTransactions,
-    putStockTransaction,
-    deleteStockTransaction,
-};
+    getDiaryEntries,
+    postDiaryEntries,
+    putDiaryEntry,
+    deleteDiaryEntry
+}

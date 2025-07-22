@@ -1,6 +1,6 @@
 import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
 
-export type TransactionData = {
+export interface TransactionData {
     id?: number,
     stockId: number,
     type: TransactionTypeKeys;
@@ -12,7 +12,7 @@ export type TransactionData = {
     currency: CurrencyKeys;
 }
 
-export type TransactionDataBE = {
+export interface TransactionDataBE {
     id?: number,
     stock_id: number;
     type: TransactionTypeKeys;
@@ -24,7 +24,7 @@ export type TransactionDataBE = {
     currency: CurrencyKeys;
 }
 
-export type NewTransactionInputs = {
+export interface NewTransactionInputs {
     stockId: number;
     type: TransactionTypeKeys;
     amtWFee: string;
@@ -32,4 +32,12 @@ export type NewTransactionInputs = {
     quantity: string;
     transactionDate: string;
     currency: CurrencyKeys;
+}
+
+export interface DiaryEntryData {
+    id: number,
+    stockId: number,
+    title: string,
+    content: string,
+    postedDate: Date
 }
