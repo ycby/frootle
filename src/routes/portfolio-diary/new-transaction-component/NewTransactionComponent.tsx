@@ -75,7 +75,7 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
                         {
                             Object.values(TransactionType).map((transactionType: TransactionTypeKeys) => {
 
-                                return(<option value={capitaliseWord(transactionType)}>{capitaliseWord(transactionType)}</option>)
+                                return(<option key={`${transactionTypeId}-${transactionType}`} value={capitaliseWord(transactionType)}>{capitaliseWord(transactionType)}</option>)
                             })
                         }
                     </select>
@@ -135,7 +135,7 @@ const NewTransactionComponent = (props: NewTransactionComponentProps) => {
                             }}>
                             {
                                 Object.values(Currency).map((currency: CurrencyKeys) => {
-                                    return (<option value={capitaliseWord(currency)}>{capitaliseWord(currency)}</option>)
+                                    return (<option key={`${currencyId}-${currency}`} value={capitaliseWord(currency)}>{capitaliseWord(currency)}</option>)
                                 })
                             }
                         </select>

@@ -3,20 +3,18 @@ import {DiaryEntryListItem} from "#root/src/routes/portfolio-diary/PortfolioDiar
 import './DiaryEntry.css';
 
 interface DiaryEntryProps {
-    index: number;
     entry: DiaryEntryListItem
 }
 
 const DiaryEntry = (props: DiaryEntryProps) => {
 
     const {
-        index,
         entry
     } = props;
 
     return (
         <div key={entry.id} className='diary-entry__container'>
-            <h3 style={{margin: '0'}}>#{index + 1}</h3>
+            <h3 className='diary-entry__header'>{entry.title}</h3>
             <div className='diary-entry__content'>
                 {entry.content}
             </div>

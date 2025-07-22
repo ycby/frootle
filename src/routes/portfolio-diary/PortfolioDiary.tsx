@@ -174,19 +174,16 @@ const PortfolioDiary = () => {
                             Thesis
                         </div>
                         <div className='diary-list'>
-                            <div style={{alignSelf: 'end'}}>
-                                <Button
-                                    style={{fontSize: '0.75em'}}
-                                    onClick={() => {
-
-                                    }}
-                                >
-                                    New
-                                </Button>
-                            </div>
-                            <div style={{margin: '12px 0', overflow: "scroll"}}>
-                                {diaryEntries.map((entry: DiaryEntryListItem, index: number) => <DiaryEntry entry={entry} index={index} />)}
-                            </div>
+                            <ListContainer
+                                name='Diary Entries'
+                                items={diaryEntries}
+                                itemRenderer={(diaryEntry: DiaryEntryListItem) => <DiaryEntry entry={diaryEntry} />}
+                                newItemRenderer={<DiaryEntry entry={{id: 1, stockId: 1, title: 'test', content: '', postedDate: new Date(2025, 1, 1), index: 0, status: ComponentStatus.VIEW}} />}
+                                filterRenderer={<div>TestFilter</div>}
+                                onNew={() => {}}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            />
                         </div>
                     </div>
                     <div style={{margin: '20px'}}>
