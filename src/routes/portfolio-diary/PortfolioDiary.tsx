@@ -3,7 +3,7 @@ import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
-import {convertBEtoFE, convertFEtoBE} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
+import {convertBEtoFETransaction, convertFEtoBETransaction, convertFEtoBEDiaryEntry} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {
     NewTransactionInputs,
     TransactionData,
@@ -18,6 +18,7 @@ import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
 import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.tsx";
 import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
+import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData;
@@ -165,7 +166,7 @@ const PortfolioDiary = () => {
             //TODO: make a mapping function for backend objects to front end
             if (response.status === APIStatus.SUCCESS) {
 
-                const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFE(data));
+                const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFETransaction(data));
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData);
                 setTransactionData(transactionDataLineItems);
@@ -201,7 +202,23 @@ const PortfolioDiary = () => {
                                 itemRenderer={(diaryEntry: DiaryEntryListItem) => <DiaryEntry entry={diaryEntry} />}
                                 newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
                                 filterRenderer={<div>TestFilter</div>}
-                                onNew={() => {}}
+                                onNew={async () => {
+
+                                    const processedNewDiaryEntry = convertFEtoBEDiaryEntry(newDiaryEntry);
+
+                                    if ((await DiaryEntryAPI.postDiaryEntries(processedNewDiaryEntry)).status === APIStatus.FAIL) {
+                                        //Handle Failure
+                                        console.error('Failed to create new Diary Entry');
+                                        return;
+                                    }
+
+                                    const processedDiaryEntry = processDiaryEntries([newDiaryEntry]);
+
+                                    let newDiaryEntries = [...diaryEntries];
+                                    newDiaryEntries.unshift(processedDiaryEntry[0]);
+
+                                    setDiaryEntries(newDiaryEntries);
+                                }}
                                 onEdit={() => {}}
                                 onDelete={() => {}}
                             />
@@ -236,7 +253,7 @@ const PortfolioDiary = () => {
                                             let newTransactionListItems = [...transactionData];
 
                                             const updatedTransactionEditObject = newTransactionListItems[index].editObject;
-                                            const transactionToBE = convertFEtoBE(updatedTransactionEditObject);
+                                            const transactionToBE = convertFEtoBETransaction(updatedTransactionEditObject);
 
                                             if (transactionData[index].id === undefined) return;
 
@@ -247,7 +264,7 @@ const PortfolioDiary = () => {
                                             }
 
                                             //if success, update the front end
-                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFE(transactionToBE));
+                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFETransaction(transactionToBE));
 
                                             setTransactionData(processTransactionData(newTransactionListItems))
                                         }}
@@ -289,7 +306,7 @@ const PortfolioDiary = () => {
                                 //validate input and generate correct values
 
                                 //generate the value
-                                const td = convertFEtoBE(newTransactionData);
+                                const td = convertFEtoBETransaction(newTransactionData);
 
                                 //send to back end
                                 if ((await StockTransactionAPI.postStockTransactions(td)).status === APIStatus.FAIL) {
@@ -299,7 +316,7 @@ const PortfolioDiary = () => {
 
                                 //parse response and append to list
                                 let newArray: TransactionData[] = [...transactionData];
-                                newArray.unshift(convertBEtoFE(td));
+                                newArray.unshift(convertBEtoFETransaction(td));
                                 setTransactionData(processTransactionData(newArray));
                             }}
                             onEdit={(index: number) => {

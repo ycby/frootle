@@ -1,6 +1,12 @@
-import {TransactionData, TransactionDataBE, NewTransactionInputs} from "#root/src/routes/portfolio-diary/types.ts";
+import {
+    TransactionData,
+    TransactionDataBE,
+    NewTransactionInputs,
+    DiaryEntryData, DiaryEntryBE
+} from "#root/src/routes/portfolio-diary/types.ts";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 
-const convertFEtoBE:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
+const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
 
     return {
         stock_id: sourceObj.stockId,
@@ -14,7 +20,7 @@ const convertFEtoBE:(sourceObj: NewTransactionInputs) => TransactionDataBE = (so
     };
 }
 
-const convertBEtoFE: (data: TransactionDataBE) => TransactionData = (data: TransactionDataBE): TransactionData => {
+const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (data: TransactionDataBE): TransactionData => {
 
     return {
         id: data.id,
@@ -29,13 +35,24 @@ const convertBEtoFE: (data: TransactionDataBE) => TransactionData = (data: Trans
     };
 }
 
+const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sourceObj: DiaryEntryData): DiaryEntryBE  => {
+
+    return {
+        stock_id: sourceObj.stockId,
+        title: sourceObj.title,
+        content: sourceObj.content,
+        posted_date: dateToStringConverter(sourceObj.postedDate)
+    };
+}
+
 const capitaliseWord: (word: string) => string = (word: string): string => {
 
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 export {
-    convertFEtoBE,
-    convertBEtoFE,
+    convertFEtoBETransaction,
+    convertBEtoFETransaction,
+    convertFEtoBEDiaryEntry,
     capitaliseWord
 }

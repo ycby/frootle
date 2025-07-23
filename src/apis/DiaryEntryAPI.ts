@@ -1,4 +1,4 @@
-import {DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
+import {DiaryEntryBE, DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/diary-entry';
@@ -28,7 +28,7 @@ const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryD
     };
 }
 
-const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]): Promise<APIResponse<any[]>> => {
+const postDiaryEntries = async (data: DiaryEntryBE | DiaryEntryBE[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array ? data : [data];
 
@@ -40,10 +40,16 @@ const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]): Promis
         }
     });
 
-    if (!response.ok) return {
-        status: APIStatus.FAIL,
-        data: []
-    };
+    if (!response.ok)  {
+
+        console.error(response)
+        console.error(await response.json());
+
+        return {
+            status: APIStatus.FAIL,
+            data: []
+        };
+    }
 
     const responseJSON = await response.json();
 

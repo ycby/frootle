@@ -48,3 +48,11 @@ export interface DiaryEntryData {
     content: string,
     postedDate: Date
 }
+
+export interface DiaryEntryBE {
+    id?: number,
+    stock_id: number,
+    title: string,
+    content: string,
+    posted_date: string
+}
