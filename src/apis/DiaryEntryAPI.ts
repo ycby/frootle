@@ -1,24 +1,34 @@
 import {DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
+import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/diary-entry';
 
-const getDiaryEntries = async (stockId: number) => {
+const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryData[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'
     });
 
     //TODO: consider changing this, doesn't make sense to return empty array when there is an error
-    if (!response.ok) return [];
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
 
     const responseJSON = await response.json();
 
-    if (responseJSON.status !== 1) return [];
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
 
-    return responseJSON.data;
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    };
 }
 
-const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]) => {
+const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array ? data : [data];
 
@@ -30,14 +40,20 @@ const postDiaryEntries = async (data: DiaryEntryData | DiaryEntryData[]) => {
         }
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
 
     const responseJSON = await response.json();
 
-    return responseJSON.status === 1;
+    return {
+        status: responseJSON.status === 1 ? APIStatus.SUCCESS : APIStatus.FAIL,
+        data: []
+    };
 }
 
-const putDiaryEntry = async (id: number, data: DiaryEntryData) => {
+const putDiaryEntry = async (id: number, data: DiaryEntryData): Promise<APIResponse<any[]>> => {
 
     const processedData = {...data, id: id};
 
@@ -49,24 +65,36 @@ const putDiaryEntry = async (id: number, data: DiaryEntryData) => {
         }
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
 
     const responseJSON = await response.json();
 
-    return responseJSON.status === 1;
+    return {
+        status: responseJSON.status === 1 ? APIStatus.SUCCESS : APIStatus.FAIL,
+        data: []
+    };
 }
 
-const deleteDiaryEntry = async (id: number) => {
+const deleteDiaryEntry = async (id: number): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'DELETE'
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
 
     const responseJSON = await response.json();
 
-    return responseJSON.status === 'success';
+    return {
+        status: responseJSON.status === 'success' ? APIStatus.SUCCESS : APIStatus.FAIL,
+        data: []
+    };
 }
 
 export {
