@@ -3,41 +3,46 @@ import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
-import Button from "#root/src/helpers/button/Button.tsx";
 import {convertBEtoFE, convertFEtoBE} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
-import {NewTransactionInputs, TransactionData, TransactionDataBE, DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
+import {
+    NewTransactionInputs,
+    TransactionData,
+    TransactionDataBE,
+    DiaryEntryData,
+    StockData
+} from "#root/src/routes/portfolio-diary/types.ts";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
-import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
+import {APIStatus, ComponentStatus, ComponentStatusKeys, APIResponse} from "#root/src/types.ts";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
 import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.tsx";
 
-type StockData = SectionContainerItem & {
-    name: string;
-    full_name?: string;
-}
+type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData;
 
 export type TransactionDataListItem = ListItem & TransactionData & {
     editObject: NewTransactionInputs;
 };
 
-const exampleStocks: StockData[] = [
+const exampleStocks: StockDataContainerItem[] = [
     {
         id: 1,
         ticker_no: '00001',
-        name: 'Stock 1'
+        name: 'Stock 1',
+        title: '00001'
     },
     {
         id: 2,
         ticker_no: '00002',
         name: 'Stock 2',
+        title: '00002'
     },
     {
         id: 3,
         ticker_no: '00003',
         name: 'Stock 3',
+        title: '00003'
     }
 ]
 
@@ -103,7 +108,7 @@ const exampleDiaryEntry: DiaryEntryData[] = [
 
 const PortfolioDiary = () => {
 
-    const [stockData, setStockData] = useState<StockData[]>(exampleStocks);
+    const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
     const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
     const [tdBaseFields, setTDBaseFields] = useState<NewTransactionInputs>({
         stockId: 3007,
@@ -122,14 +127,20 @@ const PortfolioDiary = () => {
 
         const getStocksWithTransactions = async () => {
 
-            const data = await StockTransactionAPI.getStocksWithTransactions();
+            const response: APIResponse<StockData[]> = await StockTransactionAPI.getStocksWithTransactions();
 
-            if (data.length === 0) {
+            if (response.status === APIStatus.FAIL) {
 
                 console.error('No stocks with transactions found');
             }
 
-            setStockData(data);
+            //do some processing for response
+
+            const processedData:StockDataContainerItem[] = response.data.map((data: StockData): StockDataContainerItem => {
+                return {...data, title: data.ticker_no}
+            });
+
+            setStockData(processedData);
             setCurrentStockIndex(0);
         }
 
@@ -142,13 +153,16 @@ const PortfolioDiary = () => {
         //skip while making templates
         const getTransactions = async () => {
 
-            const response = await StockTransactionAPI.getStockTransactions(stockData[currentStockIndex].id);
+            const response: APIResponse<TransactionDataBE[]> = await StockTransactionAPI.getStockTransactions(stockData[currentStockIndex].id);
 
             //TODO: make a mapping function for backend objects to front end
-            const transactionData = response.map((data: TransactionDataBE) => convertBEtoFE(data));
+            if (response.status === APIStatus.SUCCESS) {
 
-            const transactionDataLineItems = processTransactionData(transactionData);
-            setTransactionData(transactionDataLineItems);
+                const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFE(data));
+
+                const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData);
+                setTransactionData(transactionDataLineItems);
+            }//Handle if failed to retrieve
         }
 
         if (currentStockIndex >= 0 && currentStockIndex < stockData.length) {
@@ -217,7 +231,7 @@ const PortfolioDiary = () => {
                                             const updatedTransactionEditObject = newTransactionListItems[index].editObject;
                                             const transactionToBE = convertFEtoBE(updatedTransactionEditObject);
 
-                                            if (!(await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE))) {
+                                            if ((await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE)).status === APIStatus.FAIL) {
 
                                                 console.error('Failed to update transaction');
                                                 return;
@@ -235,8 +249,8 @@ const PortfolioDiary = () => {
                                             //perform the api call
                                             const transactionToDelete = transactionData[index];
 
-                                            const completed = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
-                                            if (!completed) {
+                                            const response = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
+                                            if (response.status === APIStatus.FAIL) {
 
                                                 console.error('Failed to delete transaction');
                                             } else {
@@ -267,7 +281,7 @@ const PortfolioDiary = () => {
                                 const td = convertFEtoBE(tdBaseFields);
 
                                 //send to back end
-                                if (!(await StockTransactionAPI.postStockTransactions(td))) {
+                                if ((await StockTransactionAPI.postStockTransactions(td)).status === APIStatus.FAIL) {
                                     console.error('Failed to create transaction');
                                     return;
                                 }

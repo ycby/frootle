@@ -10,8 +10,7 @@ type SectionContainerProps = {
 }
 
 export interface SectionContainerItem {
-    ticker_no: string;
-    id: number;
+    title: string;
 }
 
 const SectionContainer = (props: SectionContainerProps) => {
@@ -44,11 +43,11 @@ const generateSidebarItems = (sections: SectionContainerItem[], onClick: (item: 
 
         return (
             <li
-                key={section.id}
+                key={`${index}-${section.title}`}
                 onClick={() => onClick(index)}
                 className={`section-container__item ${index === selected ? 'selected' : ''}`}
             >
-                {section.ticker_no}
+                {section.title}
             </li>
         )
     });

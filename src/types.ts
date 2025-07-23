@@ -1,10 +1,16 @@
 //=====================================================================================
 //API Related
 //=====================================================================================
+
 const APIStatus = {
     SUCCESS: 'success',
     FAIL: 'fail'
 } as const;
+
+export interface APIResponse <T>{
+    status: APIStatusKeys;
+    data: T;
+}
 
 export type APIStatusKeys = typeof APIStatus[keyof typeof APIStatus];
 //=====================================================================================

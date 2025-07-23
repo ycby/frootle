@@ -1,17 +1,12 @@
-import {TransactionData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
-import {APIStatus, APIStatusKeys} from "#root/src/types.ts";
+import {StockData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
+import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/transaction';
 
 //map to local format - most transactions will only require checking status
 //{ status, data }
 
-interface StockTransactionAPIResponse {
-    status: APIStatusKeys;
-    data: TransactionData[];
-}
-
-const getStockTransactions = async (stockId: number): Promise<StockTransactionAPIResponse> => {
+const getStockTransactions = async (stockId: number): Promise<APIResponse<TransactionDataBE[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'
@@ -20,14 +15,14 @@ const getStockTransactions = async (stockId: number): Promise<StockTransactionAP
     if (!response.ok) return {
         status: APIStatus.FAIL,
         data: [],
-    } as StockTransactionAPIResponse;
+    } as APIResponse<TransactionDataBE[]>;
 
     const responseJSON = await response.json();
 
     if (responseJSON.status !== 1) return {
         status: APIStatus.FAIL,
         data: [],
-    } as StockTransactionAPIResponse;
+    } as APIResponse<TransactionDataBE[]>;
 
     return {
         status: APIStatus.SUCCESS,
@@ -35,7 +30,7 @@ const getStockTransactions = async (stockId: number): Promise<StockTransactionAP
     };
 }
 
-const getStocksWithTransactions = async (): Promise<StockTransactionAPIResponse> => {
+const getStocksWithTransactions = async (): Promise<APIResponse<StockData[]>> => {
 
     const response = await fetch(`${baseUrl}/stocks`, {
         method: 'GET'
@@ -59,7 +54,7 @@ const getStocksWithTransactions = async (): Promise<StockTransactionAPIResponse>
     };
 }
 
-const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE[]): Promise<StockTransactionAPIResponse> => {
+const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array ? data : [data];
 
@@ -84,7 +79,7 @@ const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE
     };
 }
 
-const putStockTransaction = async (id: number, data: TransactionDataBE): Promise<StockTransactionAPIResponse> => {
+const putStockTransaction = async (id: number, data: TransactionDataBE): Promise<APIResponse<any[]>> => {
 
     const processedData = {...data, id: id}
 
@@ -109,7 +104,7 @@ const putStockTransaction = async (id: number, data: TransactionDataBE): Promise
     };
 }
 
-const deleteStockTransaction = async (id: number): Promise<StockTransactionAPIResponse> => {
+const deleteStockTransaction = async (id: number): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'DELETE'

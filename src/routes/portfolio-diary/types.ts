@@ -1,5 +1,12 @@
 import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
 
+export interface StockData {
+    id: number;
+    ticker_no: string;
+    name: string;
+    full_name?: string;
+}
+
 export interface TransactionData {
     id?: number,
     stockId: number,
