@@ -47,5 +47,13 @@ body {
 Generic
 ========================================================= */
 .display-none {
-  display: none;
+  display: none !important;
+}
+
+.enable-scroll {
+  overflow: scroll;
+}
+
+.disable-scroll {
+  overflow: hidden;
 }

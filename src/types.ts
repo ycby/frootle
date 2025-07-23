@@ -39,6 +39,11 @@ const ComponentStatus = {
     DELETE: 'delete'
 } as const;
 
+export interface NewItemView<T> {
+    sourceObject: T;
+    updateSource: (sourceObject: T) => void;
+}
+
 export type ComponentStatusKeys = typeof ComponentStatus[keyof typeof ComponentStatus];
 
 export {

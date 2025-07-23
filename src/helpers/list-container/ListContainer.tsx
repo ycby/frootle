@@ -6,7 +6,6 @@ import {MdAdd, MdDelete, MdEdit} from "react-icons/md";
 import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 
 export interface ListItem {
-    id: number;
     index: number;
     status: ComponentStatusKeys;
 }
@@ -61,8 +60,29 @@ export function ListContainer(props: ListContainerProps) {
                     </Button>
                 </div>
             </div>
-            <div className='list-container__container'>
-                {generateItems(items, itemRenderer, onEdit, onDelete)}
+            <div className={`list-container__container ${isNewOverlayOpened || isFilterOverlayOpened ? 'enable-scroll' : 'enable-scroll'}`}>
+                {items.map((item: any) => {
+
+                    return (
+                        <div className={`list-container__item ${isNewOverlayOpened || isFilterOverlayOpened ? 'display-none' : ''}`} key={item.id}>
+                            <div className={`list-container__item-controls ${item.status !== ComponentStatus.VIEW ? 'display-none' : ''}`}>
+                                <MdEdit
+                                    style={{margin: '4px 2px', cursor: 'pointer'}}
+                                    onClick={() => {
+                                        onEdit(item.index);
+                                    }}
+                                />
+                                <MdDelete
+                                    style={{margin: '4px 2px', cursor: 'pointer'}}
+                                    onClick={() => {
+                                        onDelete(item.index);
+                                    }}
+                                />
+                            </div>
+                            {itemRenderer(item)}
+                        </div>
+                    );
+                })}
                 <div className={`list-container__overlay ${isNewOverlayOpened ? 'opened' : ''}`}>
                     <form>
                         {newItemRenderer}
@@ -83,32 +103,6 @@ export function ListContainer(props: ListContainerProps) {
             </div>
         </div>
     );
-}
-
-
-const generateItems = (items: any[], itemRenderer: (item: any) => ReactElement, onEdit: (index: number) => void, onDelete: (index: number) => void) => {
-
-    return (items.map((item) => {
-        return (
-            <div className={'list-container__item'} key={item.id}>
-                <div className={`list-container__item-controls ${item.status !== ComponentStatus.VIEW ? 'display-none' : ''}`}>
-                    <MdEdit
-                        style={{margin: '4px 2px', cursor: 'pointer'}}
-                        onClick={() => {
-                            onEdit(item.index);
-                        }}
-                    />
-                    <MdDelete
-                        style={{margin: '4px 2px', cursor: 'pointer'}}
-                        onClick={() => {
-                            onDelete(item.index);
-                        }}
-                    />
-                </div>
-                {itemRenderer(item)}
-            </div>
-        );
-    }));
 }
 
 //TODO: filter renderer

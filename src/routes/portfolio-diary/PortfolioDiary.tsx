@@ -17,6 +17,7 @@ import {APIStatus, ComponentStatus, ComponentStatusKeys, APIResponse} from "#roo
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
 import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.tsx";
+import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData;
@@ -110,7 +111,7 @@ const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
     const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
-    const [tdBaseFields, setTDBaseFields] = useState<NewTransactionInputs>({
+    const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>({
         stockId: 3007,
         type: 'buy',
         transactionDate: '',
@@ -120,6 +121,12 @@ const PortfolioDiary = () => {
         currency: 'HKD'
     });
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
+    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>({
+        stockId: 3007,
+        title: '',
+        content: '',
+        postedDate: new Date(),
+    });
 
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
@@ -192,7 +199,7 @@ const PortfolioDiary = () => {
                                 name='Diary Entries'
                                 items={diaryEntries}
                                 itemRenderer={(diaryEntry: DiaryEntryListItem) => <DiaryEntry entry={diaryEntry} />}
-                                newItemRenderer={<DiaryEntry entry={{id: 1, stockId: 1, title: 'test', content: '', postedDate: new Date(2025, 1, 1), index: 0, status: ComponentStatus.VIEW}} />}
+                                newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
                                 filterRenderer={<div>TestFilter</div>}
                                 onNew={() => {}}
                                 onEdit={() => {}}
@@ -231,6 +238,8 @@ const PortfolioDiary = () => {
                                             const updatedTransactionEditObject = newTransactionListItems[index].editObject;
                                             const transactionToBE = convertFEtoBE(updatedTransactionEditObject);
 
+                                            if (transactionData[index].id === undefined) return;
+
                                             if ((await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE)).status === APIStatus.FAIL) {
 
                                                 console.error('Failed to update transaction');
@@ -248,6 +257,8 @@ const PortfolioDiary = () => {
 
                                             //perform the api call
                                             const transactionToDelete = transactionData[index];
+
+                                            if (transactionToDelete.id === undefined) return;
 
                                             const response = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
                                             if (response.status === APIStatus.FAIL) {
@@ -270,7 +281,7 @@ const PortfolioDiary = () => {
                                 )
                             }}
                             newItemRenderer={
-                                <NewTransactionComponent sourceObject={tdBaseFields} updateSource={setTDBaseFields} />
+                                <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
                             }
                             filterRenderer={<div>Test Filter</div>}
                             onNew={async () => {
@@ -278,7 +289,7 @@ const PortfolioDiary = () => {
                                 //validate input and generate correct values
 
                                 //generate the value
-                                const td = convertFEtoBE(tdBaseFields);
+                                const td = convertFEtoBE(newTransactionData);
 
                                 //send to back end
                                 if ((await StockTransactionAPI.postStockTransactions(td)).status === APIStatus.FAIL) {

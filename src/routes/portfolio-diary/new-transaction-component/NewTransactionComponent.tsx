@@ -1,16 +1,11 @@
 import './NewTransactionComponent.css';
 import {useId} from "react";
 import NumberInput from "#root/src/helpers/number-input/NumberInput.tsx";
-import {Currency, CurrencyKeys, TransactionType, TransactionTypeKeys} from "#root/src/types.ts";
+import {Currency, CurrencyKeys, NewItemView, TransactionType, TransactionTypeKeys} from "#root/src/types.ts";
 import {capitaliseWord} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {NewTransactionInputs} from "#root/src/routes/portfolio-diary/types.ts";
 
-type NewTransactionComponentProps = {
-    sourceObject: NewTransactionInputs;
-    updateSource: (sourceObject: NewTransactionInputs) => void;
-}
-
-const NewTransactionComponent = (props: NewTransactionComponentProps) => {
+const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
 
     const {
         sourceObject,

@@ -42,7 +42,7 @@ export interface NewTransactionInputs {
 }
 
 export interface DiaryEntryData {
-    id: number,
+    id?: number,
     stockId: number,
     title: string,
     content: string,

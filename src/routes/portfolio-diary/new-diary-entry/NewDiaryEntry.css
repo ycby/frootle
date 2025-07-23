@@ -1,0 +1,14 @@
+.new-diary-entry__container {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+}
+
+.new-diary-entry__input {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.new-diary-entry__title {
+    font-size: 1.5rem;
+}
