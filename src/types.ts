@@ -1,3 +1,15 @@
+//=====================================================================================
+//API Related
+//=====================================================================================
+const APIStatus = {
+    SUCCESS: 'success',
+    FAIL: 'fail'
+} as const;
+
+export type APIStatusKeys = typeof APIStatus[keyof typeof APIStatus];
+//=====================================================================================
+//Stock Specific
+//=====================================================================================
 const Currency = {
     HKD: 'HKD',
     RMB: 'RMB',
@@ -24,6 +36,7 @@ const ComponentStatus = {
 export type ComponentStatusKeys = typeof ComponentStatus[keyof typeof ComponentStatus];
 
 export {
+    APIStatus,
     Currency,
     TransactionType,
     ComponentStatus,
