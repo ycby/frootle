@@ -26,7 +26,9 @@ import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewD
 import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
-export type DiaryEntryListItem = ListItem & DiaryEntryData;
+export type DiaryEntryListItem = ListItem & DiaryEntryData & {
+    editObject: DiaryEntryData;
+};
 
 export type TransactionDataListItem = ListItem & TransactionData & {
     editObject: NewTransactionInputs;
@@ -188,7 +190,6 @@ const PortfolioDiary = () => {
 
         const getDiaryEntries = async () => {
 
-            console.log(stockData[currentStockIndex].id);
             const response: APIResponse<DiaryEntryBE[]> = await DiaryEntryAPI.getDiaryEntries(stockData[currentStockIndex].id);
 
             if (response.status === APIStatus.SUCCESS) {
@@ -223,7 +224,71 @@ const PortfolioDiary = () => {
                             <ListContainer
                                 name='Diary Entries'
                                 items={diaryEntries}
-                                itemRenderer={(diaryEntry: DiaryEntryListItem) => <DiaryEntry entry={diaryEntry} />}
+                                itemRenderer={(diaryEntry: DiaryEntryListItem) =>
+                                    <DiaryEntry
+                                        entry={diaryEntry}
+                                        editView={
+                                            <NewDiaryEntry
+                                                sourceObject={diaryEntry.editObject}
+                                                updateSource={(obj: DiaryEntryData) => {
+
+                                                    let newDiaryEntries: DiaryEntryListItem[] = [...diaryEntries];
+
+                                                    newDiaryEntries[diaryEntry.index].editObject = obj;
+
+                                                    setDiaryEntries(newDiaryEntries);
+                                                }
+                                            }
+                                            />}
+                                        onEdit={ async (index: number) => {
+
+                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+
+                                            const updatedDiaryEntryEditObject: DiaryEntryData = newDiaryEntryListItems[index].editObject;
+                                            const diaryEntryBE: DiaryEntryBE = convertFEtoBEDiaryEntry(updatedDiaryEntryEditObject);
+
+                                            if (newDiaryEntryListItems[index].id === undefined) return;
+
+                                            if ((await DiaryEntryAPI.putDiaryEntry(newDiaryEntryListItems[index].id, diaryEntryBE)).status === APIStatus.FAIL) {
+
+                                                console.error('Failed to update transaction');
+                                                return;
+                                            }
+
+                                            //if success, update the front end
+                                            newDiaryEntryListItems[index] = replaceDiaryEntryData(newDiaryEntryListItems[index], convertBEtoFEDiaryEntry(diaryEntryBE));
+
+                                            setDiaryEntries(processDiaryEntries(newDiaryEntryListItems));
+                                        }}
+                                        onDelete={ async (index: number) => {
+
+                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+
+                                            //perform the api call
+                                            const diaryEntryToDelete: DiaryEntryListItem = diaryEntries[index];
+
+                                            if (diaryEntryToDelete.id === undefined) return;
+
+                                            const response: APIResponse<any[]> = await DiaryEntryAPI.deleteDiaryEntry(diaryEntryToDelete.id);
+
+                                            if (response.status === APIStatus.FAIL) {
+
+                                                console.error('Failed to delete transaction');
+                                            } else {
+
+                                                //on successful delete, remove from frontend list
+                                                newDiaryEntryListItems.splice(index, 1);
+
+                                                setDiaryEntries(newDiaryEntryListItems);
+                                            }
+                                        }}
+                                        onBack={(index: number) => {
+                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+                                            newDiaryEntryListItems[index].status = ComponentStatus.VIEW;
+                                            setDiaryEntries(newDiaryEntryListItems);
+                                        }}
+                                    />
+                                }
                                 newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
                                 filterRenderer={<div>TestFilter</div>}
                                 onNew={async () => {
@@ -243,8 +308,16 @@ const PortfolioDiary = () => {
 
                                     setDiaryEntries(newDiaryEntries);
                                 }}
-                                onEdit={() => {}}
-                                onDelete={() => {}}
+                                onEdit={(index: number) => {
+                                    let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+                                    newDiaryEntryListItems[index].status = ComponentStatus.EDIT;
+                                    setDiaryEntries(newDiaryEntryListItems);
+                                }}
+                                onDelete={(index: number) => {
+                                    let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+                                    newDiaryEntryListItems[index].status = ComponentStatus.DELETE;
+                                    setDiaryEntries(newDiaryEntryListItems);
+                                }}
                             />
                         </div>
                     </div>
@@ -392,6 +465,13 @@ const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListIte
             ...element,
             index: index,
             status: ComponentStatus.VIEW as ComponentStatusKeys,
+            editObject: {
+                id: element.id,
+                stockId: element.stockId,
+                title: element.title,
+                content: element.content,
+                postedDate: element.postedDate,
+            }
         }
     });
 }
@@ -412,6 +492,21 @@ const replaceTransactionData: (original: TransactionDataListItem, transactionDat
             currency: transactionData.currency
         }
     } as TransactionDataListItem);
+}
+
+const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: DiaryEntryData) => DiaryEntryListItem = (original: DiaryEntryListItem, diaryEntryData: DiaryEntryData): DiaryEntryListItem => {
+
+    return ({
+        ...diaryEntryData,
+        index: original.index,
+        status: original.status,
+        editObject: {
+            stockId: diaryEntryData.stockId,
+            title: diaryEntryData.title,
+            content: diaryEntryData.content,
+            postedDate: diaryEntryData.postedDate,
+        }
+    } as DiaryEntryListItem);
 }
 
 export {

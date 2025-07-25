@@ -1,4 +1,4 @@
-import {DiaryEntryBE, DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
+import {DiaryEntryBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/diary-entry';
@@ -59,7 +59,7 @@ const postDiaryEntries = async (data: DiaryEntryBE | DiaryEntryBE[]): Promise<AP
     };
 }
 
-const putDiaryEntry = async (id: number, data: DiaryEntryData): Promise<APIResponse<any[]>> => {
+const putDiaryEntry = async (id: number, data: DiaryEntryBE): Promise<APIResponse<any[]>> => {
 
     const processedData = {...data, id: id};
 
@@ -90,15 +90,18 @@ const deleteDiaryEntry = async (id: number): Promise<APIResponse<any[]>> => {
         method: 'DELETE'
     });
 
-    if (!response.ok) return {
-        status: APIStatus.FAIL,
-        data: []
-    };
+    if (!response.ok) {
+
+        return {
+            status: APIStatus.FAIL,
+            data: []
+        };
+    }
 
     const responseJSON = await response.json();
 
     return {
-        status: responseJSON.status === 'success' ? APIStatus.SUCCESS : APIStatus.FAIL,
+        status: responseJSON.data.status === 'success' ? APIStatus.SUCCESS : APIStatus.FAIL,
         data: []
     };
 }
