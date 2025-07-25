@@ -4,7 +4,7 @@ import {
     NewTransactionInputs,
     DiaryEntryData, DiaryEntryBE
 } from "#root/src/routes/portfolio-diary/types.ts";
-import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
+import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
 
@@ -45,6 +45,17 @@ const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sou
     };
 }
 
+const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData  => {
+
+    return {
+        id: sourceObj.id,
+        stockId: sourceObj.stock_id,
+        title: sourceObj.title,
+        content: sourceObj.content,
+        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1)
+    };
+}
+
 const capitaliseWord: (word: string) => string = (word: string): string => {
 
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -54,5 +65,6 @@ export {
     convertFEtoBETransaction,
     convertBEtoFETransaction,
     convertFEtoBEDiaryEntry,
+    convertBEtoFEDiaryEntry,
     capitaliseWord
 }

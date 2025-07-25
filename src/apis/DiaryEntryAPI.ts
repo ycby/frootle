@@ -3,7 +3,7 @@ import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/diary-entry';
 
-const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryData[]>> => {
+const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryBE[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'

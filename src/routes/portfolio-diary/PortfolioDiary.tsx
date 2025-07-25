@@ -3,13 +3,18 @@ import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
 import {useEffect, useState} from "react";
-import {convertBEtoFETransaction, convertFEtoBETransaction, convertFEtoBEDiaryEntry} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
+import {
+    convertBEtoFETransaction,
+    convertFEtoBETransaction,
+    convertFEtoBEDiaryEntry,
+    convertBEtoFEDiaryEntry
+} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {
     NewTransactionInputs,
     TransactionData,
     TransactionDataBE,
     DiaryEntryData,
-    StockData
+    StockData, DiaryEntryBE
 } from "#root/src/routes/portfolio-diary/types.ts";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
@@ -177,6 +182,25 @@ const PortfolioDiary = () => {
 
             getTransactions();
         }
+    }, [currentStockIndex, stockData]);
+
+    useEffect(() => {
+
+        const getDiaryEntries = async () => {
+
+            console.log(stockData[currentStockIndex].id);
+            const response: APIResponse<DiaryEntryBE[]> = await DiaryEntryAPI.getDiaryEntries(stockData[currentStockIndex].id);
+
+            if (response.status === APIStatus.SUCCESS) {
+
+                const diaryEntryData: DiaryEntryData[] = response.data.map((data: DiaryEntryBE): DiaryEntryData => convertBEtoFEDiaryEntry(data));
+
+                const diaryEntryLineItems: DiaryEntryListItem[] = processDiaryEntries(diaryEntryData);
+                setDiaryEntries(diaryEntryLineItems);
+            }//Handle if failed to retrieve
+        }
+
+        getDiaryEntries();
     }, [currentStockIndex, stockData]);
 
     return (
