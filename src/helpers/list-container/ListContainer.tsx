@@ -1,6 +1,5 @@
 import './ListContainer.css';
 import {ReactElement, ReactNode, useState} from "react";
-import {IoFilter} from "react-icons/io5";
 import Button from "#root/src/helpers/button/Button.tsx";
 import {MdAdd, MdDelete, MdEdit} from "react-icons/md";
 import {ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
@@ -15,7 +14,6 @@ type ListContainerProps = {
     items: any[];
     itemRenderer: (item: any) => ReactElement;
     newItemRenderer: ReactNode;
-    filterRenderer: ReactNode;
     onNew: () => void;
     onEdit: (index: number) => void;
     onDelete: (index: number) => void;
@@ -28,14 +26,12 @@ export function ListContainer(props: ListContainerProps) {
         items,
         itemRenderer,
         newItemRenderer,
-        filterRenderer,
         onNew,
         onEdit,
         onDelete
     } = props;
 
     const [isNewOverlayOpened, setIsNewOverlayOpened] = useState(false);
-    const [isFilterOverlayOpened, setIsFilterOverlayOpened] = useState(false);
 
     return (
         <div className='list-container'>
@@ -44,27 +40,18 @@ export function ListContainer(props: ListContainerProps) {
                 <div className='list-container__header-item'>
                     <Button
                         onClick={() => {
-                            setIsFilterOverlayOpened(!isFilterOverlayOpened);
-                            if (isNewOverlayOpened) setIsNewOverlayOpened(false);
-                        }}
-                    >
-                        <IoFilter size='1rem' />
-                    </Button>
-                    <Button
-                        onClick={() => {
                             setIsNewOverlayOpened(!isNewOverlayOpened);
-                            if (isFilterOverlayOpened) setIsFilterOverlayOpened(false);
                         }}
                     >
                         <MdAdd size='1rem' className={isNewOverlayOpened ? 'rotate-45' : 'rotate-0'} />
                     </Button>
                 </div>
             </div>
-            <div className={`list-container__container ${isNewOverlayOpened || isFilterOverlayOpened ? 'enable-scroll' : 'enable-scroll'}`}>
+            <div className={`list-container__container ${isNewOverlayOpened ? 'enable-scroll' : 'enable-scroll'}`}>
                 {items.map((item: any) => {
 
                     return (
-                        <div className={`list-container__item ${isNewOverlayOpened || isFilterOverlayOpened ? 'display-none' : ''}`} key={item.id}>
+                        <div className={`list-container__item ${isNewOverlayOpened ? 'display-none' : ''}`} key={item.id}>
                             <div className={`list-container__item-controls ${item.status !== ComponentStatus.VIEW ? 'display-none' : ''}`}>
                                 <MdEdit
                                     style={{margin: '4px 2px', cursor: 'pointer'}}
@@ -96,17 +83,6 @@ export function ListContainer(props: ListContainerProps) {
                             </Button>
                         </div>
                     </form>
-                </div>
-                <div className={`list-container__overlay ${isFilterOverlayOpened ? 'opened' : ''}`}>
-                    {filterRenderer}
-                    <div className='list-container__footer'>
-                        <Button onClick={() => {
-
-                            setIsFilterOverlayOpened(false);
-                        }}>
-                            Apply
-                        </Button>
-                    </div>
                 </div>
             </div>
         </div>

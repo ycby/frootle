@@ -290,7 +290,6 @@ const PortfolioDiary = () => {
                                     />
                                 }
                                 newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
-                                filterRenderer={<div>TestFilter</div>}
                                 onNew={async () => {
 
                                     const processedNewDiaryEntry = convertFEtoBEDiaryEntry(newDiaryEntry);
@@ -397,7 +396,6 @@ const PortfolioDiary = () => {
                             newItemRenderer={
                                 <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
                             }
-                            filterRenderer={<div>Test Filter</div>}
                             onNew={async () => {
 
                                 //validate input and generate correct values
@@ -432,6 +430,42 @@ const PortfolioDiary = () => {
                         </ListContainer>
                     </div>
                 </div>
+                {/*<Tabs>*/}
+                {/*    <Tab title='Thesis'>*/}
+                {/*        <div>Thesis Content</div>*/}
+                {/*    </Tab>*/}
+                {/*    <Tab title='Diary'>*/}
+                {/*        <div>Diary Content</div>*/}
+                {/*    </Tab>*/}
+                {/*    <Tab title='Transactions'>*/}
+                {/*        <div>*/}
+                {/*            <h2>Transactions</h2>*/}
+                {/*            <table>*/}
+                {/*                <thead>*/}
+                {/*                    <tr>*/}
+                {/*                        <th>Type</th>*/}
+                {/*                        <th>Amount</th>*/}
+                {/*                        <th>Fee</th>*/}
+                {/*                        <th>Reported Date</th>*/}
+                {/*                    </tr>*/}
+                {/*                </thead>*/}
+                {/*                <tbody>*/}
+                {/*                    {transactionData.map(transaction => {*/}
+
+                {/*                        return (*/}
+                {/*                            <tr key={transaction.id}>*/}
+                {/*                                <td>{transaction.type}</td>*/}
+                {/*                                <td>{transaction.amount}</td>*/}
+                {/*                                <td>{transaction.fee}</td>*/}
+                {/*                                <td>{dateToStringConverter(transaction.transactionDate)}</td>*/}
+                {/*                            </tr>*/}
+                {/*                        );*/}
+                {/*                    })}*/}
+                {/*                </tbody>*/}
+                {/*            </table>*/}
+                {/*        </div>*/}
+                {/*    </Tab>*/}
+                {/*</Tabs>*/}
             </SectionContainer>
         </div>
     );

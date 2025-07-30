@@ -1,0 +1,35 @@
+.tab-button {
+    list-style: none;
+    display: inline-block;
+    padding: 0.65em 0.5em 0.35em;
+    cursor: pointer;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+}
+
+.tab-button:not(:first-child) {
+    margin-left: -1px;
+}
+
+.tab-button.active{
+    border-right: 1px solid black;
+}
+
+.tab-button.active:not(:first-child) {
+    border-left: 1px solid black;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.tab-buttons-container {
+    margin: 0 0 1em 0;
+    padding: 0;
+    display: flex;
+    border-bottom: 1px black solid;
+}
