@@ -59,7 +59,6 @@
 }
 
 .list-container__overlay.opened {
-    transition: height 0.5s ease-out;
     height: 100%;
 }
 

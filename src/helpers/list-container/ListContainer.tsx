@@ -42,21 +42,21 @@ export function ListContainer(props: ListContainerProps) {
             <div className='list-container__header'>
                 <h3>{name}</h3>
                 <div className='list-container__header-item'>
-                    <div
+                    <Button
                         onClick={() => {
                             setIsFilterOverlayOpened(!isFilterOverlayOpened);
                             if (isNewOverlayOpened) setIsNewOverlayOpened(false);
                         }}
                     >
-                        <IoFilter size='24px' style={{margin: '4px'}} />
-                    </div>
+                        <IoFilter size='1rem' />
+                    </Button>
                     <Button
                         onClick={() => {
                             setIsNewOverlayOpened(!isNewOverlayOpened);
                             if (isFilterOverlayOpened) setIsFilterOverlayOpened(false);
                         }}
                     >
-                        <MdAdd size='24px' className={isNewOverlayOpened ? 'rotate-45' : 'rotate-0'} />
+                        <MdAdd size='1rem' className={isNewOverlayOpened ? 'rotate-45' : 'rotate-0'} />
                     </Button>
                 </div>
             </div>
@@ -99,6 +99,14 @@ export function ListContainer(props: ListContainerProps) {
                 </div>
                 <div className={`list-container__overlay ${isFilterOverlayOpened ? 'opened' : ''}`}>
                     {filterRenderer}
+                    <div className='list-container__footer'>
+                        <Button onClick={() => {
+
+                            setIsFilterOverlayOpened(false);
+                        }}>
+                            Apply
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
