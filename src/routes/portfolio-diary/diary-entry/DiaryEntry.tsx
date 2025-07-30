@@ -42,7 +42,7 @@ const diaryEntryView = (entry: DiaryEntryListItem, editView: ReactElement, onEdi
             );
         case ComponentStatus.EDIT:
             return(
-                <div key={entry.id} className='diary-entry__container'>
+                <div key={entry.id} style={{width: '100%'}}>
                     {editView}
                     <div className='diary-entry__button-container'>
                         <Button

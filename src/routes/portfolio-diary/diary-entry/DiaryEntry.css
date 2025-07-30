@@ -1,8 +1,10 @@
 .diary-entry__container {
-    padding: 0 50px 1em 1em;
+    padding: 2em;
+    width: 100%;
 }
 
 .diary-entry__header {
+    margin: 0 0 0.5em 0;
 }
 
 .diary-entry__content {
@@ -10,4 +12,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     height: 5lh;
+}
+
+.diary-entry__button-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2em 2em 2em;
 }
