@@ -204,6 +204,9 @@ const PortfolioDiary = () => {
         getDiaryEntries();
     }, [currentStockIndex, stockData]);
 
+    //TODO: split into 2 col
+    //Left: Thesis and Diary Entries
+    //Right: Transactions and totals
     return (
         <div id="portfolio-diary">
             <h1>Portfolio Diary</h1>

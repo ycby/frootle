@@ -1,5 +1,6 @@
 import './Section.css';
 import {ReactNode} from "react";
+import Button from "#root/src/helpers/button/Button.tsx";
 
 type SectionContainerProps = {
     className?: string;
@@ -29,6 +30,12 @@ const SectionContainer = (props: SectionContainerProps) => {
                 <ul>
                     {generateSidebarItems(items, onClick, selected)}
                 </ul>
+                <Button
+                    style={{padding: 0}}
+                    onClick={() => {}}
+                >
+                    +
+                </Button>
             </div>
             <div className='section-container__content'>
                 {children}
