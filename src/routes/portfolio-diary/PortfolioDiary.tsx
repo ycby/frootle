@@ -486,7 +486,7 @@ const processTransactionData: (transactionData: TransactionData[]) => Transactio
             editObject: {
                 stockId: element.stockId,
                 type: element.type,
-                amtWFee: (element.amount + element.fee).toString(),
+                amtWFee: (Number(element.amount) + Number(element.fee)).toFixed(2),
                 amtWOFee: (element.amount).toString(),
                 quantity: (element.quantity).toString(),
                 transactionDate: dateToStringConverter(element.transactionDate),
@@ -521,6 +521,7 @@ const replaceTransactionData: (original: TransactionDataListItem, transactionDat
         ...transactionData,
         index: original.index,
         status: original.status,
+        id: original.id,
         editObject: {
             stockId: transactionData.stockId,
             type: transactionData.type,
