@@ -249,6 +249,7 @@ const PortfolioDiary = () => {
 
                                             const updatedDiaryEntryEditObject: DiaryEntryData = newDiaryEntryListItems[index].editObject;
                                             const diaryEntryBE: DiaryEntryBE = convertFEtoBEDiaryEntry(updatedDiaryEntryEditObject);
+                                            console.log(diaryEntryBE);
 
                                             if (newDiaryEntryListItems[index].id === undefined) return;
 
@@ -259,6 +260,7 @@ const PortfolioDiary = () => {
                                             }
 
                                             //if success, update the front end
+                                            console.log(index);
                                             newDiaryEntryListItems[index] = replaceDiaryEntryData(newDiaryEntryListItems[index], convertBEtoFEDiaryEntry(diaryEntryBE));
 
                                             setDiaryEntries(processDiaryEntries(newDiaryEntryListItems));
@@ -537,6 +539,7 @@ const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: Diar
         ...diaryEntryData,
         index: original.index,
         status: original.status,
+        id: original.id,
         editObject: {
             stockId: diaryEntryData.stockId,
             title: diaryEntryData.title,
