@@ -43,7 +43,6 @@ const postDiaryEntries = async (data: DiaryEntryBE | DiaryEntryBE[]): Promise<AP
     if (!response.ok)  {
 
         console.error(response)
-        console.error(await response.json());
 
         return {
             status: APIStatus.FAIL,
@@ -55,7 +54,7 @@ const postDiaryEntries = async (data: DiaryEntryBE | DiaryEntryBE[]): Promise<AP
 
     return {
         status: responseJSON.status === 1 ? APIStatus.SUCCESS : APIStatus.FAIL,
-        data: []
+        data: responseJSON.data.map((d: any) => d.insertId)
     };
 }
 

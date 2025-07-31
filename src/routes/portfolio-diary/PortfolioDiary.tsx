@@ -249,7 +249,6 @@ const PortfolioDiary = () => {
 
                                             const updatedDiaryEntryEditObject: DiaryEntryData = newDiaryEntryListItems[index].editObject;
                                             const diaryEntryBE: DiaryEntryBE = convertFEtoBEDiaryEntry(updatedDiaryEntryEditObject);
-                                            console.log(diaryEntryBE);
 
                                             if (newDiaryEntryListItems[index].id === undefined) return;
 
@@ -260,7 +259,6 @@ const PortfolioDiary = () => {
                                             }
 
                                             //if success, update the front end
-                                            console.log(index);
                                             newDiaryEntryListItems[index] = replaceDiaryEntryData(newDiaryEntryListItems[index], convertBEtoFEDiaryEntry(diaryEntryBE));
 
                                             setDiaryEntries(processDiaryEntries(newDiaryEntryListItems));
@@ -299,12 +297,14 @@ const PortfolioDiary = () => {
 
                                     const processedNewDiaryEntry = convertFEtoBEDiaryEntry(newDiaryEntry);
 
-                                    if ((await DiaryEntryAPI.postDiaryEntries(processedNewDiaryEntry)).status === APIStatus.FAIL) {
+                                    const response = await DiaryEntryAPI.postDiaryEntries(processedNewDiaryEntry);
+                                    if (response.status === APIStatus.FAIL) {
                                         //Handle Failure
                                         console.error('Failed to create new Diary Entry');
                                         return;
                                     }
 
+                                    newDiaryEntry.id = response.data[0];
                                     const processedDiaryEntry = processDiaryEntries([newDiaryEntry]);
 
                                     let newDiaryEntries = [...diaryEntries];
@@ -356,7 +356,10 @@ const PortfolioDiary = () => {
                                             const updatedTransactionEditObject = newTransactionListItems[index].editObject;
                                             const transactionToBE = convertFEtoBETransaction(updatedTransactionEditObject);
 
-                                            if (transactionData[index].id === undefined) return;
+                                            if (transactionData[index].id === undefined) {
+                                                console.error('Missing Id!')
+                                                return;
+                                            }
 
                                             if ((await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE)).status === APIStatus.FAIL) {
 
@@ -409,11 +412,14 @@ const PortfolioDiary = () => {
                                 const td = convertFEtoBETransaction(newTransactionData);
 
                                 //send to back end
-                                if ((await StockTransactionAPI.postStockTransactions(td)).status === APIStatus.FAIL) {
+                                const response = await StockTransactionAPI.postStockTransactions(td);
+                                if (response.status === APIStatus.FAIL) {
                                     console.error('Failed to create transaction');
                                     return;
                                 }
 
+                                //set the id of the transaction - assume only 1
+                                td.id = response.data[0];
                                 //parse response and append to list
                                 let newArray: TransactionData[] = [...transactionData];
                                 newArray.unshift(convertBEtoFETransaction(td));

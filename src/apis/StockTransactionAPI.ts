@@ -75,13 +75,15 @@ const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE
 
     return {
         status: responseJSON.status === 1 ? APIStatus.SUCCESS : APIStatus.FAIL,
-        data: [],
+        data: responseJSON.data.map((d: any) => d.insertId),
     };
 }
 
 const putStockTransaction = async (id: number, data: TransactionDataBE): Promise<APIResponse<any[]>> => {
 
     const processedData = {...data, id: id}
+
+    console.log(processedData)
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'PUT',
