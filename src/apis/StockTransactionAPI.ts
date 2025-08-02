@@ -1,4 +1,4 @@
-import {StockData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
+import {TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
 const baseUrl = 'http://localhost:3000/transaction';
@@ -23,30 +23,6 @@ const getStockTransactions = async (stockId: number): Promise<APIResponse<Transa
         status: APIStatus.FAIL,
         data: [],
     } as APIResponse<TransactionDataBE[]>;
-
-    return {
-        status: APIStatus.SUCCESS,
-        data: responseJSON.data
-    };
-}
-
-const getStocksWithTransactions = async (): Promise<APIResponse<StockData[]>> => {
-
-    const response = await fetch(`${baseUrl}/stocks`, {
-        method: 'GET'
-    });
-
-    if (!response.ok) return {
-        status: APIStatus.FAIL,
-        data: []
-    };
-
-    const responseJSON = await response.json();
-
-    if (responseJSON.status !== 1) return {
-        status: APIStatus.FAIL,
-        data: [],
-    };
 
     return {
         status: APIStatus.SUCCESS,
@@ -127,7 +103,6 @@ const deleteStockTransaction = async (id: number): Promise<APIResponse<any[]>> =
 
 export {
     getStockTransactions,
-    getStocksWithTransactions,
     postStockTransactions,
     putStockTransaction,
     deleteStockTransaction,

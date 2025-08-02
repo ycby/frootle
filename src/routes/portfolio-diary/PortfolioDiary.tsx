@@ -24,6 +24,7 @@ import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
 import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.tsx";
 import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
 import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
+import * as StockAPI from "#root/src/apis/StockAPI.ts";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData & {
@@ -142,11 +143,11 @@ const PortfolioDiary = () => {
 
         const getStocksWithTransactions = async () => {
 
-            const response: APIResponse<StockData[]> = await StockTransactionAPI.getStocksWithTransactions();
+            const response: APIResponse<StockData[]> = await StockAPI.getTrackedStocks();
 
             if (response.status === APIStatus.FAIL) {
 
-                console.error('No stocks with transactions found');
+                console.error('No tracked stocks found');
             }
 
             //do some processing for response
@@ -183,6 +184,8 @@ const PortfolioDiary = () => {
         if (currentStockIndex >= 0 && currentStockIndex < stockData.length) {
 
             getTransactions();
+            setNewTransactionData({...newTransactionData, stockId: stockData[currentStockIndex].id});
+            setNewDiaryEntry({...newDiaryEntry, stockId: stockData[currentStockIndex].id});
         }
     }, [currentStockIndex, stockData]);
 
@@ -441,42 +444,6 @@ const PortfolioDiary = () => {
                         </ListContainer>
                     </div>
                 </div>
-                {/*<Tabs>*/}
-                {/*    <Tab title='Thesis'>*/}
-                {/*        <div>Thesis Content</div>*/}
-                {/*    </Tab>*/}
-                {/*    <Tab title='Diary'>*/}
-                {/*        <div>Diary Content</div>*/}
-                {/*    </Tab>*/}
-                {/*    <Tab title='Transactions'>*/}
-                {/*        <div>*/}
-                {/*            <h2>Transactions</h2>*/}
-                {/*            <table>*/}
-                {/*                <thead>*/}
-                {/*                    <tr>*/}
-                {/*                        <th>Type</th>*/}
-                {/*                        <th>Amount</th>*/}
-                {/*                        <th>Fee</th>*/}
-                {/*                        <th>Reported Date</th>*/}
-                {/*                    </tr>*/}
-                {/*                </thead>*/}
-                {/*                <tbody>*/}
-                {/*                    {transactionData.map(transaction => {*/}
-
-                {/*                        return (*/}
-                {/*                            <tr key={transaction.id}>*/}
-                {/*                                <td>{transaction.type}</td>*/}
-                {/*                                <td>{transaction.amount}</td>*/}
-                {/*                                <td>{transaction.fee}</td>*/}
-                {/*                                <td>{dateToStringConverter(transaction.transactionDate)}</td>*/}
-                {/*                            </tr>*/}
-                {/*                        );*/}
-                {/*                    })}*/}
-                {/*                </tbody>*/}
-                {/*            </table>*/}
-                {/*        </div>*/}
-                {/*    </Tab>*/}
-                {/*</Tabs>*/}
             </SectionContainer>
         </div>
     );
