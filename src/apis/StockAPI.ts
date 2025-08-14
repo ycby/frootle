@@ -27,6 +27,56 @@ const getTrackedStocks = async (): Promise<APIResponse<StockData[]>> => {
     };
 }
 
+const setTrackedStock = async (id: number): Promise<APIResponse<StockData[]>> => {
+
+    const response = await fetch(`${baseUrl}/tracked/${id}/track`, {
+        method: 'POST'
+    });
+
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
+
+    const responseJSON = await response.json();
+
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.FAIL,
+        data: [],
+    };
+
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    };
+}
+
+const setUntrackedStock = async (id: number): Promise<APIResponse<StockData[]>> => {
+
+    const response = await fetch(`${baseUrl}/tracked/${id}/untrack`, {
+        method: 'POST'
+    });
+
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
+
+    const responseJSON = await response.json();
+
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.FAIL,
+        data: [],
+    };
+
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    };
+}
+
 export {
-    getTrackedStocks
+    getTrackedStocks,
+    setTrackedStock,
+    setUntrackedStock
 }

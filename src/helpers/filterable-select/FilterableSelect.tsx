@@ -1,5 +1,5 @@
 import {useState, useRef} from 'react';
-import FilterableSelectItem from './FilterableSelectItem.tsx';
+import FilterableSelectItem from './FilterableSelectItem';
 //import { MdOutlineSearch } from "react-icons/md";
 
 import './FilterableSelect.css'

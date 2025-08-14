@@ -25,6 +25,8 @@ import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.
 import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
 import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
+import Modal from "#root/src/helpers/modal/Modal.tsx";
+import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx.js";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData & {
@@ -139,6 +141,8 @@ const PortfolioDiary = () => {
 
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
+    const [openNewTrackedStock, setOpenNewTrackedStock] = useState<boolean>(false);
+
     useEffect(() => {
 
         const getStocksWithTransactions = async () => {
@@ -218,6 +222,10 @@ const PortfolioDiary = () => {
                 items={stockData}
                 onClick={(selected: number) => {
                     setCurrentStockIndex(selected);
+                }}
+                onNew={() => {
+                    //TODO: implement the modal for creating new track stock
+                    setOpenNewTrackedStock(true);
                 }}
                 selected={currentStockIndex}
             >
@@ -445,6 +453,10 @@ const PortfolioDiary = () => {
                     </div>
                 </div>
             </SectionContainer>
+            <Modal>
+                <h3>Track New Stock</h3>
+                <FilterableSelect dataList={} onSelect={}></FilterableSelect>
+            </Modal>
         </div>
     );
 }

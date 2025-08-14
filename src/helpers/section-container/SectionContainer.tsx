@@ -6,6 +6,7 @@ type SectionContainerProps = {
     className?: string;
     items: SectionContainerItem[];
     onClick: (selected: number) => void;
+    onNew: () => void;
     selected: number;
     children: ReactNode;
 }
@@ -20,6 +21,7 @@ const SectionContainer = (props: SectionContainerProps) => {
         className,
         items,
         onClick,
+        onNew,
         selected,
         children
     } = props;
@@ -32,7 +34,7 @@ const SectionContainer = (props: SectionContainerProps) => {
                 </ul>
                 <Button
                     style={{padding: 0}}
-                    onClick={() => {}}
+                    onClick={() => onNew()}
                 >
                     +
                 </Button>
