@@ -7,6 +7,14 @@ export interface StockData {
     full_name?: string;
 }
 
+export interface ShortData {
+    id: number;
+    stockId: number;
+    shortedShares: number;
+    shortedAmount: number;
+    reportingDate: Date;
+}
+
 export interface TransactionData {
     id?: number,
     stockId: number,

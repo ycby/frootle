@@ -12,7 +12,8 @@ import './short-reporting.css';
 import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as Stock from "#root/src/apis/StockAPI.ts";
-import {StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
+import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import {APIResponse} from '#root/src/types.ts';
 
@@ -28,8 +29,8 @@ type ChartPoint = {
 
 const headers = [
 	{
-		label: 'Stock Code',
-		value: 'stock_code'
+		label: 'Stock Id',
+		value: 'stock_id'
 	},
 	{
 		label: 'Reporting Date',
@@ -59,7 +60,7 @@ const jsonMapping: ShortReportingMapping[] = [
 		type: 'String'
 	},
 	{
-		value: 'stock_code',
+		value: 'stock_id',
 		type: 'String'
 	},
 	{
@@ -86,7 +87,7 @@ const jsonMapping: ShortReportingMapping[] = [
 
 export default function ShortReporting() {
 
-	const [data, setData] = useState([]);
+	const [data, setData] = useState<ShortData[]>([]);
 	const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
 	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
@@ -108,17 +109,14 @@ export default function ShortReporting() {
 
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:3000/short?stock_code=${selectedStock.value}&start_date=${dateToStringConverter(startDate)}&end_date=${dateToStringConverter(endDate)}`, {
-				method: 'GET'
-			})
+			if (!selectedStock.value) return;
 
-			if (!response.ok) throw new Error(`Response Status: ${response.status}`)
+			const response = await ShortDataAPI.getShortData(selectedStock.value, dateToStringConverter(startDate), dateToStringConverter(endDate));
 
-			//TODO: custom set object json
-			const jsonResponse = await response.json()
+			const processedData: ShortData[] = response.data.map((json: any) => processJSON(jsonMapping, json) as ShortData);
 
-			setData(jsonResponse.data.map((json: any) => processJSON(jsonMapping, json)));
-			setChartData(jsonResponse.data.map((d: any): ChartPoint => {
+			setData(processedData);
+			setChartData(response.data.map((d: any): ChartPoint => {
 				return {
 					x: d.reporting_date,
 					y: d.shorted_shares
