@@ -1,6 +1,10 @@
-import {ForwardedRef, forwardRef} from 'react';
-import {FilterableSelectData} from "./FilterableSelect.tsx";
 import * as React from "react";
+
+export interface FilterableSelectData {
+	label: string | null;
+	value: string | null;
+	subtext: string | null;
+}
 
 interface FilterableSelectItemProps {
 	data: FilterableSelectData;
@@ -9,7 +13,7 @@ interface FilterableSelectItemProps {
 	onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<any>) => {
+const FilterableSelectItem = (props:FilterableSelectItemProps) => {
 
 	const {
 		data,
@@ -20,7 +24,6 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 
 	return (
 		<div
-			ref={ref}
 			data-value={ data.value }
 			tabIndex={ tabIndex }
 			className='dropdown-item'
@@ -35,4 +38,6 @@ export default forwardRef((props:FilterableSelectItemProps, ref: ForwardedRef<an
 			<span className='sub-text'>{ data.subtext }</span>
 		</div>
 	);
-});
+}
+
+export default FilterableSelectItem;

@@ -1,24 +1,18 @@
-import {useState, useRef} from 'react';
-import FilterableSelectItem from './FilterableSelectItem';
+import {useState, useRef, useEffect} from 'react';
+import FilterableSelectItem, {FilterableSelectData} from './FilterableSelectItem';
 //import { MdOutlineSearch } from "react-icons/md";
 
 import './FilterableSelect.css'
 
 interface FilterableSelectProps {
-	dataList: FilterableSelectData[],
+	queryFn: (args: string) => Promise<FilterableSelectData[]>,
 	onSelect: (value: FilterableSelectData) => void
-}
-
-export type FilterableSelectData = {
-	label: string | null;
-	value: string | null;
-	subtext: string | null;
 }
 
 export const FilterableSelect = (props: FilterableSelectProps) => {
 
 	const {
-		dataList = [],
+		queryFn,
 		onSelect
 	} = props;
 
@@ -29,15 +23,23 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 	const dropdownElements = useRef<HTMLDivElement[]>([]);
 	const selectedIndex = useRef<number>(-1);
 
-	const filteredList: FilterableSelectData[] = dataList.filter((item: FilterableSelectData) => {
+	const [listItems, setListItems] = useState<FilterableSelectData[]>([]);
 
-		if (!item.label || !item.subtext) return false;
+	useEffect(() => {
 
-		return item.label.toLowerCase().startsWith(searchTerm.toLowerCase()) || item.subtext.toLowerCase().includes(searchTerm.toLowerCase());
-	});
+		if (searchTerm.length < 2) return;
 
-	//add no items found element
-	if (filteredList.length === 0) filteredList.push({label: 'No results found...', value: null, subtext: null});
+		const getData = async () => {
+
+			const data = await queryFn(searchTerm);
+
+			if (data.length === 0) data.push({label: 'No results found...', value: null, subtext: null});
+
+			setListItems(data);
+		}
+
+		getData();
+	}, [searchTerm]);
 
 	return (
 		<div
@@ -58,12 +60,12 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 				}}
 				onBlur={() => setIsOpen(false)}
 				onKeyDown={(e) => {
-					selectedIndex.current = keyDownController(e, filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current)
+					selectedIndex.current = keyDownController(e, filterableRef.current, listItems, dropdownElements.current, selectedIndex.current)
 
 					//get search key
-					if (e.key == 'Enter' && filteredList.length != 0) {
+					if (e.key == 'Enter' && listItems.length != 0) {
 
-						const childItem = filteredList[selectedIndex.current];
+						const childItem = listItems[selectedIndex.current];
 						setIsOpen(false);
 						setSearchTerm(childItem?.label !== null ? childItem.label : '');
 						onSelect(childItem);
@@ -75,14 +77,13 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 				<div
 					className='filterable-dropdown'
 				>
-					{ filteredList.map((item, index) => 
+					{ listItems.map((item, index) =>
 						<FilterableSelectItem
-							ref={ (el) => dropdownElements.current[index] = el}
 							key={ item.value }
 							tabIndex={ index }
 							data={ item }
 							setData={ (id) => {
-								const childItem = filteredList.find((item) => item.value == id);
+								const childItem = listItems.find((item) => item.value == id);
 								const currentSearchTerm = childItem != null && childItem?.label !== null ? childItem.label : '';
 
 								setIsOpen(false);
@@ -90,7 +91,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 								if (childItem != null) onSelect(childItem);
 							}}
 							onMouseEnter={(e) => {
-								selectedIndex.current = updateSelectedItem(filterableRef.current, filteredList, dropdownElements.current, selectedIndex.current, e.currentTarget.tabIndex);
+								selectedIndex.current = updateSelectedItem(filterableRef.current, listItems, dropdownElements.current, selectedIndex.current, e.currentTarget.tabIndex);
 							}}
 						/>
 					)}

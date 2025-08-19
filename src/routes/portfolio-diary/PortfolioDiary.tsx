@@ -455,7 +455,6 @@ const PortfolioDiary = () => {
             </SectionContainer>
             <Modal>
                 <h3>Track New Stock</h3>
-                <FilterableSelect dataList={} onSelect={}></FilterableSelect>
             </Modal>
         </div>
     );
