@@ -121,6 +121,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 							}}
 							onMouseEnter={(e) => {
 								// selectedIndex.current = updateSelectedItem(filterableRef.current, listItems, dropdownElements.current, selectedIndex.current, e.currentTarget.tabIndex);
+								setSelectedIndex(index);
 							}}
 						/>
 					)}
