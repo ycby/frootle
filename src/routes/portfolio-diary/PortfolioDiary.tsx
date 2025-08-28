@@ -26,7 +26,10 @@ import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewD
 import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import Modal from "#root/src/helpers/modal/Modal.tsx";
-import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx.js";
+import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
+import * as Stock from "#root/src/apis/StockAPI.ts";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import Button from "#root/src/helpers/button/Button.tsx";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData & {
@@ -141,11 +144,13 @@ const PortfolioDiary = () => {
 
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
-    const [openNewTrackedStock, setOpenNewTrackedStock] = useState<boolean>(false);
+    const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData>();
+    const [hasNewTrackedStockCreated, setHasNewTrackedStockCreated] = useState<number>(0);
+    const [isOpenNewTrackedStock, setIsOpenNewTrackedStock] = useState<boolean>(false);
 
     useEffect(() => {
 
-        const getStocksWithTransactions = async () => {
+        const getTrackedStocks = async () => {
 
             const response: APIResponse<StockData[]> = await StockAPI.getTrackedStocks();
 
@@ -164,8 +169,8 @@ const PortfolioDiary = () => {
             setCurrentStockIndex(0);
         }
 
-        getStocksWithTransactions();
-    }, []);
+        getTrackedStocks();
+    }, [hasNewTrackedStockCreated]);
 
     useEffect(() => {
 
@@ -225,7 +230,7 @@ const PortfolioDiary = () => {
                 }}
                 onNew={() => {
                     //TODO: implement the modal for creating new track stock
-                    setOpenNewTrackedStock(true);
+                    setIsOpenNewTrackedStock(true);
                 }}
                 selected={currentStockIndex}
             >
@@ -453,8 +458,46 @@ const PortfolioDiary = () => {
                     </div>
                 </div>
             </SectionContainer>
-            <Modal>
+            <Modal
+                isOpen={isOpenNewTrackedStock}
+                setIsOpen={setIsOpenNewTrackedStock}
+            >
                 <h3>Track New Stock</h3>
+                <FilterableSelect
+                    queryFn={async (args: string) => {
+
+                        const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
+                        //TODO: handle the fail state
+                        return response.data.map((data: StockData): FilterableSelectData => {
+
+                            return ({
+                                label: data.name,
+                                value: data.id.toString(),
+                                subtext: data.ticker_no
+                            } as FilterableSelectData);
+                        });
+                    }}
+                    onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
+                />
+                <div>Name: {newTrackedStock?.label}</div>
+                <div>Ticker: {newTrackedStock?.subtext}</div>
+                <Button onClick={async () => {
+
+                    if (!newTrackedStock) return;
+                    if (!newTrackedStock.value) return;
+
+                    const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
+
+                    if (result.status === APIStatus.FAIL) {
+                        //TODO: handle fail case
+                    }
+
+                    if (result.status === APIStatus.SUCCESS) {
+                        //learn something new everyday: can provide usestate with function
+                        setHasNewTrackedStockCreated(prevState => prevState + 1);
+                        setIsOpenNewTrackedStock(false);
+                    }
+                }}>Save</Button>
             </Modal>
         </div>
     );

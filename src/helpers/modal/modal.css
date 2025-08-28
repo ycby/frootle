@@ -19,7 +19,7 @@
     flex-direction: column;
 }
 
-.modal-close {
+.modal-close-icon {
     display: flex;
     align-self: end;
     margin-top: 1rem;
@@ -28,4 +28,11 @@
 
 .modal-content {
     padding: 0 2rem 1rem;
+}
+
+.modal-open {
+}
+
+.modal-close {
+    display: none;
 }
