@@ -1,12 +1,14 @@
 import './Section.css';
 import {ReactNode} from "react";
 import Button from "#root/src/helpers/button/Button.tsx";
+import {MdDelete} from "react-icons/md";
 
 type SectionContainerProps = {
     className?: string;
     items: SectionContainerItem[];
     onClick: (selected: number) => void;
     onNew: () => void;
+    onDelete: (index: number) => void;
     selected: number;
     children: ReactNode;
 }
@@ -22,6 +24,7 @@ const SectionContainer = (props: SectionContainerProps) => {
         items,
         onClick,
         onNew,
+        onDelete,
         selected,
         children
     } = props;
@@ -30,7 +33,7 @@ const SectionContainer = (props: SectionContainerProps) => {
         <div className={`section-container ${className ?? ''}`}>
             <div className='section-container__sidebar'>
                 <ul>
-                    {generateSidebarItems(items, onClick, selected)}
+                    {generateSidebarItems(items, onClick, selected, onDelete)}
                 </ul>
                 <Button
                     style={{padding: 0}}
@@ -46,7 +49,7 @@ const SectionContainer = (props: SectionContainerProps) => {
     );
 }
 
-const generateSidebarItems = (sections: SectionContainerItem[], onClick: (item: number) => void, selected: number) => {
+const generateSidebarItems = (sections: SectionContainerItem[], onClick: (item: number) => void, selected: number, onDelete: (index: number) => void) => {
 
     return sections.map((section, index) => {
 
@@ -57,6 +60,14 @@ const generateSidebarItems = (sections: SectionContainerItem[], onClick: (item: 
                 className={`section-container__item ${index === selected ? 'selected' : ''}`}
             >
                 {section.title}
+                { index === selected &&
+                    <MdDelete
+                        style={{margin: '4px 2px', cursor: 'pointer'}}
+                        onClick={() => {
+                            onDelete(index);
+                        }}
+                    />
+                }
             </li>
         )
     });

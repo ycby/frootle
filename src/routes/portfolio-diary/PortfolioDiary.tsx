@@ -2,7 +2,7 @@ import './PortfolioDiary.css';
 import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
 import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
-import {useEffect, useState} from "react";
+import {MutableRefObject, useEffect, useRef, useState} from "react";
 import {
     convertBEtoFETransaction,
     convertFEtoBETransaction,
@@ -145,8 +145,12 @@ const PortfolioDiary = () => {
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
     const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData>();
+    //use ref for performance
+    const untrackStockRef: MutableRefObject<number> = useRef(-1);
     const [hasNewTrackedStockCreated, setHasNewTrackedStockCreated] = useState<number>(0);
+
     const [isOpenNewTrackedStock, setIsOpenNewTrackedStock] = useState<boolean>(false);
+    const [isOpenUntrackStock, setIsOpenUntrackStock] = useState<boolean>(false);
 
     useEffect(() => {
 
@@ -229,10 +233,14 @@ const PortfolioDiary = () => {
                     setCurrentStockIndex(selected);
                 }}
                 onNew={() => {
-                    //TODO: implement the modal for creating new track stock
                     setIsOpenNewTrackedStock(true);
                 }}
                 selected={currentStockIndex}
+                onDelete={(selected: number) => {
+
+                    untrackStockRef.current = selected;
+                    setIsOpenUntrackStock(true);
+                }}
             >
                 <div className='portfolio-diary__main'>
                     <div className='portfolio-diary__content'>
@@ -498,6 +506,31 @@ const PortfolioDiary = () => {
                         setIsOpenNewTrackedStock(false);
                     }
                 }}>Save</Button>
+            </Modal>
+            <Modal
+                isOpen={isOpenUntrackStock}
+                setIsOpen={setIsOpenUntrackStock}
+            >
+                <h3>Untrack Stock: {untrackStockRef.current >= 0 ? stockData[untrackStockRef.current].ticker_no : ''}</h3>
+                <p>Are you sure?</p>
+                <Button onClick={async () => {
+
+                    //should never happen? no need failsafe?
+                    if (!stockData[untrackStockRef.current]) return;
+                    if (!stockData[untrackStockRef.current].id) return;
+
+                    const result = await StockAPI.setUntrackedStock(Number(stockData[untrackStockRef.current].id));
+
+                    if (result.status === APIStatus.FAIL) {
+                        //TODO: handle fail case
+                    }
+
+                    if (result.status === APIStatus.SUCCESS) {
+                        untrackStockRef.current = -1;
+                        setIsOpenUntrackStock(false);
+                        setHasNewTrackedStockCreated(prevState => prevState + 1);
+                    }
+                }}>Delete</Button>
             </Modal>
         </div>
     );

@@ -35,6 +35,13 @@
     color: #FFFCF2;
 }
 
+.section-container__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .section-container__content {
     border: 1px solid #000000;
     flex: 1;
