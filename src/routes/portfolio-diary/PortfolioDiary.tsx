@@ -125,22 +125,10 @@ const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
     const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
-    const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>({
-        stockId: 3007,
-        type: 'buy',
-        transactionDate: '',
-        amtWOFee: '',
-        amtWFee: '',
-        quantity: '',
-        currency: 'HKD'
-    });
+    const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
+
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
-    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>({
-        stockId: 3007,
-        title: '',
-        content: '',
-        postedDate: new Date(),
-    });
+    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
 
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
@@ -169,8 +157,13 @@ const PortfolioDiary = () => {
                 return {...data, title: data.ticker_no}
             });
 
+            let newCurrentStockIndex: number = 0;
+            if (newTrackedStock) {
+                newCurrentStockIndex = processedData.findIndex((element) => element.id === Number(newTrackedStock.value));
+            }
+
             setStockData(processedData);
-            setCurrentStockIndex(0);
+            setCurrentStockIndex(newCurrentStockIndex);
         }
 
         getTrackedStocks();
@@ -197,8 +190,8 @@ const PortfolioDiary = () => {
         if (currentStockIndex >= 0 && currentStockIndex < stockData.length) {
 
             getTransactions();
-            setNewTransactionData({...newTransactionData, stockId: stockData[currentStockIndex].id});
-            setNewDiaryEntry({...newDiaryEntry, stockId: stockData[currentStockIndex].id});
+            setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
+            setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData[currentStockIndex].id});
         }
     }, [currentStockIndex, stockData]);
 
@@ -335,6 +328,7 @@ const PortfolioDiary = () => {
                                     newDiaryEntries.unshift(processedDiaryEntry[0]);
 
                                     setDiaryEntries(newDiaryEntries);
+                                    setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData[currentStockIndex].id});
                                 }}
                                 onEdit={(index: number) => {
                                     let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
@@ -448,6 +442,7 @@ const PortfolioDiary = () => {
                                 let newArray: TransactionData[] = [...transactionData];
                                 newArray.unshift(convertBEtoFETransaction(td));
                                 setTransactionData(processTransactionData(newArray));
+                                setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
                             }}
                             onEdit={(index: number) => {
                                 console.log('onEdit icon');
@@ -608,6 +603,29 @@ const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: Diar
             postedDate: diaryEntryData.postedDate,
         }
     } as DiaryEntryListItem);
+}
+
+const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionInputs => {
+
+    return {
+        stockId: 0,
+        type: 'buy',
+        transactionDate: '',
+        amtWOFee: '',
+        amtWFee: '',
+        quantity: '',
+        currency: 'HKD'
+    }
+}
+
+const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
+
+    return {
+        stockId: 0,
+        title: '',
+        content: '',
+        postedDate: new Date(),
+    }
 }
 
 export {
