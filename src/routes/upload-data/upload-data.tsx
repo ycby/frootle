@@ -3,6 +3,7 @@ import Papa, {LocalFile} from 'papaparse';
 import {TableGenerator} from "#root/src/helpers/table-generator/TableGenerator.tsx";
 import {postShortData} from "#root/src/apis/ShortDataAPI.ts";
 import {APIStatus} from "#root/src/types.ts";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 
 type UploadDataMapping = { [p: string]: UploadDataMappingElement };
 type UploadDataMappingElement = { label: string; value: string };
@@ -17,7 +18,7 @@ type ShortDataRaw = {
 interface ShortData {
 	id: number; //only for handling on frontend side, not used in backend
 	stock_code: string;
-	reporting_date: Date;
+	reporting_date: string;
 	shorted_shares: number;
 	shorted_amount: number;
 }
@@ -155,7 +156,12 @@ async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, s
 			if (field === 'reporting_date') {
 
 				const dateString = value.split('/');
-				return new Date(parseInt(dateString[2]), parseInt(dateString[1]) - 1, parseInt(dateString[0]));
+				return dateToStringConverter(new Date(parseInt(dateString[2]), parseInt(dateString[1]) - 1, parseInt(dateString[0])));
+			}
+
+			if (field === 'stock_code') {
+
+				return value.padStart(5, '0');
 			}
 
 			return value;

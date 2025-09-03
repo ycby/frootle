@@ -39,12 +39,13 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
         body: JSON.stringify(payload),
     });
 
+    const responseJSON = await response.json();
+    console.log(responseJSON.data);
+
     if (!response.ok) return {
         status: APIStatus.FAIL,
-        data: []
+        data: responseJSON.data
     };
-
-    const responseJSON = await response.json();
 
     if (responseJSON.status !== 1) return {
         status: APIStatus.SUCCESS,
