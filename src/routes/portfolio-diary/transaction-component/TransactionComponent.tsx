@@ -123,7 +123,13 @@ const getTransactionDetails = (transaction: TransactionData): TransactionCalcula
             break;
         case TransactionType.DIVIDEND:
             bgColour = '#FDFD96';
-            calculationString = `Dividend ${transaction.quantity} @ $${Number(transaction.amountPerShare).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
+            if (!transaction.quantity || transaction.quantity === 0) {
+                //cash div
+                calculationString = `Cash Dividend $${Number(transaction.amount).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
+            } else {
+                //scrip div
+                calculationString = `Scrip Dividend ${transaction.quantity} @ $${Number(transaction.amountPerShare).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
+            }
             totalAmount = Number(transaction.amount) - Number(transaction.fee);
             break;
         default:

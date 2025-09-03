@@ -187,7 +187,7 @@ const PortfolioDiary = () => {
             }//Handle if failed to retrieve
         }
 
-        if (currentStockIndex >= 0 && currentStockIndex < stockData.length) {
+        if (stockData && stockData[currentStockIndex] && currentStockIndex >= 0 && currentStockIndex < stockData.length) {
 
             getTransactions();
             setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
@@ -210,7 +210,10 @@ const PortfolioDiary = () => {
             }//Handle if failed to retrieve
         }
 
-        getDiaryEntries();
+        if (stockData && stockData[currentStockIndex]) {
+
+            getDiaryEntries();
+        }
     }, [currentStockIndex, stockData]);
 
     //TODO: split into 2 col
@@ -541,9 +544,9 @@ const processTransactionData: (transactionData: TransactionData[]) => Transactio
             editObject: {
                 stockId: element.stockId,
                 type: element.type,
-                amtWFee: (Number(element.amount) + Number(element.fee)).toFixed(2),
-                amtWOFee: (element.amount).toString(),
-                quantity: (element.quantity).toString(),
+                amtWFee: (Number(element.amount ?? 0) + Number(element.fee ?? 0)).toFixed(2),
+                amtWOFee: (element.amount ?? 0).toString(),
+                quantity: (element.quantity ?? 0).toString(),
                 transactionDate: dateToStringConverter(element.transactionDate),
                 currency: element.currency
             }
