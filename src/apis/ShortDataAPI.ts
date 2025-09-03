@@ -28,7 +28,37 @@ const getShortData = async (stockCode: string, startDate: string, endDate: strin
     }
 }
 
+const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
+
+    const response = await fetch('http://localhost:3000/short', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
+
+    const responseJSON = await response.json();
+
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.SUCCESS,
+        data: []
+    };
+
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    }
+}
+
 
 export {
     getShortData,
+    postShortData
 }

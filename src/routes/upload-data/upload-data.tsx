@@ -1,15 +1,25 @@
 import {useState, useRef, FormEvent,} from 'react';
 import Papa, {LocalFile} from 'papaparse';
 import {TableGenerator} from "#root/src/helpers/table-generator/TableGenerator.tsx";
+import {postShortData} from "#root/src/apis/ShortDataAPI.ts";
+import {APIStatus} from "#root/src/types.ts";
 
 type UploadDataMapping = { [p: string]: UploadDataMappingElement };
 type UploadDataMappingElement = { label: string; value: string };
 
-type ShortData = {
+type ShortDataRaw = {
 	'Stock Code': string;
 	'Date': Date;
 	'Aggregated Reportable Short Positions (Shares)': number;
 	'Aggregated Reportable Short Positions (HK$)': number;
+}
+
+interface ShortData {
+	id: number; //only for handling on frontend side, not used in backend
+	stock_code: string;
+	reporting_date: Date;
+	shorted_shares: number;
+	shorted_amount: number;
 }
 
 const mapping: UploadDataMapping = {
@@ -46,7 +56,7 @@ export default function UploadData() {
 
 	const [hasError, setHasError] = useState<boolean>(false);
 
-	const setFileResult: (data: any[]) => void = (data: any[]): void => {
+	const setFileResult: (data: ShortData[]) => void = (data: ShortData[]): void => {
 
 		setIsFileParsed(true);
 		setFileAsArray(data);
@@ -70,7 +80,7 @@ export default function UploadData() {
 				<input ref={inputRef} type='file' id='upload-short-data' accept='text/csv' name='shortdata' />
 				<input type='submit' value='Process' />
 			</form>
-			{isFileParsed && <span>File Uploaded Successfully!</span>}
+			{isFileParsed && <span>File Loaded Successfully!</span>}
 
 			{isFileParsed &&
 				<TableGenerator
@@ -88,22 +98,14 @@ export default function UploadData() {
 					onClick={async () => {
 
 						try {
-							const response = await fetch('http://localhost:3000/short', {
-								method: 'POST',
-								mode: 'cors',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify(fileAsArray),
-							});
+							const response = await postShortData(fileAsArray);
 
-							if (response.ok) {
-
-								const responseJSON = await response.json();
+							if (response.status === APIStatus.SUCCESS) {
 
 								setIsFileUploaded(true);
+							} else {
 
-								if (responseJSON.status !== 1) setHasError(true);
+								setHasError(true);
 							}
 						} catch (e) {
 
@@ -126,19 +128,19 @@ export default function UploadData() {
 	)
 }
 
-async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, setFileResult: (data: any[]) => void) {
+async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, setFileResult: (data: ShortData[]) => void) {
 
 	console.log('Upload Data Submitted');
 	e.preventDefault();
 	//Prepare JSON
-	Papa.parse<ShortData>(fileData, {
-		complete: (results: Papa.ParseResult<ShortData>): void => {
+	Papa.parse<ShortDataRaw>(fileData, {
+		complete: (results: Papa.ParseResult<ShortDataRaw>): void => {
 
 			setFileResult(results.data.map((data: any, index: number) => {
 
 				data.id = index;
 
-				return data;
+				return data as ShortData;
 			}));
 		},
 		header: true,
