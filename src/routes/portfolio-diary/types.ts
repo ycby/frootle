@@ -1,4 +1,4 @@
-import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
+import {CurrencyKeys, DividendTypeKeys, TransactionTypeKeys} from "#root/src/types.ts";
 
 export interface StockData {
     id: number;
@@ -42,6 +42,7 @@ export interface TransactionDataBE {
 export interface NewTransactionInputs {
     stockId: number;
     type: TransactionTypeKeys;
+    dividendType: DividendTypeKeys | null;
     amtWFee: string;
     amtWOFee: string;
     quantity: string;

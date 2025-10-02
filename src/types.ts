@@ -26,9 +26,14 @@ const TransactionType = {
     SELL: 'sell',
     DIVIDEND: 'dividend'
 } as const;
+const DividendType = {
+    CASH: 'CASH',
+    SCRIP: 'SCRIP',
+}
 
 export type CurrencyKeys = typeof Currency[keyof typeof Currency];
 export type TransactionTypeKeys = typeof TransactionType[keyof typeof TransactionType];
+export type DividendTypeKeys = typeof DividendType[keyof typeof DividendType];
 
 //=====================================================================================
 //General
@@ -50,5 +55,6 @@ export {
     APIStatus,
     Currency,
     TransactionType,
+    DividendType,
     ComponentStatus,
 }
