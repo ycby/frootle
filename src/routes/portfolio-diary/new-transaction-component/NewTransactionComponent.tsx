@@ -67,12 +67,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
                             updateSource({...sourceObject, type: e.target.value as TransactionTypeKeys});
                         }}
                     >
-                        {
-                            Object.values(TransactionType).map((transactionType: TransactionTypeKeys) => {
-
-                                return(<option key={`${transactionTypeId}-${transactionType}`} value={capitaliseWord(transactionType)}>{capitaliseWord(transactionType)}</option>)
-                            })
-                        }
+                        {generateTypeOptions(transactionTypeId)}
                     </select>
                 </div>
                 <div className='new-transaction-component__item-container'>
@@ -130,7 +125,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
                             }}>
                             {
                                 Object.values(Currency).map((currency: CurrencyKeys) => {
-                                    return (<option key={`${currencyId}-${currency}`} value={capitaliseWord(currency)}>{capitaliseWord(currency)}</option>)
+                                    return (<option key={`${currencyId}-${currency}`} value={currency}>{capitaliseWord(currency)}</option>)
                                 })
                             }
                         </select>
@@ -142,6 +137,15 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
             </div>
         </div>
     );
+}
+
+const generateTypeOptions = (transactionTypeId: string) => {
+
+    return Object.values(TransactionType).map((transactionType: TransactionTypeKeys) => {
+
+        console.log(transactionType);
+        return(<option key={`${transactionTypeId}-${transactionType}`} value={transactionType}>{capitaliseWord(transactionType)}</option>)
+    })
 }
 
 export default NewTransactionComponent;
