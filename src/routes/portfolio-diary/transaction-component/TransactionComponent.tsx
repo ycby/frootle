@@ -123,8 +123,8 @@ const getTransactionDetails = (transaction: TransactionData): TransactionCalcula
             break;
         case TransactionType.CASH_DIVIDEND:
             bgColour = '#FDFD96';
-            calculationString = `Cash Dividend $${Number(transaction.amount).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
-            totalAmount = Number(transaction.amount) - Number(transaction.fee);
+            calculationString = `Cash Dividend $${(Number(transaction.amount) + Number(transaction.fee)).toFixed(2)} - $${Number(transaction.fee).toFixed(2)}`;
+            totalAmount = Number(transaction.amount);
             break;
         case TransactionType.SCRIP_DIVIDEND:
             bgColour = '#FDFD96';

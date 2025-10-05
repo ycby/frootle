@@ -5,6 +5,7 @@ import {
     DiaryEntryData, DiaryEntryBE
 } from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {TransactionType} from "#root/src/types.ts";
 
 const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
 
@@ -12,7 +13,7 @@ const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionD
         stock_id: sourceObj.stockId,
         type: sourceObj.type,
         amount: Number(sourceObj.amtWOFee),
-        quantity: Number(sourceObj.quantity),
+        quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
         fee: Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee),
         amount_per_share: Number(sourceObj.amtWOFee) / Number(sourceObj.quantity),
         transaction_date: sourceObj.transactionDate,

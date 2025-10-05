@@ -431,11 +431,11 @@ const PortfolioDiary = () => {
 
                                 //generate the value
                                 const td = convertFEtoBETransaction(newTransactionData);
-
+                                console.log(td);
                                 //send to back end
                                 const response = await StockTransactionAPI.postStockTransactions(td);
                                 if (response.status === APIStatus.FAIL) {
-                                    console.error('Failed to create transaction');
+                                    console.error('Failed to create transaction: ' + response.data);
                                     return;
                                 }
 
