@@ -77,7 +77,7 @@ const exampleTransactions: TransactionData[] = [
         id: 2,
         stockId: 1,
         amount: 200,
-        type: 'dividend',
+        type: 'scrip_dividend',
         amountPerShare: 1,
         quantity: 5,
         fee: 0.1,

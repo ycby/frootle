@@ -42,7 +42,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
             break;
         case TransactionType.CASH_DIVIDEND:
-            preview = `${amtWOFeeNum + (amtWOFeeNum - amtWFeeNum)}`;
+            preview = `${amtWOFeeNum.toFixed(2)} + ${(amtWFeeNum - amtWOFeeNum).toFixed(2)}`;
             break;
         default:
             preview = `Select a transaction type`;
@@ -139,7 +139,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
                             }}>
                             {
                                 Object.values(Currency).map((currency: CurrencyKeys) => {
-                                    return (<option key={`${currencyId}-${currency}`} value={currency}>{capitaliseWord(currency)}</option>)
+                                    return (<option key={`${currencyId}-${currency}`} value={currency}>{currency}</option>)
                                 })
                             }
                         </select>
