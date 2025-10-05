@@ -14,7 +14,7 @@ const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionD
         type: sourceObj.type,
         amount: Number(sourceObj.amtWOFee),
         quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
-        fee: Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee),
+        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)),
         amount_per_share: Number(sourceObj.amtWOFee) / Number(sourceObj.quantity),
         transaction_date: sourceObj.transactionDate,
         currency: sourceObj.currency
