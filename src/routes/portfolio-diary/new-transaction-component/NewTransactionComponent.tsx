@@ -36,7 +36,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
             break;
         case TransactionType.SELL:
-            preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} - ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
+            preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} - ${amtWFeeNum && amtWOFeeNum ? (amtWOFeeNum - amtWFeeNum).toFixed(2) : 'FEE'}`;
             break;
         case TransactionType.SCRIP_DIVIDEND:
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
