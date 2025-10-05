@@ -61,10 +61,16 @@ const capitaliseWord: (word: string) => string = (word: string): string => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
+const replaceUndescoreWithSpace: (sentence: string) => string = (sentence: string): string => {
+
+    return sentence.replaceAll('_', ' ');
+}
+
 export {
     convertFEtoBETransaction,
     convertBEtoFETransaction,
     convertFEtoBEDiaryEntry,
     convertBEtoFEDiaryEntry,
-    capitaliseWord
+    capitaliseWord,
+    replaceUndescoreWithSpace
 }
