@@ -1,12 +1,12 @@
 import {DiaryEntryBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
-const baseUrl = 'http://localhost:3000/diary-entry';
+const baseUrl = 'https://localhost:3000/diary-entry';
 
 const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryBE[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
-        method: 'GET'
+        method: 'GET',
     });
 
     //TODO: consider changing this, doesn't make sense to return empty array when there is an error

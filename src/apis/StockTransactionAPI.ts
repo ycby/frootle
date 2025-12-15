@@ -1,7 +1,7 @@
 import {TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
-const baseUrl = 'http://localhost:3000/transaction';
+const baseUrl = 'https://localhost:3000/transaction';
 
 //map to local format - most transactions will only require checking status
 //{ status, data }

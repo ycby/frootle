@@ -1,7 +1,7 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {StockData} from "#root/src/routes/portfolio-diary/types.ts";
 
-const baseUrl = 'http://localhost:3000/stock';
+const baseUrl = 'https://localhost:3000/stock';
 
 const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<StockData[]>> => {
 
@@ -31,8 +31,9 @@ const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<S
 const getTrackedStocks = async (): Promise<APIResponse<StockData[]>> => {
 
     const response = await fetch(`${baseUrl}/tracked`, {
-        method: 'GET'
+        method: 'GET',
     });
+    console.log(response.url);
 
     if (!response.ok) return {
         status: APIStatus.FAIL,

@@ -1,7 +1,7 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {StockData} from "#root/src/routes/portfolio-diary/types.ts";
 
-const baseUrl = 'http://localhost:3000/short';
+const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
 const getShortData = async (stockCode: string, startDate: string, endDate: string): Promise<APIResponse<StockData[]>> => {
 
@@ -30,7 +30,7 @@ const getShortData = async (stockCode: string, startDate: string, endDate: strin
 
 const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
 
-    const response = await fetch('http://localhost:3000/short', {
+    const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         mode: 'cors',
         headers: {
