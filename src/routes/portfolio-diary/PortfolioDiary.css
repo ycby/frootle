@@ -64,3 +64,9 @@
 #portfolio-diary tr:nth-child(even) {
     background-color: #dddddd;
 }
+
+.stock-card:hover {
+    background-color: #dddddd;
+    cursor: pointer;
+    transition: background-color 0.2s linear;
+}

@@ -30,6 +30,12 @@ import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSe
 import * as Stock from "#root/src/apis/StockAPI.ts";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import Button from "#root/src/helpers/button/Button.tsx";
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from "react-bootstrap/Card";
+import {Form, Stack} from "react-bootstrap";
+import {useNavigate} from "react-router-dom";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData & {
@@ -130,6 +136,8 @@ const PortfolioDiary = () => {
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
 
+    const [searchTerm, setSearchTerm] = useState('');
+
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
     const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData>();
@@ -216,321 +224,361 @@ const PortfolioDiary = () => {
         }
     }, [currentStockIndex, stockData]);
 
+    let navigate = useNavigate();
+
     //TODO: split into 2 col
     //Left: Thesis and Diary Entries
     //Right: Transactions and totals
     return (
-        <div id="portfolio-diary">
-            <h1>Portfolio Diary</h1>
-            <SectionContainer
-                className='portfolio-diary__container'
-                items={stockData}
-                onClick={(selected: number) => {
-                    setCurrentStockIndex(selected);
-                }}
-                onNew={() => {
-                    setIsOpenNewTrackedStock(true);
-                }}
-                selected={currentStockIndex}
-                onDelete={(selected: number) => {
-
-                    untrackStockRef.current = selected;
-                    setIsOpenUntrackStock(true);
-                }}
-            >
-                <div className='portfolio-diary__main'>
-                    <div className='portfolio-diary__content'>
-                        <div className='thesis'>
-                            Thesis
-                        </div>
-                        <div className='diary-list'>
-                            <ListContainer
-                                name='Diary Entries'
-                                items={diaryEntries}
-                                itemRenderer={(diaryEntry: DiaryEntryListItem) =>
-                                    <DiaryEntry
-                                        entry={diaryEntry}
-                                        editView={
-                                            <NewDiaryEntry
-                                                sourceObject={diaryEntry.editObject}
-                                                updateSource={(obj: DiaryEntryData) => {
-
-                                                    let newDiaryEntries: DiaryEntryListItem[] = [...diaryEntries];
-
-                                                    newDiaryEntries[diaryEntry.index].editObject = obj;
-
-                                                    setDiaryEntries(newDiaryEntries);
-                                                }
-                                            }
-                                            />}
-                                        onEdit={ async (index: number) => {
-
-                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
-
-                                            const updatedDiaryEntryEditObject: DiaryEntryData = newDiaryEntryListItems[index].editObject;
-                                            const diaryEntryBE: DiaryEntryBE = convertFEtoBEDiaryEntry(updatedDiaryEntryEditObject);
-
-                                            if (newDiaryEntryListItems[index].id === undefined) return;
-
-                                            if ((await DiaryEntryAPI.putDiaryEntry(newDiaryEntryListItems[index].id, diaryEntryBE)).status === APIStatus.FAIL) {
-
-                                                console.error('Failed to update transaction');
-                                                return;
-                                            }
-
-                                            //if success, update the front end
-                                            newDiaryEntryListItems[index] = replaceDiaryEntryData(newDiaryEntryListItems[index], convertBEtoFEDiaryEntry(diaryEntryBE));
-
-                                            setDiaryEntries(processDiaryEntries(newDiaryEntryListItems));
-                                        }}
-                                        onDelete={ async (index: number) => {
-
-                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
-
-                                            //perform the api call
-                                            const diaryEntryToDelete: DiaryEntryListItem = diaryEntries[index];
-
-                                            if (diaryEntryToDelete.id === undefined) return;
-
-                                            const response: APIResponse<any[]> = await DiaryEntryAPI.deleteDiaryEntry(diaryEntryToDelete.id);
-
-                                            if (response.status === APIStatus.FAIL) {
-
-                                                console.error('Failed to delete transaction');
-                                            } else {
-
-                                                //on successful delete, remove from frontend list
-                                                newDiaryEntryListItems.splice(index, 1);
-
-                                                setDiaryEntries(newDiaryEntryListItems);
-                                            }
-                                        }}
-                                        onBack={(index: number) => {
-                                            let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
-                                            newDiaryEntryListItems[index].status = ComponentStatus.VIEW;
-                                            setDiaryEntries(newDiaryEntryListItems);
-                                        }}
-                                    />
-                                }
-                                newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
-                                onNew={async () => {
-
-                                    const processedNewDiaryEntry = convertFEtoBEDiaryEntry(newDiaryEntry);
-
-                                    const response = await DiaryEntryAPI.postDiaryEntries(processedNewDiaryEntry);
-                                    if (response.status === APIStatus.FAIL) {
-                                        //Handle Failure
-                                        console.error('Failed to create new Diary Entry');
-                                        return;
-                                    }
-
-                                    newDiaryEntry.id = response.data[0];
-                                    const processedDiaryEntry = processDiaryEntries([newDiaryEntry]);
-
-                                    let newDiaryEntries = [...diaryEntries];
-                                    newDiaryEntries.unshift(processedDiaryEntry[0]);
-
-                                    setDiaryEntries(newDiaryEntries);
-                                    setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData[currentStockIndex].id});
-                                }}
-                                onEdit={(index: number) => {
-                                    let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
-                                    newDiaryEntryListItems[index].status = ComponentStatus.EDIT;
-                                    setDiaryEntries(newDiaryEntryListItems);
-                                }}
-                                onDelete={(index: number) => {
-                                    let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
-                                    newDiaryEntryListItems[index].status = ComponentStatus.DELETE;
-                                    setDiaryEntries(newDiaryEntryListItems);
-                                }}
-                            />
-                        </div>
-                    </div>
-                    <div style={{margin: '20px'}}>
-                        <ListContainer
-                            name='Transactions'
-                            items={transactionData}
-                            itemRenderer={(item: TransactionDataListItem) => {
-
-                                return (
-                                    <TransactionComponent
-                                        item={item}
-                                        editView={
-                                        <NewTransactionComponent
-                                            sourceObject={item.editObject}
-                                            updateSource={(obj) => {
-
-                                                    let newTransactionListItems = [...transactionData];
-
-                                                    newTransactionListItems[item.index].editObject = obj;
-
-                                                    setTransactionData(newTransactionListItems);
-                                                }
-                                            }
-                                        />
-                                        }
-                                        onEdit={async (index: number) => {
-                                            console.log('onEdit')
-
-                                            let newTransactionListItems = [...transactionData];
-
-                                            const updatedTransactionEditObject = newTransactionListItems[index].editObject;
-                                            const transactionToBE = convertFEtoBETransaction(updatedTransactionEditObject);
-
-                                            if (transactionData[index].id === undefined) {
-                                                console.error('Missing Id!')
-                                                return;
-                                            }
-
-                                            if ((await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE)).status === APIStatus.FAIL) {
-
-                                                console.error('Failed to update transaction');
-                                                return;
-                                            }
-
-                                            //if success, update the front end
-                                            newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFETransaction(transactionToBE));
-
-                                            setTransactionData(processTransactionData(newTransactionListItems))
-                                        }}
-                                        onDelete={async (index) => {
-                                            console.log('onDelete');
-                                            let newTransactionListItems = [...transactionData];
-
-                                            //perform the api call
-                                            const transactionToDelete = transactionData[index];
-
-                                            if (transactionToDelete.id === undefined) return;
-
-                                            const response = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
-                                            if (response.status === APIStatus.FAIL) {
-
-                                                console.error('Failed to delete transaction');
-                                            } else {
-
-                                                //on successful delete, remove from frontend list
-                                                newTransactionListItems.splice(index, 1);
-
-                                                setTransactionData(newTransactionListItems);
-                                            }
-                                        }}
-                                        onBack={(index) => {
-                                            let newTransactionListItems = [...transactionData];
-                                            newTransactionListItems[index].status = ComponentStatus.VIEW;
-                                            setTransactionData(newTransactionListItems);
-                                        }}
-                                    />
-                                )
-                            }}
-                            newItemRenderer={
-                                <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
-                            }
-                            onNew={async () => {
-
-                                //validate input and generate correct values
-
-                                //generate the value
-                                const td = convertFEtoBETransaction(newTransactionData);
-                                console.log(td);
-                                //send to back end
-                                const response = await StockTransactionAPI.postStockTransactions(td);
-                                if (response.status === APIStatus.FAIL) {
-                                    console.error('Failed to create transaction: ' + response.data);
-                                    return;
-                                }
-
-                                //set the id of the transaction - assume only 1
-                                td.id = response.data[0];
-                                //parse response and append to list
-                                let newArray: TransactionData[] = [...transactionData];
-                                newArray.unshift(convertBEtoFETransaction(td));
-                                setTransactionData(processTransactionData(newArray));
-                                setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
-                            }}
-                            onEdit={(index: number) => {
-                                console.log('onEdit icon');
-                                let newTransactionListItems = [...transactionData];
-                                newTransactionListItems[index].status = ComponentStatus.EDIT;
-                                setTransactionData(newTransactionListItems);
-                            }}
-                            onDelete={(index: number) => {
-                                console.log('onDelete icon');
-                                let newTransactionListItems = [...transactionData];
-                                newTransactionListItems[index].status = ComponentStatus.DELETE;
-                                setTransactionData(newTransactionListItems);
-                            }}
-                        >
-                        </ListContainer>
-                    </div>
-                </div>
-            </SectionContainer>
-            <Modal
-                isOpen={isOpenNewTrackedStock}
-                setIsOpen={setIsOpenNewTrackedStock}
-            >
-                <h3>Track New Stock</h3>
-                <FilterableSelect
-                    queryFn={async (args: string) => {
-
-                        const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
-                        //TODO: handle the fail state
-                        return response.data.map((data: StockData): FilterableSelectData => {
-
-                            return ({
-                                label: data.name,
-                                value: data.id.toString(),
-                                subtext: data.ticker_no
-                            } as FilterableSelectData);
-                        });
-                    }}
-                    onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
+        <Container fluid>
+            <Form>
+                <Form.Control
+                    type='text'
+                    placeholder='Filter tracked stocks...'
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
                 />
-                <div>Name: {newTrackedStock?.label}</div>
-                <div>Ticker: {newTrackedStock?.subtext}</div>
-                <Button onClick={async () => {
+            </Form>
+            <Stack
+                direction='horizontal'
+                gap={3}
+                className='mt-4 mb-4'
+                style={{ width: '100%', flexWrap: 'wrap', justifyContent: 'start'}}>
+                {
+                    stockData.filter(element => {
 
-                    if (!newTrackedStock) return;
-                    if (!newTrackedStock.value) return;
+                        if (!searchTerm) return true;
 
-                    const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
+                        return element.ticker_no.includes(searchTerm);
+                    }).map(element => {
 
-                    if (result.status === APIStatus.FAIL) {
-                        //TODO: handle fail case
-                    }
-
-                    if (result.status === APIStatus.SUCCESS) {
-                        //learn something new everyday: can provide usestate with function
-                        setHasNewTrackedStockCreated(prevState => prevState + 1);
-                        setIsOpenNewTrackedStock(false);
-                    }
-                }}>Save</Button>
-            </Modal>
-            <Modal
-                isOpen={isOpenUntrackStock}
-                setIsOpen={setIsOpenUntrackStock}
-            >
-                <h3>Untrack Stock: {untrackStockRef.current >= 0 ? stockData[untrackStockRef.current].ticker_no : ''}</h3>
-                <p>Are you sure?</p>
-                <Button onClick={async () => {
-
-                    //should never happen? no need failsafe?
-                    if (!stockData[untrackStockRef.current]) return;
-                    if (!stockData[untrackStockRef.current].id) return;
-
-                    const result = await StockAPI.setUntrackedStock(Number(stockData[untrackStockRef.current].id));
-
-                    if (result.status === APIStatus.FAIL) {
-                        //TODO: handle fail case
-                    }
-
-                    if (result.status === APIStatus.SUCCESS) {
-                        untrackStockRef.current = -1;
-                        setIsOpenUntrackStock(false);
-                        setHasNewTrackedStockCreated(prevState => prevState + 1);
-                    }
-                }}>Delete</Button>
-            </Modal>
-        </div>
+                        return (
+                            <Card
+                                key={element.id} style={{width: '30%', height: '9rem'}}
+                                onClick={() => navigate(`/portfolio/${element.ticker_no}`)}
+                                className='stock-card'
+                            >
+                                <Card.Body>
+                                    <Card.Title>{element.ticker_no}-{element.name}</Card.Title>
+                                    <Card.Text>Example Text</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        )
+                    })
+                }
+            </Stack>
+        </Container>
+        // <div id="portfolio-diary">
+        //     <h1>Portfolio Diary</h1>
+        //     <SectionContainer
+        //         className='portfolio-diary__container'
+        //         items={stockData}
+        //         onClick={(selected: number) => {
+        //             setCurrentStockIndex(selected);
+        //         }}
+        //         onNew={() => {
+        //             setIsOpenNewTrackedStock(true);
+        //         }}
+        //         selected={currentStockIndex}
+        //         onDelete={(selected: number) => {
+        //
+        //             untrackStockRef.current = selected;
+        //             setIsOpenUntrackStock(true);
+        //         }}
+        //     >
+        //         <div className='portfolio-diary__main'>
+        //             <div className='portfolio-diary__content'>
+        //                 <div className='thesis'>
+        //                     Thesis
+        //                 </div>
+        //                 <div className='diary-list'>
+        //                     <ListContainer
+        //                         name='Diary Entries'
+        //                         items={diaryEntries}
+        //                         itemRenderer={(diaryEntry: DiaryEntryListItem) =>
+        //                             <DiaryEntry
+        //                                 entry={diaryEntry}
+        //                                 editView={
+        //                                     <NewDiaryEntry
+        //                                         sourceObject={diaryEntry.editObject}
+        //                                         updateSource={(obj: DiaryEntryData) => {
+        //
+        //                                             let newDiaryEntries: DiaryEntryListItem[] = [...diaryEntries];
+        //
+        //                                             newDiaryEntries[diaryEntry.index].editObject = obj;
+        //
+        //                                             setDiaryEntries(newDiaryEntries);
+        //                                         }
+        //                                     }
+        //                                     />}
+        //                                 onEdit={ async (index: number) => {
+        //
+        //                                     let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+        //
+        //                                     const updatedDiaryEntryEditObject: DiaryEntryData = newDiaryEntryListItems[index].editObject;
+        //                                     const diaryEntryBE: DiaryEntryBE = convertFEtoBEDiaryEntry(updatedDiaryEntryEditObject);
+        //
+        //                                     if (newDiaryEntryListItems[index].id === undefined) return;
+        //
+        //                                     if ((await DiaryEntryAPI.putDiaryEntry(newDiaryEntryListItems[index].id, diaryEntryBE)).status === APIStatus.FAIL) {
+        //
+        //                                         console.error('Failed to update transaction');
+        //                                         return;
+        //                                     }
+        //
+        //                                     //if success, update the front end
+        //                                     newDiaryEntryListItems[index] = replaceDiaryEntryData(newDiaryEntryListItems[index], convertBEtoFEDiaryEntry(diaryEntryBE));
+        //
+        //                                     setDiaryEntries(processDiaryEntries(newDiaryEntryListItems));
+        //                                 }}
+        //                                 onDelete={ async (index: number) => {
+        //
+        //                                     let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+        //
+        //                                     //perform the api call
+        //                                     const diaryEntryToDelete: DiaryEntryListItem = diaryEntries[index];
+        //
+        //                                     if (diaryEntryToDelete.id === undefined) return;
+        //
+        //                                     const response: APIResponse<any[]> = await DiaryEntryAPI.deleteDiaryEntry(diaryEntryToDelete.id);
+        //
+        //                                     if (response.status === APIStatus.FAIL) {
+        //
+        //                                         console.error('Failed to delete transaction');
+        //                                     } else {
+        //
+        //                                         //on successful delete, remove from frontend list
+        //                                         newDiaryEntryListItems.splice(index, 1);
+        //
+        //                                         setDiaryEntries(newDiaryEntryListItems);
+        //                                     }
+        //                                 }}
+        //                                 onBack={(index: number) => {
+        //                                     let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+        //                                     newDiaryEntryListItems[index].status = ComponentStatus.VIEW;
+        //                                     setDiaryEntries(newDiaryEntryListItems);
+        //                                 }}
+        //                             />
+        //                         }
+        //                         newItemRenderer={<NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />}
+        //                         onNew={async () => {
+        //
+        //                             const processedNewDiaryEntry = convertFEtoBEDiaryEntry(newDiaryEntry);
+        //
+        //                             const response = await DiaryEntryAPI.postDiaryEntries(processedNewDiaryEntry);
+        //                             if (response.status === APIStatus.FAIL) {
+        //                                 //Handle Failure
+        //                                 console.error('Failed to create new Diary Entry');
+        //                                 return;
+        //                             }
+        //
+        //                             newDiaryEntry.id = response.data[0];
+        //                             const processedDiaryEntry = processDiaryEntries([newDiaryEntry]);
+        //
+        //                             let newDiaryEntries = [...diaryEntries];
+        //                             newDiaryEntries.unshift(processedDiaryEntry[0]);
+        //
+        //                             setDiaryEntries(newDiaryEntries);
+        //                             setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData[currentStockIndex].id});
+        //                         }}
+        //                         onEdit={(index: number) => {
+        //                             let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+        //                             newDiaryEntryListItems[index].status = ComponentStatus.EDIT;
+        //                             setDiaryEntries(newDiaryEntryListItems);
+        //                         }}
+        //                         onDelete={(index: number) => {
+        //                             let newDiaryEntryListItems: DiaryEntryListItem[] = [...diaryEntries];
+        //                             newDiaryEntryListItems[index].status = ComponentStatus.DELETE;
+        //                             setDiaryEntries(newDiaryEntryListItems);
+        //                         }}
+        //                     />
+        //                 </div>
+        //             </div>
+        //             <div style={{margin: '20px'}}>
+        //                 <ListContainer
+        //                     name='Transactions'
+        //                     items={transactionData}
+        //                     itemRenderer={(item: TransactionDataListItem) => {
+        //
+        //                         return (
+        //                             <TransactionComponent
+        //                                 item={item}
+        //                                 editView={
+        //                                 <NewTransactionComponent
+        //                                     sourceObject={item.editObject}
+        //                                     updateSource={(obj) => {
+        //
+        //                                             let newTransactionListItems = [...transactionData];
+        //
+        //                                             newTransactionListItems[item.index].editObject = obj;
+        //
+        //                                             setTransactionData(newTransactionListItems);
+        //                                         }
+        //                                     }
+        //                                 />
+        //                                 }
+        //                                 onEdit={async (index: number) => {
+        //                                     console.log('onEdit')
+        //
+        //                                     let newTransactionListItems = [...transactionData];
+        //
+        //                                     const updatedTransactionEditObject = newTransactionListItems[index].editObject;
+        //                                     const transactionToBE = convertFEtoBETransaction(updatedTransactionEditObject);
+        //
+        //                                     if (transactionData[index].id === undefined) {
+        //                                         console.error('Missing Id!')
+        //                                         return;
+        //                                     }
+        //
+        //                                     if ((await StockTransactionAPI.putStockTransaction(transactionData[index].id, transactionToBE)).status === APIStatus.FAIL) {
+        //
+        //                                         console.error('Failed to update transaction');
+        //                                         return;
+        //                                     }
+        //
+        //                                     //if success, update the front end
+        //                                     newTransactionListItems[index] = replaceTransactionData(newTransactionListItems[index], convertBEtoFETransaction(transactionToBE));
+        //
+        //                                     setTransactionData(processTransactionData(newTransactionListItems))
+        //                                 }}
+        //                                 onDelete={async (index) => {
+        //                                     console.log('onDelete');
+        //                                     let newTransactionListItems = [...transactionData];
+        //
+        //                                     //perform the api call
+        //                                     const transactionToDelete = transactionData[index];
+        //
+        //                                     if (transactionToDelete.id === undefined) return;
+        //
+        //                                     const response = await StockTransactionAPI.deleteStockTransaction(transactionToDelete.id);
+        //                                     if (response.status === APIStatus.FAIL) {
+        //
+        //                                         console.error('Failed to delete transaction');
+        //                                     } else {
+        //
+        //                                         //on successful delete, remove from frontend list
+        //                                         newTransactionListItems.splice(index, 1);
+        //
+        //                                         setTransactionData(newTransactionListItems);
+        //                                     }
+        //                                 }}
+        //                                 onBack={(index) => {
+        //                                     let newTransactionListItems = [...transactionData];
+        //                                     newTransactionListItems[index].status = ComponentStatus.VIEW;
+        //                                     setTransactionData(newTransactionListItems);
+        //                                 }}
+        //                             />
+        //                         )
+        //                     }}
+        //                     newItemRenderer={
+        //                         <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
+        //                     }
+        //                     onNew={async () => {
+        //
+        //                         //validate input and generate correct values
+        //
+        //                         //generate the value
+        //                         const td = convertFEtoBETransaction(newTransactionData);
+        //                         console.log(td);
+        //                         //send to back end
+        //                         const response = await StockTransactionAPI.postStockTransactions(td);
+        //                         if (response.status === APIStatus.FAIL) {
+        //                             console.error('Failed to create transaction: ' + response.data);
+        //                             return;
+        //                         }
+        //
+        //                         //set the id of the transaction - assume only 1
+        //                         td.id = response.data[0];
+        //                         //parse response and append to list
+        //                         let newArray: TransactionData[] = [...transactionData];
+        //                         newArray.unshift(convertBEtoFETransaction(td));
+        //                         setTransactionData(processTransactionData(newArray));
+        //                         setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
+        //                     }}
+        //                     onEdit={(index: number) => {
+        //                         console.log('onEdit icon');
+        //                         let newTransactionListItems = [...transactionData];
+        //                         newTransactionListItems[index].status = ComponentStatus.EDIT;
+        //                         setTransactionData(newTransactionListItems);
+        //                     }}
+        //                     onDelete={(index: number) => {
+        //                         console.log('onDelete icon');
+        //                         let newTransactionListItems = [...transactionData];
+        //                         newTransactionListItems[index].status = ComponentStatus.DELETE;
+        //                         setTransactionData(newTransactionListItems);
+        //                     }}
+        //                 >
+        //                 </ListContainer>
+        //             </div>
+        //         </div>
+        //     </SectionContainer>
+        //     <Modal
+        //         isOpen={isOpenNewTrackedStock}
+        //         setIsOpen={setIsOpenNewTrackedStock}
+        //     >
+        //         <h3>Track New Stock</h3>
+        //         <FilterableSelect
+        //             queryFn={async (args: string) => {
+        //
+        //                 const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
+        //                 //TODO: handle the fail state
+        //                 return response.data.map((data: StockData): FilterableSelectData => {
+        //
+        //                     return ({
+        //                         label: data.name,
+        //                         value: data.id.toString(),
+        //                         subtext: data.ticker_no
+        //                     } as FilterableSelectData);
+        //                 });
+        //             }}
+        //             onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
+        //         />
+        //         <div>Name: {newTrackedStock?.label}</div>
+        //         <div>Ticker: {newTrackedStock?.subtext}</div>
+        //         <Button onClick={async () => {
+        //
+        //             if (!newTrackedStock) return;
+        //             if (!newTrackedStock.value) return;
+        //
+        //             const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
+        //
+        //             if (result.status === APIStatus.FAIL) {
+        //                 //TODO: handle fail case
+        //             }
+        //
+        //             if (result.status === APIStatus.SUCCESS) {
+        //                 //learn something new everyday: can provide usestate with function
+        //                 setHasNewTrackedStockCreated(prevState => prevState + 1);
+        //                 setIsOpenNewTrackedStock(false);
+        //             }
+        //         }}>Save</Button>
+        //     </Modal>
+        //     <Modal
+        //         isOpen={isOpenUntrackStock}
+        //         setIsOpen={setIsOpenUntrackStock}
+        //     >
+        //         <h3>Untrack Stock: {untrackStockRef.current >= 0 ? stockData[untrackStockRef.current].ticker_no : ''}</h3>
+        //         <p>Are you sure?</p>
+        //         <Button onClick={async () => {
+        //
+        //             //should never happen? no need failsafe?
+        //             if (!stockData[untrackStockRef.current]) return;
+        //             if (!stockData[untrackStockRef.current].id) return;
+        //
+        //             const result = await StockAPI.setUntrackedStock(Number(stockData[untrackStockRef.current].id));
+        //
+        //             if (result.status === APIStatus.FAIL) {
+        //                 //TODO: handle fail case
+        //             }
+        //
+        //             if (result.status === APIStatus.SUCCESS) {
+        //                 untrackStockRef.current = -1;
+        //                 setIsOpenUntrackStock(false);
+        //                 setHasNewTrackedStockCreated(prevState => prevState + 1);
+        //             }
+        //         }}>Delete</Button>
+        //     </Modal>
+        // </div>
     );
 }
 
