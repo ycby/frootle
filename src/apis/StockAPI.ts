@@ -1,7 +1,7 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {StockData} from "#root/src/routes/portfolio-diary/types.ts";
 
-const baseUrl = 'https://localhost:3000/stock';
+const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/stock`;
 
 const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<StockData[]>> => {
 

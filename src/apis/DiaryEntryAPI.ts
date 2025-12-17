@@ -1,7 +1,7 @@
 import {DiaryEntryBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 
-const baseUrl = 'https://localhost:3000/diary-entry';
+const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/diary-entry`;
 
 const getDiaryEntries = async (stockId: number): Promise<APIResponse<DiaryEntryBE[]>> => {
 

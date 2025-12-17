@@ -42,7 +42,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
             preview = `${quantityNum ? quantityNum : 'QTY'} @ ${quantityNum && amtWOFeeNum ? (amtWOFeeNum / quantityNum).toFixed(2) : 'PPS'} + ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
             break;
         case TransactionType.CASH_DIVIDEND:
-            preview = `${amtWFeeNum ? amtWFeeNum.toFixed(2) : 'AMT'} - ${amtWFeeNum && amtWOFeeNum ? (amtWFeeNum - amtWOFeeNum).toFixed(2) : 'FEE'}`;
+            preview = `${amtWFeeNum ? amtWFeeNum.toFixed(2) : 'AMT'} - ${amtWFeeNum && amtWOFeeNum ? (amtWOFeeNum - amtWFeeNum).toFixed(2) : 'FEE'}`;
             break;
         default:
             preview = `Select a transaction type`;
