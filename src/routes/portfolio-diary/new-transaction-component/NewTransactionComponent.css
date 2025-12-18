@@ -1,73 +1,7 @@
-.new-transaction-component {
-    display: flex;
-    flex-direction: column;
-    padding: 0 0.5em;
-}
-
-.new-transaction-component__item-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5em 0;
-    gap: 20px;
-}
-
-.new-transaction-component__items {
-    padding: 1em 0;
-}
-
 .new-transaction-component__preview {
     border-top: 1px solid #252422;
     border-bottom: 1px solid #252422;
     padding: 1em 0;
-}
-
-.new-transaction-component__item-input {
-    display: flex;
-    flex: 1;
-    min-width: 60px;
-    max-width: 80px;
-    text-align: right;
-    justify-content: end;
-}
-
-.new-transaction-component [type=number] {
-    -moz-appearance: textfield;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.radio-button-group {
-    position: relative;
-    display: flex;
-    flex: 1;
-    padding: 0 2px;
-}
-
-.radio-button-group input {
-    position: absolute;
-    display: block;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: 1px solid black;
-    border-right: none;
-    padding: 0;
-    margin: 0;
-}
-
-.radio-button-group:last-child {
-    border-right: 1px solid black;
-}
-
-.radio-button-group.selected {
-    background-color: #eeeeee;
+    margin-top: 2rem;
+    text-align: center;
 }

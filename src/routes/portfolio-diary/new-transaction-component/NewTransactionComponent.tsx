@@ -10,6 +10,8 @@ import {
 } from "#root/src/types.ts";
 import {capitaliseWord, replaceUndescoreWithSpace} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {NewTransactionInputs} from "#root/src/routes/portfolio-diary/types.ts";
+import {Col, Form, Row} from 'react-bootstrap';
+import Container from "react-bootstrap/Container";
 
 const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
 
@@ -49,110 +51,102 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
     }
 
     return(
-        <div className='new-transaction-component'>
-            <div className='new-transaction-component__items'>
-                <div className='new-transaction-component__item-container'>
-                    <label htmlFor={transactionDateId}>Date</label>
-                    <div className='new-transaction-component__item-input'>
-                        <input
-                            type='date'
-                            id={transactionDateId}
-                            name='transactionDate'
-                            value={sourceObject.transactionDate}
-                            onChange={(e) => {
-                                updateSource({...sourceObject, transactionDate: e.target.value});
-                            }}
-                        />
-                    </div>
-                </div>
-                <div className='new-transaction-component__item-container'>
-                    <label htmlFor={transactionTypeId}>Type</label>
-                    <select
-                        id={transactionTypeId}
-                        name="type"
-                        value={sourceObject.type}
-                        onChange={(e) => {
+        <>
+            <Container fluid>
+                <Row lg={2} sm={1} className='gy-3'>
+                    <Col>
+                        <Form.Group controlId={transactionTypeId}>
+                            <Form.Label>Type</Form.Label>
+                            <Form.Select
+                                value={sourceObject.type}
+                                onChange={(e) => {
 
-                            //initiate dividend value with cash first
-                            const selectedValue = e.target.value as TransactionTypeKeys;
-                            updateSource({
-                                ...sourceObject,
-                                type: selectedValue
-                            });
-                        }}
-                    >
-                        {generateTypeOptions(transactionTypeId)}
-                    </select>
-                </div>
-                <div className='new-transaction-component__item-container'>
-                    <label htmlFor={amtWFeeId}>Amt w/ Fee</label>
-                    <div className='new-transaction-component__item-input'>
-                        <NumberInput
-                            id={amtWFeeId}
-                            type='currency'
-                            name='totalAmountWFee'
-                            value={sourceObject.amtWFee}
-                            onChange={(newValue) => {
-                                updateSource({...sourceObject, amtWFee: newValue});
-                            }}
-                        />
-                    </div>
-                </div>
-                <div className='new-transaction-component__item-container'>
-                    <label htmlFor={amtWOFeeId}>Amt w/o Fee</label>
-                    <div className='new-transaction-component__item-input'>
-                        <NumberInput
-                            id={amtWOFeeId}
-                            type='currency'
-                            name='totalAmountWOFee'
-                            value={sourceObject.amtWOFee}
-                            onChange={(newValue) =>  {
-                                updateSource({...sourceObject, amtWOFee: newValue});
-                            }}
-                        />
-                    </div>
-                </div>
-                <div
-                    className={`new-transaction-component__item-container`}
-                    style={sourceObject.type === 'cash_dividend' ? {display: 'none'} : {}}
-                >
-                    <label htmlFor={quantityId}>Quantity</label>
-                    <div className='new-transaction-component__item-input'>
-                        <NumberInput
-                            id={quantityId}
-                            name='quantity'
-                            value={sourceObject.quantity}
-                            onChange={(newValue) => {
-                                updateSource({...sourceObject, quantity: newValue});
-                            }}
-                            type='integer'
-                        />
-                    </div>
-                </div>
-                <div className='new-transaction-component__item-container'>
-                    <label htmlFor={currencyId}>Currency</label>
-                    <div className='new-transaction-component__item-input'>
-                        <select
-                            id={currencyId}
-                            name="currency"
-                            value={sourceObject.currency}
-                            onChange={(e) => {
+                                    //initiate dividend value with cash first
+                                    const selectedValue = e.target.value as TransactionTypeKeys;
+                                    updateSource({
+                                        ...sourceObject,
+                                        type: selectedValue
+                                    });
+                                }}
+                            >
+                                {generateTypeOptions(transactionTypeId)}
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId={transactionDateId}>
+                            <Form.Label>Date</Form.Label>
+                            <Form.Control
+                                type='date'
+                                value={sourceObject.transactionDate}
+                                onChange={(e) => {
+                                    updateSource({...sourceObject, transactionDate: e.target.value});
+                                }}
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId={amtWFeeId}>
+                            <Form.Label>Amt w/ Fee</Form.Label>
+                            <NumberInput
+                                type='currency'
+                                value={sourceObject.amtWFee}
+                                onChange={(newValue) => {
+                                    updateSource({...sourceObject, amtWFee: newValue});
+                                }}
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId={amtWOFeeId}>
+                            <Form.Label>Amt w/o Fee</Form.Label>
+                            <NumberInput
+                                type='currency'
+                                value={sourceObject.amtWOFee}
+                                onChange={(newValue) =>  {
+                                    updateSource({...sourceObject, amtWOFee: newValue});
+                                }}
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group
+                            controlId={quantityId}
+                            style={sourceObject.type === 'cash_dividend' ? {display: 'none'} : {}}
+                        >
+                            <Form.Label>Quantity</Form.Label>
+                            <NumberInput
+                                value={sourceObject.quantity}
+                                onChange={(newValue) => {
+                                    updateSource({...sourceObject, quantity: newValue});
+                                }}
+                                type='integer'
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId={currencyId}>
+                            <Form.Label>Currency</Form.Label>
+                            <Form.Select
+                                value={sourceObject.currency}
+                                onChange={(e) => {
 
-                                updateSource({...sourceObject, currency: e.target.value as CurrencyKeys});
-                            }}>
-                            {
-                                Object.values(Currency).map((currency: CurrencyKeys) => {
-                                    return (<option key={`${currencyId}-${currency}`} value={currency}>{currency}</option>)
-                                })
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
+                                    updateSource({...sourceObject, currency: e.target.value as CurrencyKeys});
+                                }}>
+                                {
+                                    Object.values(Currency).map((currency: CurrencyKeys) => {
+                                        return (<option key={`${currencyId}-${currency}`} value={currency}>{currency}</option>)
+                                    })
+                                }
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                </Row>
+            </Container>
             <div className='new-transaction-component__preview'>
                 {preview}
             </div>
-        </div>
+        </>
     );
 }
 

@@ -1,8 +1,8 @@
+import { Form } from 'react-bootstrap';
 import './NumberInput.css';
 
 type NumberInputProps = {
     id?: string,
-    name: string,
     value: string | null,
     onChange: (value: string) => void,
     type: string
@@ -12,7 +12,6 @@ const NumberInput = (props:NumberInputProps) => {
 
     const {
         id,
-        name,
         value,
         onChange,
         type
@@ -34,11 +33,10 @@ const NumberInput = (props:NumberInputProps) => {
     }
 
     return (
-        <input
+        <Form.Control
             id={id}
             className='number-input'
             type='text'
-            name={name}
             value={valueString}
             onChange={(e) => {
 

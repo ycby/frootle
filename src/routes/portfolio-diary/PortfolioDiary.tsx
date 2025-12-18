@@ -31,8 +31,6 @@ import * as Stock from "#root/src/apis/StockAPI.ts";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import Button from "#root/src/helpers/button/Button.tsx";
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Card from "react-bootstrap/Card";
 import {Form, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
@@ -67,42 +65,6 @@ const exampleStocks: StockDataContainerItem[] = [
     }
 ]
 
-const exampleTransactions: TransactionData[] = [
-    {
-        id: 1,
-        stockId: 1,
-        amount: 100,
-        type: 'buy',
-        amountPerShare: 10,
-        quantity: 5,
-        fee: 0.1,
-        transactionDate: new Date(2025, 1, 1),
-        currency: 'HKD',
-    },
-    {
-        id: 2,
-        stockId: 1,
-        amount: 200,
-        type: 'scrip_dividend',
-        amountPerShare: 1,
-        quantity: 5,
-        fee: 0.1,
-        transactionDate: new Date(2025, 4, 13),
-        currency: "HKD",
-    },
-    {
-        id: 3,
-        stockId: 1,
-        amount: 300,
-        type: 'sell',
-        amountPerShare: 10,
-        quantity: 5,
-        fee: 0.1,
-        transactionDate: new Date(2025, 6, 21),
-        currency: 'HKD',
-    }
-]
-
 const exampleDiaryEntry: DiaryEntryData[] = [
     {
         id: 1,
@@ -130,8 +92,6 @@ const exampleDiaryEntry: DiaryEntryData[] = [
 const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
-    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
-    const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
@@ -140,7 +100,6 @@ const PortfolioDiary = () => {
 
     const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
 
-    const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData>();
     //use ref for performance
     const untrackStockRef: MutableRefObject<number> = useRef(-1);
     const [hasNewTrackedStockCreated, setHasNewTrackedStockCreated] = useState<number>(0);
@@ -165,43 +124,11 @@ const PortfolioDiary = () => {
                 return {...data, title: data.ticker_no}
             });
 
-            let newCurrentStockIndex: number = 0;
-            if (newTrackedStock) {
-                newCurrentStockIndex = processedData.findIndex((element) => element.id === Number(newTrackedStock.value));
-            }
-
             setStockData(processedData);
-            setCurrentStockIndex(newCurrentStockIndex);
         }
 
         getTrackedStocks();
     }, [hasNewTrackedStockCreated]);
-
-    useEffect(() => {
-
-        //TODO: fetch transaction data for selected stock data
-        //skip while making templates
-        const getTransactions = async () => {
-
-            const response: APIResponse<TransactionDataBE[]> = await StockTransactionAPI.getStockTransactions(stockData[currentStockIndex].id);
-
-            //TODO: make a mapping function for backend objects to front end
-            if (response.status === APIStatus.SUCCESS) {
-
-                const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFETransaction(data));
-
-                const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData);
-                setTransactionData(transactionDataLineItems);
-            }//Handle if failed to retrieve
-        }
-
-        if (stockData && stockData[currentStockIndex] && currentStockIndex >= 0 && currentStockIndex < stockData.length) {
-
-            getTransactions();
-            setNewTransactionData({...resetNewTransactionData(), stockId: stockData[currentStockIndex].id});
-            setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData[currentStockIndex].id});
-        }
-    }, [currentStockIndex, stockData]);
 
     useEffect(() => {
 
@@ -582,26 +509,6 @@ const PortfolioDiary = () => {
     );
 }
 
-const processTransactionData: (transactionData: TransactionData[]) => TransactionDataListItem[] = (transactionData: TransactionData[]): TransactionDataListItem[] => {
-
-    return transactionData.map((element: TransactionData, index: number): TransactionDataListItem => {
-        return ({
-            ...element,
-            index: index,
-            status: ComponentStatus.VIEW as ComponentStatusKeys,
-            editObject: {
-                stockId: element.stockId,
-                type: element.type,
-                amtWFee: (Number(element.amount ?? 0) + Number(element.fee ?? 0)).toFixed(2),
-                amtWOFee: (element.amount ?? 0).toString(),
-                quantity: (element.quantity ?? 0).toString(),
-                transactionDate: dateToStringConverter(element.transactionDate),
-                currency: element.currency
-            }
-        }) as TransactionDataListItem;
-    });
-}
-
 const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntryData[]): DiaryEntryListItem[] => {
 
     return diaryEntries.map((element: DiaryEntryData, index: number) => {
@@ -654,19 +561,6 @@ const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: Diar
             postedDate: diaryEntryData.postedDate,
         }
     } as DiaryEntryListItem);
-}
-
-const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionInputs => {
-
-    return {
-        stockId: 0,
-        type: 'buy',
-        transactionDate: '',
-        amtWOFee: '',
-        amtWFee: '',
-        quantity: '',
-        currency: 'HKD'
-    }
 }
 
 const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
