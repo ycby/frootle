@@ -16,9 +16,11 @@ import {
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {Button, Modal, Table} from "react-bootstrap";
+import {Button, Modal, Tab, Table, Tabs} from "react-bootstrap";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+import {Chart, Point, registerables} from "chart.js";
+import {Line} from "react-chartjs-2";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -65,6 +67,8 @@ const PortfolioPage = () => {
     const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
+    const [dataPoints, setDataPoints] = useState<Point[]>([]);
+
     const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
 
     useEffect(() => {
@@ -110,6 +114,16 @@ const PortfolioPage = () => {
         setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
     }, [stockData]);
 
+    useEffect(() => {
+
+        setDataPoints(getHoldingsOverTimeSeries(transactionData));
+    }, [transactionData]);
+
+    Chart.register(...registerables,
+        {
+            id: 'vertical-line'
+        }
+    );
     return (
         <>
             {/*<Alert TODO: MOVE TO USE CONTEXT*/}
@@ -121,92 +135,126 @@ const PortfolioPage = () => {
             {/*>*/}
             {/*    Stock Data not loaded properly! Please refresh!*/}
             {/*</Alert>*/}
+
             <Container fluid>
                 <h1>Portfolio Page - {params.id}</h1>
+                <Tabs defaultActiveKey='transactions' className="mb-3">
+                    <Tab eventKey='transactions' title='Transactions'>
+                        <Line
+                            data={{
+                                datasets: [
+                                    {
+                                        label: 'Quantity',
+                                        data: dataPoints
+                                    }
+                                ]
+                            }}
+                            options={{
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time: {
+                                            unit: 'month',
+                                            tooltipFormat: 'dd-MM-yyyy',
+                                            displayFormats: {
+                                                month: 'MM-yyyy'
+                                            }
+                                        }
+                                    },
+                                    y: {
+                                        min: 0,
+                                    }
+                                }
+                            }}
+                        />
+                        <Button onClick={() => {
 
-                <Button onClick={() => {
+                            if (!stockData?.id) {
 
-                    if (!stockData?.id) {
-
-                        // setShowStockNotLoadedAlert(true);
-                        return;
-                    }
-
-                    setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
-                    setShowNewTransactionModal(true)
-                }}>
-                    New +
-                </Button>
-                {transactionData && <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Type</th>
-                            <th>Quantity</th>
-                            <th>Amount</th>
-                            <th>Fee</th>
-                            <th>Transaction Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {
-                        transactionData.map((element, index) => {
-
-                            return (
-                                <tr key={element.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{element.type}</td>
-                                    <td>{element.quantity}</td>
-                                    <td>{element.amount}</td>
-                                    <td>{element.fee}</td>
-                                    <td>{dateToStringConverter(element.transactionDate)}</td>
-                                </tr>
-                            );
-                        })
-                    }
-                    </tbody>
-                </Table>}
-                <Modal show={showNewTransactionModal} onHide={() => setShowNewTransactionModal(false)}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Add new transaction</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant='secondary' onClick={() => setShowNewTransactionModal(false)}>
-                            Close
-                        </Button>
-                        <Button variant='primary' onClick={async () => {
-
-                            //validate input and generate correct values
-
-                            //generate the value
-                            const td = convertFEtoBETransaction(newTransactionData);
-                            console.log(td);
-                            //send to back end
-                            const response = await StockTransactionAPI.postStockTransactions(td);
-                            if (response.status === APIStatus.FAIL) {
-                                console.error('Failed to create transaction: ' + response.data);
+                                // setShowStockNotLoadedAlert(true);
                                 return;
                             }
 
-                            //set the id of the transaction - assume only 1
-                            td.id = response.data[0];
-                            //parse response and append to list
-                            let newArray: TransactionData[] = [...transactionData];
-                            newArray.unshift(convertBEtoFETransaction(td));
-                            setTransactionData(processTransactionData(newArray));
-                            //just clear extra here in case
-                            if (stockData?.id) setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
-
-                            setShowNewTransactionModal(false);
+                            setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
+                            setShowNewTransactionModal(true)
                         }}>
-                            Save
+                            New +
                         </Button>
-                    </Modal.Footer>
-                </Modal>
+                        {transactionData && <Table striped bordered hover>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                                <th>Fee</th>
+                                <th>Transaction Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                transactionData.map((element, index) => {
+
+                                    return (
+                                        <tr key={element.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{element.type}</td>
+                                            <td>{element.quantity}</td>
+                                            <td>{element.amount}</td>
+                                            <td>{element.fee}</td>
+                                            <td>{dateToStringConverter(element.transactionDate)}</td>
+                                        </tr>
+                                    );
+                                })
+                            }
+                            </tbody>
+                        </Table>}
+                    </Tab>
+                    <Tab eventKey='diary' title='Diary'>
+
+                    </Tab>
+                </Tabs>
             </Container>
+            <Modal show={showNewTransactionModal} onHide={() => setShowNewTransactionModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add new transaction</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='secondary' onClick={() => setShowNewTransactionModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant='primary' onClick={async () => {
+
+                        //validate input and generate correct values
+
+                        //generate the value
+                        const td = convertFEtoBETransaction(newTransactionData);
+                        console.log(td);
+                        //send to back end
+                        const response = await StockTransactionAPI.postStockTransactions(td);
+                        if (response.status === APIStatus.FAIL) {
+                            console.error('Failed to create transaction: ' + response.data);
+                            return;
+                        }
+
+                        //set the id of the transaction - assume only 1
+                        td.id = response.data[0];
+                        //parse response and append to list
+                        let newArray: TransactionData[] = [...transactionData];
+                        newArray.unshift(convertBEtoFETransaction(td));
+                        setTransactionData(processTransactionData(newArray));
+                        //just clear extra here in case
+                        if (stockData?.id) setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
+
+                        setShowNewTransactionModal(false);
+                    }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }
@@ -242,6 +290,33 @@ const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionIn
         quantity: '',
         currency: 'HKD'
     }
+}
+
+const getHoldingsOverTimeSeries = (transactionData: TransactionData[]): Point[] => {
+
+    let accumulator: number = 0;
+
+    return transactionData.reverse().map((element): Point => {
+
+        switch (element.type) {
+            case 'buy':
+                accumulator += element.quantity;
+                break;
+            case 'sell':
+                accumulator -= element.quantity;
+                break;
+            case 'scrip_dividend':
+                accumulator += element.quantity;
+                break;
+            default:
+                break;
+        }
+
+        return ({
+            x: element.transactionDate.valueOf(),
+            y: accumulator
+        });
+    });
 }
 
 export {
