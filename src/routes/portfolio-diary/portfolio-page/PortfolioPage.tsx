@@ -3,6 +3,7 @@ import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {APIResponse, APIStatus, ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 import {
+    DiaryEntryBE, DiaryEntryData,
     NewTransactionInputs,
     StockData,
     TransactionData,
@@ -11,16 +12,20 @@ import {
 import * as StockTransactionAPI from "#root/src/apis/StockTransactionAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {
-    convertBEtoFETransaction,
+    convertBEtoFEDiaryEntry,
+    convertBEtoFETransaction, convertFEtoBEDiaryEntry,
     convertFEtoBETransaction
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
-import {TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
+import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {Button, Modal, Tab, Table, Tabs} from "react-bootstrap";
+import {Button, Modal, Stack, Tab, Table, Tabs} from "react-bootstrap";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 import {Chart, Point, registerables} from "chart.js";
 import {Line} from "react-chartjs-2";
+import Card from "react-bootstrap/Card";
+import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
+import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -58,6 +63,30 @@ const exampleTransactions: TransactionData[] = [
     }
 ];
 
+const exampleDiaryEntry: DiaryEntryData[] = [
+    {
+        id: 1,
+        stockId: 1,
+        title: 'Initial thoughts',
+        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
+        postedDate: new Date(2025, 1, 1)
+    },
+    {
+        id: 2,
+        stockId: 1,
+        title: 'Update 1',
+        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
+        postedDate: new Date(2025, 2, 1)
+    },
+    {
+        id: 3,
+        stockId: 1,
+        title: 'Update 2',
+        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
+        postedDate: new Date(2025, 3, 1)
+    }
+];
+
 const PortfolioPage = () => {
 
     let params = useParams();
@@ -67,9 +96,13 @@ const PortfolioPage = () => {
     const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
+    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
+    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
+
     const [dataPoints, setDataPoints] = useState<Point[]>([]);
 
     const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
+    const [showNewDiaryEntryModal, setShowNewDiaryEntryModal] = useState(false);
 
     useEffect(() => {
 
@@ -112,6 +145,26 @@ const PortfolioPage = () => {
 
         getTransactions();
         setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
+    }, [stockData]);
+
+    useEffect(() => {
+
+        if (!stockData) return;
+
+        const getDiaryEntries = async () => {
+
+            const response: APIResponse<DiaryEntryBE[]> = await DiaryEntryAPI.getDiaryEntries(stockData.id);
+
+            if (response.status === APIStatus.SUCCESS) {
+
+                const diaryEntryData: DiaryEntryData[] = response.data.map((data: DiaryEntryBE): DiaryEntryData => convertBEtoFEDiaryEntry(data));
+
+                const diaryEntryLineItems: DiaryEntryListItem[] = processDiaryEntries(diaryEntryData);
+                setDiaryEntries(diaryEntryLineItems);
+            }//Handle if failed to retrieve
+        }
+
+        getDiaryEntries();
     }, [stockData]);
 
     useEffect(() => {
@@ -211,7 +264,41 @@ const PortfolioPage = () => {
                         </Table>}
                     </Tab>
                     <Tab eventKey='diary' title='Diary'>
+                        <Button onClick={() => {
 
+                            if (!stockData?.id) {
+
+                                // setShowStockNotLoadedAlert(true);
+                                return;
+                            }
+
+                            setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
+                            setShowNewDiaryEntryModal(true)
+                        }}>
+                            New +
+                        </Button>
+                        <Stack gap={3}>
+                            {diaryEntries.map((element) => {
+
+                                return (
+                                    <Card key={element.id}>
+                                        <Card.Header className='d-flex justify-content-between'>
+                                            <div>
+                                                {element.title}
+                                            </div>
+                                            <div className='text-muted'>
+                                                {dateToStringConverter(element.postedDate)}
+                                            </div>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            <Card.Text>
+                                                {element.content}
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                );
+                            })}
+                        </Stack>
                     </Tab>
                 </Tabs>
             </Container>
@@ -255,6 +342,47 @@ const PortfolioPage = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <Modal show={showNewDiaryEntryModal} onHide={() => setShowNewDiaryEntryModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add new diary entry</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='secondary' onClick={() => setShowNewDiaryEntryModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant='primary' onClick={async () => {
+
+                        //validate input and generate correct values
+
+                        //generate the value
+                        const de = convertFEtoBEDiaryEntry(newDiaryEntry);
+                        console.log(de);
+                        //send to back end
+                        const response = await DiaryEntryAPI.postDiaryEntries(de);
+
+                        if (response.status === APIStatus.FAIL) {
+                            console.error('Failed to create diary entry: ' + response.data);
+                            return;
+                        }
+
+                        //set the id of the transaction - assume only 1
+                        de.id = response.data[0];
+                        //parse response and append to list
+                        let newArray: DiaryEntryData[] = [...diaryEntries];
+                        newArray.unshift(convertBEtoFEDiaryEntry(de));
+                        setDiaryEntries(processDiaryEntries(newArray));
+                        //just clear extra here in case
+                        if (stockData?.id) setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
+
+                        setShowNewDiaryEntryModal(false);
+                    }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }
@@ -289,6 +417,35 @@ const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionIn
         amtWFee: '',
         quantity: '',
         currency: 'HKD'
+    }
+}
+
+const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntryData[]): DiaryEntryListItem[] => {
+
+    return diaryEntries.map((element: DiaryEntryData, index: number) => {
+
+        return {
+            ...element,
+            index: index,
+            status: ComponentStatus.VIEW as ComponentStatusKeys,
+            editObject: {
+                id: element.id,
+                stockId: element.stockId,
+                title: element.title,
+                content: element.content,
+                postedDate: element.postedDate,
+            }
+        }
+    });
+}
+
+const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
+
+    return {
+        stockId: 0,
+        title: '',
+        content: '',
+        postedDate: new Date(),
     }
 }
 

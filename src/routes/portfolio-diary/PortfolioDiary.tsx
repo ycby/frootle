@@ -1,35 +1,17 @@
 import './PortfolioDiary.css';
-import SectionContainer, {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
-import {ListContainer, ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
-import TransactionComponent from "#root/src/routes/portfolio-diary/transaction-component/TransactionComponent.tsx";
+import {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
+import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
-import {
-    convertBEtoFETransaction,
-    convertFEtoBETransaction,
-    convertFEtoBEDiaryEntry,
-    convertBEtoFEDiaryEntry
-} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {
     NewTransactionInputs,
     TransactionData,
-    TransactionDataBE,
     DiaryEntryData,
-    StockData, DiaryEntryBE
+    StockData
 } from "#root/src/routes/portfolio-diary/types.ts";
-import NewTransactionComponent
-    from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
+
 import {APIStatus, ComponentStatus, ComponentStatusKeys, APIResponse} from "#root/src/types.ts";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import * as StockTransactionAPI from '#root/src/apis/StockTransactionAPI.ts';
-import DiaryEntry from "#root/src/routes/portfolio-diary/diary-entry/DiaryEntry.tsx";
-import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
-import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
-import Modal from "#root/src/helpers/modal/Modal.tsx";
-import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import * as Stock from "#root/src/apis/StockAPI.ts";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
-import Button from "#root/src/helpers/button/Button.tsx";
 import Container from 'react-bootstrap/Container';
 import Card from "react-bootstrap/Card";
 import {Form, Stack} from "react-bootstrap";
@@ -65,43 +47,13 @@ const exampleStocks: StockDataContainerItem[] = [
     }
 ]
 
-const exampleDiaryEntry: DiaryEntryData[] = [
-    {
-        id: 1,
-        stockId: 1,
-        title: 'Initial thoughts',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 1, 1)
-    },
-    {
-        id: 2,
-        stockId: 1,
-        title: 'Update 1',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 2, 1)
-    },
-    {
-        id: 3,
-        stockId: 1,
-        title: 'Update 2',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 3, 1)
-    }
-]
-
 const PortfolioDiary = () => {
 
     const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
 
-    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
-    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
-
     const [searchTerm, setSearchTerm] = useState('');
 
-    const [currentStockIndex, setCurrentStockIndex] = useState<number>(0);
-
     //use ref for performance
-    const untrackStockRef: MutableRefObject<number> = useRef(-1);
     const [hasNewTrackedStockCreated, setHasNewTrackedStockCreated] = useState<number>(0);
 
     const [isOpenNewTrackedStock, setIsOpenNewTrackedStock] = useState<boolean>(false);
@@ -129,27 +81,6 @@ const PortfolioDiary = () => {
 
         getTrackedStocks();
     }, [hasNewTrackedStockCreated]);
-
-    useEffect(() => {
-
-        const getDiaryEntries = async () => {
-
-            const response: APIResponse<DiaryEntryBE[]> = await DiaryEntryAPI.getDiaryEntries(stockData[currentStockIndex].id);
-
-            if (response.status === APIStatus.SUCCESS) {
-
-                const diaryEntryData: DiaryEntryData[] = response.data.map((data: DiaryEntryBE): DiaryEntryData => convertBEtoFEDiaryEntry(data));
-
-                const diaryEntryLineItems: DiaryEntryListItem[] = processDiaryEntries(diaryEntryData);
-                setDiaryEntries(diaryEntryLineItems);
-            }//Handle if failed to retrieve
-        }
-
-        if (stockData && stockData[currentStockIndex]) {
-
-            getDiaryEntries();
-        }
-    }, [currentStockIndex, stockData]);
 
     let navigate = useNavigate();
 
@@ -509,25 +440,6 @@ const PortfolioDiary = () => {
     );
 }
 
-const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntryData[]): DiaryEntryListItem[] => {
-
-    return diaryEntries.map((element: DiaryEntryData, index: number) => {
-
-        return {
-            ...element,
-            index: index,
-            status: ComponentStatus.VIEW as ComponentStatusKeys,
-            editObject: {
-                id: element.id,
-                stockId: element.stockId,
-                title: element.title,
-                content: element.content,
-                postedDate: element.postedDate,
-            }
-        }
-    });
-}
-
 const replaceTransactionData: (original: TransactionDataListItem, transactionData: TransactionData) => TransactionDataListItem = (original: TransactionDataListItem, transactionData: TransactionData): TransactionDataListItem => {
 
     return ({
@@ -563,15 +475,7 @@ const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: Diar
     } as DiaryEntryListItem);
 }
 
-const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
 
-    return {
-        stockId: 0,
-        title: '',
-        content: '',
-        postedDate: new Date(),
-    }
-}
 
 export {
     PortfolioDiary

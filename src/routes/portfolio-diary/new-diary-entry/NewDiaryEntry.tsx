@@ -3,6 +3,7 @@ import {DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
 import {NewItemView} from "#root/src/types.ts";
 
 import './NewDiaryEntry.css';
+import {Form, Stack} from "react-bootstrap";
 
 const NewDiaryEntry = (props: NewItemView<DiaryEntryData>) => {
 
@@ -15,30 +16,32 @@ const NewDiaryEntry = (props: NewItemView<DiaryEntryData>) => {
     const contentId = useId();
 
     return (
-        <div className='new-diary-entry__container'>
-            <input
-                className='new-diary-entry__input new-diary-entry__title'
-                type='text'
-                id={titleId}
-                name='title'
-                placeholder='Title'
-                value={sourceObject.title}
-                onChange={(e) => {
-                    updateSource({...sourceObject, title: e.target.value});
-                }}
-            />
-            <textarea
-                className='new-diary-entry__input'
-                id={contentId}
-                name='content'
-                placeholder={`What's the update?`}
-                rows={8}
-                value={sourceObject.content}
-                onChange={(e) => {
-                    updateSource({...sourceObject, content: e.target.value});
-                }}
-            />
-        </div>
+        <Stack gap={3}>
+            <Form.Group controlId={titleId}>
+                <Form.Label>Title</Form.Label>
+                <Form.Control
+                    type='text'
+                    placeholder='Title'
+                    value={sourceObject.title}
+                    onChange={(e) => {
+                        updateSource({...sourceObject, title: e.target.value});
+                    }}
+                />
+            </Form.Group>
+            <Form.Group controlId={contentId}>
+                <Form.Label>Content</Form.Label>
+                <Form.Control
+                    type='text'
+                    as='textarea'
+                    rows={4}
+                    placeholder="What's the update?"
+                    value={sourceObject.content}
+                    onChange={(e) => {
+                        updateSource({...sourceObject, content: e.target.value});
+                    }}
+                />
+            </Form.Group>
+        </Stack>
     );
 }
 
