@@ -19,10 +19,10 @@ export interface TransactionData {
     id?: number,
     stockId: number,
     type: TransactionTypeKeys;
-    amount: number;
-    amountPerShare: number;
+    amount: string;
+    amountPerShare: string;
     quantity: number;
-    fee: number;
+    fee: string;
     transactionDate: Date;
     currency: CurrencyKeys;
 }
@@ -40,6 +40,7 @@ export interface TransactionDataBE {
 }
 
 export interface NewTransactionInputs {
+    id?: number;
     stockId: number;
     type: TransactionTypeKeys;
     amtWFee: string;

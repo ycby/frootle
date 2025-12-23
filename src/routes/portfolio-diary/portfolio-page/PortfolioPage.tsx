@@ -14,7 +14,7 @@ import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {
     convertBEtoFEDiaryEntry,
     convertBEtoFETransaction, convertFEtoBEDiaryEntry,
-    convertFEtoBETransaction
+    convertFEtoBETransaction, convertTransactionToNewTransaction
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
@@ -33,33 +33,33 @@ const exampleTransactions: TransactionData[] = [
     {
         id: 1,
         stockId: 1,
-        amount: 100,
+        amount: "100.00",
         type: 'buy',
-        amountPerShare: 10,
+        amountPerShare: "10.00",
         quantity: 5,
-        fee: 0.1,
+        fee: "0.10",
         transactionDate: new Date(2025, 1, 1),
         currency: 'HKD',
     },
     {
         id: 2,
         stockId: 1,
-        amount: 200,
+        amount: "200.00",
         type: 'scrip_dividend',
-        amountPerShare: 1,
+        amountPerShare: "1.00",
         quantity: 5,
-        fee: 0.1,
+        fee: "0.10",
         transactionDate: new Date(2025, 4, 13),
         currency: "HKD",
     },
     {
         id: 3,
         stockId: 1,
-        amount: 300,
+        amount: "300.00",
         type: 'sell',
-        amountPerShare: 10,
+        amountPerShare: "10.00",
         quantity: 5,
-        fee: 0.1,
+        fee: "0.10",
         transactionDate: new Date(2025, 6, 21),
         currency: 'HKD',
     }
@@ -103,8 +103,8 @@ const PortfolioPage = () => {
 
     const [dataPoints, setDataPoints] = useState<Point[]>([]);
 
-    const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
-    const [showNewDiaryEntryModal, setShowNewDiaryEntryModal] = useState(false);
+    const [showTransactionModal, setShowTransactionModal] = useState(false);
+    const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
     const [showUntrackStockModal, setShowUntrackStockModal] = useState(false);
 
     let navigate = useNavigate();
@@ -143,7 +143,7 @@ const PortfolioPage = () => {
 
                 const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFETransaction(data));
 
-                const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData);
+                const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
                 setTransactionData(transactionDataLineItems);
             }//Handle if failed to retrieve
         }
@@ -242,7 +242,7 @@ const PortfolioPage = () => {
                             }
 
                             setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
-                            setShowNewTransactionModal(true)
+                            setShowTransactionModal(true)
                         }}>
                             New +
                         </Button>
@@ -255,6 +255,7 @@ const PortfolioPage = () => {
                                 <th>Amount</th>
                                 <th>Fee</th>
                                 <th>Transaction Date</th>
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -269,6 +270,17 @@ const PortfolioPage = () => {
                                             <td>{element.amount}</td>
                                             <td>{element.fee}</td>
                                             <td>{dateToStringConverter(element.transactionDate)}</td>
+                                            <td>
+                                                <MdModeEdit
+                                                    role='button'
+                                                    className='me-2'
+                                                    onClick={() => {
+
+                                                        setNewTransactionData(convertTransactionToNewTransaction(element));
+                                                        setShowTransactionModal(true);
+                                                    }}
+                                                />
+                                            </td>
                                         </tr>
                                     );
                                 })
@@ -286,7 +298,7 @@ const PortfolioPage = () => {
                             }
 
                             setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
-                            setShowNewDiaryEntryModal(true)
+                            setShowDiaryEntryModal(true)
                         }}>
                             New +
                         </Button>
@@ -304,21 +316,21 @@ const PortfolioPage = () => {
                                             </div>
                                         </Card.Header>
                                         <Card.Body className='position-relative'>
-                                            <Card.Text>
-                                                <div className='position-absolute top-0 end-0'>
-                                                    <MdModeEdit
-                                                        role='button'
-                                                        className='me-2'
-                                                        onClick={() => {
+                                            <div className='position-absolute top-0 end-0'>
+                                                <MdModeEdit
+                                                    role='button'
+                                                    className='me-2'
+                                                    onClick={() => {
 
                                                         setNewDiaryEntry(element);
-                                                        setShowNewDiaryEntryModal(true);
+                                                        setShowDiaryEntryModal(true);
                                                     }} />
-                                                    <IoMdTrash
-                                                        role='button'
-                                                        className='me-2'
-                                                    />
-                                                </div>
+                                                <IoMdTrash
+                                                    role='button'
+                                                    className='me-2'
+                                                />
+                                            </div>
+                                            <Card.Text>
                                                 {element.content}
                                             </Card.Text>
                                         </Card.Body>
@@ -329,47 +341,51 @@ const PortfolioPage = () => {
                     </Tab>
                 </Tabs>
             </Container>
-            <Modal show={showNewTransactionModal} onHide={() => setShowNewTransactionModal(false)}>
+            <Modal show={showTransactionModal} onHide={() => setShowTransactionModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add new transaction</Modal.Title>
+                    <Modal.Title>{`${newTransactionData.id ? 'Edit' : 'Add new'} transaction`}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <NewTransactionComponent sourceObject={newTransactionData} updateSource={setNewTransactionData} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='secondary' onClick={() => setShowNewTransactionModal(false)}>
+                    <Button variant='secondary' onClick={() => setShowTransactionModal(false)}>
                         Close
                     </Button>
                     <Button variant='primary' onClick={async () => {
-
-                        //validate input and generate correct values
 
                         //generate the value
                         const td = convertFEtoBETransaction(newTransactionData);
                         console.log(td);
                         //send to back end
-                        const response = await StockTransactionAPI.postStockTransactions(td);
+                        const response = td.id ? await StockTransactionAPI.putStockTransaction(td.id, td) : await StockTransactionAPI.postStockTransactions(td);
                         if (response.status === APIStatus.FAIL) {
                             console.error('Failed to create transaction: ' + response.data);
                             return;
                         }
 
                         //set the id of the transaction - assume only 1
-                        td.id = response.data[0];
+                        if (!td?.id) td.id = response.data[0];
                         //parse response and append to list
                         let newArray: TransactionData[] = [...transactionData];
+
+                        //remove by id if exists
+                        const editedIndex = newArray.findIndex(element => element.id === td.id);
+                        if (editedIndex !== -1) newArray.splice(editedIndex, 1);
+
                         newArray.unshift(convertBEtoFETransaction(td));
-                        setTransactionData(processTransactionData(newArray));
+                        setTransactionData(processTransactionData(newArray).sort(transactionSortingFn));
+
                         //just clear extra here in case
                         if (stockData?.id) setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
 
-                        setShowNewTransactionModal(false);
+                        setShowTransactionModal(false);
                     }}>
                         Save
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <Modal show={showNewDiaryEntryModal} onHide={() => setShowNewDiaryEntryModal(false)}>
+            <Modal show={showDiaryEntryModal} onHide={() => setShowDiaryEntryModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{`${newDiaryEntry.id ? 'Edit' : 'Add new'} diary entry`}</Modal.Title>
                 </Modal.Header>
@@ -377,7 +393,7 @@ const PortfolioPage = () => {
                     <NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='secondary' onClick={() => setShowNewDiaryEntryModal(false)}>
+                    <Button variant='secondary' onClick={() => setShowDiaryEntryModal(false)}>
                         Close
                     </Button>
                     <Button variant='primary' onClick={async () => {
@@ -402,17 +418,14 @@ const PortfolioPage = () => {
                         let newArray: DiaryEntryData[] = [...diaryEntries];
 
                         //new items won't impact the array since the id won't be found in the array
-                        if (de.id) {
-
-                            const editedIndex = newArray.findIndex(element => element.id === de.id);
-                            if (editedIndex !== -1) newArray.splice(editedIndex, 1);
-                        }
+                        const editedIndex = newArray.findIndex(element => element.id === de.id);
+                        if (editedIndex !== -1) newArray.splice(editedIndex, 1);
                         newArray.unshift(convertBEtoFEDiaryEntry(de));
-                        setDiaryEntries(processDiaryEntries(newArray).sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime()));
+                        setDiaryEntries(processDiaryEntries(newArray).sort(diaryEntrySortingFn));
                         //just clear extra here in case
                         if (stockData?.id) setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
 
-                        setShowNewDiaryEntryModal(false);
+                        setShowDiaryEntryModal(false);
                     }}>
                         Save
                     </Button>
@@ -498,11 +511,21 @@ const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
     }
 }
 
+const transactionSortingFn: (a: TransactionData, b: TransactionData) => number = (a: TransactionData, b: TransactionData):number => {
+
+    return b.transactionDate.getTime() - a.transactionDate.getTime();
+}
+
+const diaryEntrySortingFn: (a: DiaryEntryData, b: DiaryEntryData) => number = (a: DiaryEntryData, b: DiaryEntryData):number => {
+
+    return b.postedDate.getTime() - a.postedDate.getTime();
+}
+
 const getHoldingsOverTimeSeries = (transactionData: TransactionData[]): Point[] => {
 
     let accumulator: number = 0;
 
-    return transactionData.reverse().map((element): Point => {
+    return transactionData.toReversed().map((element): Point => {
 
         switch (element.type) {
             case 'buy':

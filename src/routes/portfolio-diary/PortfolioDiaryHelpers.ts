@@ -9,7 +9,7 @@ import {TransactionType} from "#root/src/types.ts";
 
 const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
 
-    return {
+    const result: TransactionDataBE = {
         stock_id: sourceObj.stockId,
         type: sourceObj.type,
         amount: Number(sourceObj.amtWOFee),
@@ -19,6 +19,10 @@ const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionD
         transaction_date: sourceObj.transactionDate,
         currency: sourceObj.currency
     };
+
+    if (sourceObj?.id) result.id = sourceObj.id;
+
+    return result;
 }
 
 const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (data: TransactionDataBE): TransactionData => {
@@ -27,10 +31,10 @@ const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (
         id: data.id,
         stockId: data.stock_id,
         type: data.type,
-        amount: data.amount,
+        amount: Number(data.amount).toFixed(2),
         quantity: data.quantity,
-        fee: data.fee,
-        amountPerShare: data.amount_per_share,
+        fee: Number(data.fee).toFixed(2),
+        amountPerShare: Number(data.amount_per_share).toFixed(2),
         transactionDate: new Date(data.transaction_date),
         currency: data.currency,
     };
@@ -50,7 +54,7 @@ const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sou
     return result;
 }
 
-const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData  => {
+const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData => {
 
     return {
         id: sourceObj.id,
@@ -59,6 +63,23 @@ const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sou
         content: sourceObj.content,
         postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1)
     };
+}
+
+const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTransactionInputs = (sourceObj: TransactionData): NewTransactionInputs => {
+
+    const result: NewTransactionInputs = {
+        stockId: sourceObj.stockId,
+        type: sourceObj.type,
+        amtWFee: (Number(sourceObj.amount) + Number(sourceObj.fee)).toFixed(2),
+        amtWOFee: Number(sourceObj.amount).toFixed(2),
+        quantity: sourceObj.quantity.toString(),
+        transactionDate: dateToStringConverter(sourceObj.transactionDate),
+        currency: sourceObj.currency
+    }
+
+    if (sourceObj?.id) result.id = sourceObj.id;
+
+    return result;
 }
 
 const capitaliseWord: (word: string) => string = (word: string): string => {
@@ -76,6 +97,7 @@ export {
     convertBEtoFETransaction,
     convertFEtoBEDiaryEntry,
     convertBEtoFEDiaryEntry,
+    convertTransactionToNewTransaction,
     capitaliseWord,
     replaceUndescoreWithSpace
 }
