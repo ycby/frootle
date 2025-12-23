@@ -3,14 +3,12 @@ import {SectionContainerItem} from "#root/src/helpers/section-container/SectionC
 import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import {useEffect, useState} from "react";
 import {
-    NewTransactionInputs,
     TransactionData,
     DiaryEntryData,
     StockData
 } from "#root/src/routes/portfolio-diary/types.ts";
 
 import {APIStatus, APIResponse} from "#root/src/types.ts";
-import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import Container from 'react-bootstrap/Container';
 import Card from "react-bootstrap/Card";
@@ -20,13 +18,10 @@ import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSe
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
-export type DiaryEntryListItem = ListItem & DiaryEntryData & {
-    editObject: DiaryEntryData;
-};
 
-export type TransactionDataListItem = ListItem & TransactionData & {
-    editObject: NewTransactionInputs;
-};
+export type DiaryEntryListItem = ListItem & DiaryEntryData;
+
+export type TransactionDataListItem = ListItem & TransactionData;
 
 const exampleStocks: StockDataContainerItem[] = [
     {
@@ -186,43 +181,6 @@ const PortfolioDiary = () => {
         </>
     );
 }
-
-const replaceTransactionData: (original: TransactionDataListItem, transactionData: TransactionData) => TransactionDataListItem = (original: TransactionDataListItem, transactionData: TransactionData): TransactionDataListItem => {
-
-    return ({
-        ...transactionData,
-        index: original.index,
-        status: original.status,
-        id: original.id,
-        editObject: {
-            stockId: transactionData.stockId,
-            type: transactionData.type,
-            amtWFee: (transactionData.amount + transactionData.fee).toString(),
-            amtWOFee: (transactionData.amount).toString(),
-            quantity: (transactionData.quantity).toString(),
-            transactionDate: dateToStringConverter(transactionData.transactionDate),
-            currency: transactionData.currency
-        }
-    } as TransactionDataListItem);
-}
-
-const replaceDiaryEntryData: (original: DiaryEntryListItem, diaryEntryData: DiaryEntryData) => DiaryEntryListItem = (original: DiaryEntryListItem, diaryEntryData: DiaryEntryData): DiaryEntryListItem => {
-
-    return ({
-        ...diaryEntryData,
-        index: original.index,
-        status: original.status,
-        id: original.id,
-        editObject: {
-            stockId: diaryEntryData.stockId,
-            title: diaryEntryData.title,
-            content: diaryEntryData.content,
-            postedDate: diaryEntryData.postedDate,
-        }
-    } as DiaryEntryListItem);
-}
-
-
 
 export {
     PortfolioDiary

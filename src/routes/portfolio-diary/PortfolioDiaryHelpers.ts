@@ -38,12 +38,16 @@ const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (
 
 const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sourceObj: DiaryEntryData): DiaryEntryBE  => {
 
-    return {
+    const result: DiaryEntryBE = {
         stock_id: sourceObj.stockId,
         title: sourceObj.title,
         content: sourceObj.content,
         posted_date: dateToStringConverter(sourceObj.postedDate)
     };
+
+    if (sourceObj?.id) result.id = sourceObj.id;
+
+    return result;
 }
 
 const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData  => {

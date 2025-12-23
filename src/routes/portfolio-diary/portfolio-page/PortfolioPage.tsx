@@ -26,6 +26,8 @@ import {Line} from "react-chartjs-2";
 import Card from "react-bootstrap/Card";
 import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
+import {MdModeEdit} from "react-icons/md";
+import {IoMdTrash} from "react-icons/io";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -288,7 +290,7 @@ const PortfolioPage = () => {
                         }}>
                             New +
                         </Button>
-                        <Stack gap={3}>
+                        <Stack gap={3} className='mt-3'>
                             {diaryEntries.map((element) => {
 
                                 return (
@@ -301,8 +303,22 @@ const PortfolioPage = () => {
                                                 {dateToStringConverter(element.postedDate)}
                                             </div>
                                         </Card.Header>
-                                        <Card.Body>
+                                        <Card.Body className='position-relative'>
                                             <Card.Text>
+                                                <div className='position-absolute top-0 end-0'>
+                                                    <MdModeEdit
+                                                        role='button'
+                                                        className='me-2'
+                                                        onClick={() => {
+
+                                                        setNewDiaryEntry(element);
+                                                        setShowNewDiaryEntryModal(true);
+                                                    }} />
+                                                    <IoMdTrash
+                                                        role='button'
+                                                        className='me-2'
+                                                    />
+                                                </div>
                                                 {element.content}
                                             </Card.Text>
                                         </Card.Body>
@@ -355,7 +371,7 @@ const PortfolioPage = () => {
             </Modal>
             <Modal show={showNewDiaryEntryModal} onHide={() => setShowNewDiaryEntryModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add new diary entry</Modal.Title>
+                    <Modal.Title>{`${newDiaryEntry.id ? 'Edit' : 'Add new'} diary entry`}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <NewDiaryEntry sourceObject={newDiaryEntry} updateSource={setNewDiaryEntry} />
@@ -371,8 +387,9 @@ const PortfolioPage = () => {
                         //generate the value
                         const de = convertFEtoBEDiaryEntry(newDiaryEntry);
                         console.log(de);
+
                         //send to back end
-                        const response = await DiaryEntryAPI.postDiaryEntries(de);
+                        const response = de.id ? await DiaryEntryAPI.putDiaryEntry(de.id, de) : await DiaryEntryAPI.postDiaryEntries(de);
 
                         if (response.status === APIStatus.FAIL) {
                             console.error('Failed to create diary entry: ' + response.data);
@@ -380,11 +397,18 @@ const PortfolioPage = () => {
                         }
 
                         //set the id of the transaction - assume only 1
-                        de.id = response.data[0];
+                        if (!de?.id) de.id = response.data[0];
                         //parse response and append to list
                         let newArray: DiaryEntryData[] = [...diaryEntries];
+
+                        //new items won't impact the array since the id won't be found in the array
+                        if (de.id) {
+
+                            const editedIndex = newArray.findIndex(element => element.id === de.id);
+                            if (editedIndex !== -1) newArray.splice(editedIndex, 1);
+                        }
                         newArray.unshift(convertBEtoFEDiaryEntry(de));
-                        setDiaryEntries(processDiaryEntries(newArray));
+                        setDiaryEntries(processDiaryEntries(newArray).sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime()));
                         //just clear extra here in case
                         if (stockData?.id) setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
 
@@ -434,16 +458,7 @@ const processTransactionData: (transactionData: TransactionData[]) => Transactio
         return ({
             ...element,
             index: index,
-            status: ComponentStatus.VIEW as ComponentStatusKeys,
-            editObject: {
-                stockId: element.stockId,
-                type: element.type,
-                amtWFee: (Number(element.amount ?? 0) + Number(element.fee ?? 0)).toFixed(2),
-                amtWOFee: (element.amount ?? 0).toString(),
-                quantity: (element.quantity ?? 0).toString(),
-                transactionDate: dateToStringConverter(element.transactionDate),
-                currency: element.currency
-            }
+            status: ComponentStatus.VIEW as ComponentStatusKeys
         }) as TransactionDataListItem;
     });
 }
@@ -468,14 +483,7 @@ const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListIte
         return {
             ...element,
             index: index,
-            status: ComponentStatus.VIEW as ComponentStatusKeys,
-            editObject: {
-                id: element.id,
-                stockId: element.stockId,
-                title: element.title,
-                content: element.content,
-                postedDate: element.postedDate,
-            }
+            status: ComponentStatus.VIEW as ComponentStatusKeys
         }
     });
 }
