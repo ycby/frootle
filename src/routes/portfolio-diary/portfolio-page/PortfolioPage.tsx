@@ -103,6 +103,7 @@ const PortfolioPage = () => {
 
     const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
     const [showNewDiaryEntryModal, setShowNewDiaryEntryModal] = useState(false);
+    const [showUntrackStockModal, setShowUntrackStockModal] = useState(false);
 
     let navigate = useNavigate();
 
@@ -195,7 +196,12 @@ const PortfolioPage = () => {
                 <Button variant='link' onClick={() => navigate(-1)}>
                     Back
                 </Button>
-                <h1>Portfolio Page - {params.id}</h1>
+                <div className='d-flex justify-content-between'>
+                    <h1>Portfolio Page - {params.id}</h1>
+                    <Button variant='outline-danger' onClick={() => setShowUntrackStockModal(true)}>
+                        Unfollow
+                    </Button>
+                </div>
                 <Tabs defaultActiveKey='transactions' className="mb-3">
                     <Tab eventKey='transactions' title='Transactions'>
                         <Line
@@ -385,6 +391,36 @@ const PortfolioPage = () => {
                         setShowNewDiaryEntryModal(false);
                     }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showUntrackStockModal} onHide={() => setShowUntrackStockModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Unfollow stock</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='secondary' onClick={() => setShowUntrackStockModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant='danger' onClick={async () => {
+
+                        if (!stockData?.id) return;
+
+                        const result = await StockAPI.setUntrackedStock(stockData.id);
+
+                        if (result.status === APIStatus.FAIL) {
+                            //TODO: handle fail case
+                        }
+
+                        if (result.status === APIStatus.SUCCESS) {
+                            setShowUntrackStockModal(false);
+                            navigate('/');
+                        }
+                    }}>
+                        Unfollow
                     </Button>
                 </Modal.Footer>
             </Modal>
