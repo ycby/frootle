@@ -89,6 +89,11 @@ const exampleDiaryEntry: DiaryEntryData[] = [
     }
 ];
 
+type DeletionObject = {
+    id: number,
+    type: string
+}
+
 const PortfolioPage = () => {
 
     let params = useParams();
@@ -101,11 +106,13 @@ const PortfolioPage = () => {
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
 
+    const [deletionObject, setDeletionObject] = useState<DeletionObject | null>(null);
+
     const [dataPoints, setDataPoints] = useState<Point[]>([]);
 
     const [showTransactionModal, setShowTransactionModal] = useState(false);
     const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
-    const [showUntrackStockModal, setShowUntrackStockModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     let navigate = useNavigate();
 
@@ -200,7 +207,15 @@ const PortfolioPage = () => {
                 </Button>
                 <div className='d-flex justify-content-between'>
                     <h1>Portfolio Page - {params.id}</h1>
-                    <Button variant='outline-danger' onClick={() => setShowUntrackStockModal(true)}>
+                    <Button
+                        variant='outline-danger'
+                        onClick={() => {
+
+                            if (!stockData?.id) return;
+
+                            setDeletionObject({id: stockData?.id, type: 'stock'});
+                            setShowDeleteModal(true);
+                    }}>
                         Unfollow
                     </Button>
                 </div>
@@ -233,7 +248,9 @@ const PortfolioPage = () => {
                                 }
                             }}
                         />
-                        <Button onClick={() => {
+                        <Button
+                            className='mt-3 mb-2'
+                            onClick={() => {
 
                             if (!stockData?.id) {
 
@@ -248,15 +265,16 @@ const PortfolioPage = () => {
                         </Button>
                         {transactionData && <Table striped bordered hover>
                             <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Type</th>
-                                <th>Quantity</th>
-                                <th>Amount</th>
-                                <th>Fee</th>
-                                <th>Transaction Date</th>
-                                <th></th>
-                            </tr>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Fee</th>
+                                    <th>Transaction Date</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
                             </thead>
                             <tbody>
                             {
@@ -278,6 +296,20 @@ const PortfolioPage = () => {
 
                                                         setNewTransactionData(convertTransactionToNewTransaction(element));
                                                         setShowTransactionModal(true);
+                                                    }}
+                                                />
+                                            </td>
+                                            <td>
+                                                <IoMdTrash
+                                                    role='button'
+                                                    className='me-2'
+                                                    onClick={() => {
+
+                                                        //handle error here - no id?
+                                                        if (!element?.id) return;
+
+                                                        setDeletionObject({id: element.id, type: 'transaction'});
+                                                        setShowDeleteModal(true);
                                                     }}
                                                 />
                                             </td>
@@ -328,6 +360,14 @@ const PortfolioPage = () => {
                                                 <IoMdTrash
                                                     role='button'
                                                     className='me-2'
+                                                    onClick={() => {
+
+                                                        //handle error here - no id?
+                                                        if (!element?.id) return;
+                                                        setDeletionObject({id: element.id, type: 'diary'});
+
+                                                        setShowDeleteModal(true);
+                                                    }}
                                                 />
                                             </div>
                                             <Card.Text>
@@ -431,33 +471,88 @@ const PortfolioPage = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <Modal show={showUntrackStockModal} onHide={() => setShowUntrackStockModal(false)}>
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Unfollow stock</Modal.Title>
+                    <Modal.Title>{`${getDeleteModalTitle(deletionObject?.type)}`}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     Are you sure?
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='secondary' onClick={() => setShowUntrackStockModal(false)}>
+                    <Button variant='secondary' onClick={() => setShowDeleteModal(false)}>
                         Close
                     </Button>
                     <Button variant='danger' onClick={async () => {
 
-                        if (!stockData?.id) return;
+                        //handle error throwing?
+                        if (!deletionObject?.id) return;
 
-                        const result = await StockAPI.setUntrackedStock(stockData.id);
+                        switch (deletionObject?.type) {
+                            case 'stock':
 
-                        if (result.status === APIStatus.FAIL) {
-                            //TODO: handle fail case
+                                const stockResult = await StockAPI.setUntrackedStock(deletionObject.id);
+
+                                if (stockResult.status === APIStatus.FAIL) {
+                                    //TODO: handle fail case
+                                }
+
+                                if (stockResult.status === APIStatus.SUCCESS) {
+                                    setShowDeleteModal(false);
+                                    navigate('/');
+                                }
+
+                                break;
+                            case 'transaction':
+
+                                const transactionResult = await StockTransactionAPI.deleteStockTransaction(deletionObject.id);
+
+                                if (transactionResult.status === APIStatus.FAIL) {
+                                    //TODO: handle fail case
+                                }
+
+                                if (transactionResult.status === APIStatus.SUCCESS) {
+
+                                    let newArray: TransactionData[] = [...transactionData];
+
+                                    //new items won't impact the array since the id won't be found in the array
+                                    const editedIndex = newArray.findIndex(element => element.id === element.id);
+                                    if (editedIndex !== -1) newArray.splice(editedIndex, 1);
+
+                                    setTransactionData(processTransactionData(newArray));
+
+                                    setShowDeleteModal(false);
+                                    //success alert?
+                                }
+                                break;
+                            case 'diary':
+
+                                const diaryResult = await DiaryEntryAPI.deleteDiaryEntry(deletionObject.id);
+
+                                if (diaryResult.status === APIStatus.FAIL) {
+                                    //TODO: handle fail case
+                                }
+
+                                if (diaryResult.status === APIStatus.SUCCESS) {
+
+                                    let newArray: DiaryEntryData[] = [...diaryEntries];
+
+                                    //new items won't impact the array since the id won't be found in the array
+                                    const editedIndex = newArray.findIndex(element => element.id === deletionObject.id);
+                                    if (editedIndex !== -1) newArray.splice(editedIndex, 1);
+
+                                    setDiaryEntries(processDiaryEntries(newArray));
+
+                                    setShowDeleteModal(false);
+                                    //success alert?
+                                }
+                                break;
+                            default:
+                                //error alert?
+                                break;
                         }
-
-                        if (result.status === APIStatus.SUCCESS) {
-                            setShowUntrackStockModal(false);
-                            navigate('/');
-                        }
+                        setDeletionObject(null);
                     }}>
-                        Unfollow
+                        {`${getDeleteModalButtonText(deletionObject?.type)}`}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -520,6 +615,35 @@ const diaryEntrySortingFn: (a: DiaryEntryData, b: DiaryEntryData) => number = (a
 
     return b.postedDate.getTime() - a.postedDate.getTime();
 }
+
+const getDeleteModalTitle: (type: string | undefined) => string = (type: string | undefined): string => {
+
+    switch (type) {
+        case 'transaction':
+            return 'Delete transaction';
+        case 'diary':
+            return 'Delete diary entry';
+        case 'stock':
+            return 'Unfollow stock';
+        default:
+            return 'Unknown';
+    }
+};
+
+const getDeleteModalButtonText: (type: string | undefined) => string = (type: string | undefined): string => {
+
+    switch (type) {
+        case 'transaction':
+            return 'Delete';
+        case 'diary':
+            return 'Delete';
+        case 'stock':
+            return 'Unfollow';
+        default:
+            return 'Unknown';
+    }
+};
+
 
 const getHoldingsOverTimeSeries = (transactionData: TransactionData[]): Point[] => {
 
