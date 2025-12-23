@@ -1,5 +1,5 @@
 import Container from 'react-bootstrap/Container';
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {APIResponse, APIStatus, ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 import {
@@ -104,6 +104,8 @@ const PortfolioPage = () => {
     const [showNewTransactionModal, setShowNewTransactionModal] = useState(false);
     const [showNewDiaryEntryModal, setShowNewDiaryEntryModal] = useState(false);
 
+    let navigate = useNavigate();
+
     useEffect(() => {
 
         const getStock = async () => {
@@ -190,6 +192,9 @@ const PortfolioPage = () => {
             {/*</Alert>*/}
 
             <Container fluid>
+                <Button variant='link' onClick={() => navigate(-1)}>
+                    Back
+                </Button>
                 <h1>Portfolio Page - {params.id}</h1>
                 <Tabs defaultActiveKey='transactions' className="mb-3">
                     <Tab eventKey='transactions' title='Transactions'>

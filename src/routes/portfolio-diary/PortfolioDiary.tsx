@@ -14,8 +14,10 @@ import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import Container from 'react-bootstrap/Container';
 import Card from "react-bootstrap/Card";
-import {Form, Stack} from "react-bootstrap";
+import {Button, Form, Modal, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
+import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx.js";
 
 type StockDataContainerItem = SectionContainerItem & StockData;
 export type DiaryEntryListItem = ListItem & DiaryEntryData & {
@@ -56,8 +58,10 @@ const PortfolioDiary = () => {
     //use ref for performance
     const [hasNewTrackedStockCreated, setHasNewTrackedStockCreated] = useState<number>(0);
 
-    const [isOpenNewTrackedStock, setIsOpenNewTrackedStock] = useState<boolean>(false);
+    const [showTrackNewStock, setShowTrackNewStock] = useState<boolean>(false);
     const [isOpenUntrackStock, setIsOpenUntrackStock] = useState<boolean>(false);
+
+    const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData | null>(null);
 
     useEffect(() => {
 
@@ -88,44 +92,102 @@ const PortfolioDiary = () => {
     //Left: Thesis and Diary Entries
     //Right: Transactions and totals
     return (
-        <Container fluid>
-            <Form>
-                <Form.Control
-                    type='text'
-                    placeholder='Filter tracked stocks...'
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                />
-            </Form>
-            <Stack
-                direction='horizontal'
-                gap={3}
-                className='mt-4 mb-4'
-                style={{ width: '100%', flexWrap: 'wrap', justifyContent: 'start'}}>
-                {
-                    stockData.filter(element => {
+        <>
+            <Container fluid>
+                <Button onClick={() => setShowTrackNewStock(true)}>
+                    New +
+                </Button>
+                <Form className='mt-3'>
+                    <Form.Control
+                        type='text'
+                        placeholder='Filter tracked stocks...'
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
+                </Form>
+                <Stack
+                    direction='horizontal'
+                    gap={2}
+                    className='my-4 justify-content-between flex-wrap'
+                    style={{ width: '100%'}}
+                >
+                    {
+                        stockData.filter(element => {
 
-                        if (!searchTerm) return true;
+                            if (!searchTerm) return true;
 
-                        return element.ticker_no.includes(searchTerm);
-                    }).map(element => {
+                            return element.ticker_no.includes(searchTerm);
+                        }).map(element => {
 
-                        return (
-                            <Card
-                                key={element.id} style={{width: '30%', height: '9rem'}}
-                                onClick={() => navigate(`/portfolio/${element.ticker_no}`)}
-                                className='stock-card'
-                            >
-                                <Card.Body>
-                                    <Card.Title>{element.ticker_no}-{element.name}</Card.Title>
-                                    <Card.Text>Example Text</Card.Text>
-                                </Card.Body>
-                            </Card>
-                        )
-                    })
-                }
-            </Stack>
-        </Container>
+                            return (
+                                <Card
+                                    key={element.id} style={{height: '9rem', minWidth: '10rem'}}
+                                    onClick={() => navigate(`/portfolio/${element.ticker_no}`)}
+                                    className='stock-card flex-fill'
+                                >
+                                    <Card.Body>
+                                        <Card.Title>{element.ticker_no}-{element.name}</Card.Title>
+                                        <Card.Text>Example Text</Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            )
+                        })
+                    }
+                </Stack>
+            </Container>
+            <Modal
+                show={showTrackNewStock}
+                onHide={() => setShowTrackNewStock(false)}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Track new stock</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <FilterableSelect
+                        queryFn={async (args: string) => {
+
+                            const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
+                            //TODO: handle the fail state
+                            return response.data.map((data: StockData): FilterableSelectData => {
+
+                                return ({
+                                    label: data.name,
+                                    value: data.id.toString(),
+                                    subtext: data.ticker_no
+                                } as FilterableSelectData);
+                            });
+                        }}
+                        onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
+                    />
+                    <Stack gap={2} className='mt-2'>
+                        <div>Name: {newTrackedStock?.label}</div>
+                        <div>Ticker: {newTrackedStock?.subtext}</div>
+                    </Stack>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='secondary' onClick={() => setShowTrackNewStock(false)}>
+                        Close
+                    </Button>
+                    <Button onClick={async () => {
+
+                        if (!newTrackedStock) return;
+                        if (!newTrackedStock.value) return;
+
+                        const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
+
+                        if (result.status === APIStatus.FAIL) {
+                            //TODO: handle fail case
+                        }
+
+                        if (result.status === APIStatus.SUCCESS) {
+                            //learn something new everyday: can provide usestate with function
+                            setHasNewTrackedStockCreated(prevState => prevState + 1);
+                            setShowTrackNewStock(false);
+                        }
+                    }}>Save</Button>
+                </Modal.Footer>
+            </Modal>
+        </>
         // <div id="portfolio-diary">
         //     <h1>Portfolio Diary</h1>
         //     <SectionContainer
@@ -370,47 +432,7 @@ const PortfolioDiary = () => {
         //             </div>
         //         </div>
         //     </SectionContainer>
-        //     <Modal
-        //         isOpen={isOpenNewTrackedStock}
-        //         setIsOpen={setIsOpenNewTrackedStock}
-        //     >
-        //         <h3>Track New Stock</h3>
-        //         <FilterableSelect
-        //             queryFn={async (args: string) => {
-        //
-        //                 const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
-        //                 //TODO: handle the fail state
-        //                 return response.data.map((data: StockData): FilterableSelectData => {
-        //
-        //                     return ({
-        //                         label: data.name,
-        //                         value: data.id.toString(),
-        //                         subtext: data.ticker_no
-        //                     } as FilterableSelectData);
-        //                 });
-        //             }}
-        //             onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
-        //         />
-        //         <div>Name: {newTrackedStock?.label}</div>
-        //         <div>Ticker: {newTrackedStock?.subtext}</div>
-        //         <Button onClick={async () => {
-        //
-        //             if (!newTrackedStock) return;
-        //             if (!newTrackedStock.value) return;
-        //
-        //             const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
-        //
-        //             if (result.status === APIStatus.FAIL) {
-        //                 //TODO: handle fail case
-        //             }
-        //
-        //             if (result.status === APIStatus.SUCCESS) {
-        //                 //learn something new everyday: can provide usestate with function
-        //                 setHasNewTrackedStockCreated(prevState => prevState + 1);
-        //                 setIsOpenNewTrackedStock(false);
-        //             }
-        //         }}>Save</Button>
-        //     </Modal>
+
         //     <Modal
         //         isOpen={isOpenUntrackStock}
         //         setIsOpen={setIsOpenUntrackStock}

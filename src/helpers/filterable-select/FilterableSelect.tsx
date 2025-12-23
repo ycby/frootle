@@ -1,13 +1,16 @@
-import {useState, useRef, useEffect} from 'react';
+import {useState, useRef, useEffect, useId} from 'react';
 import FilterableSelectItem, {FilterableSelectData} from './FilterableSelectItem';
 //import { MdOutlineSearch } from "react-icons/md";
 
 import './FilterableSelect.css'
+import {Form} from "react-bootstrap";
 
 interface FilterableSelectProps {
 	queryFn: (args: string) => Promise<FilterableSelectData[]>,
 	onSelect: (value: FilterableSelectData) => void
 }
+
+const MIN_SEARCH_LEN = 2;
 
 export const FilterableSelect = (props: FilterableSelectProps) => {
 
@@ -24,9 +27,11 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 
 	const [listItems, setListItems] = useState<FilterableSelectData[]>([]);
 
+	const inputId = useId();
+
 	useEffect(() => {
 
-		if (searchTerm.length < 2) {
+		if (searchTerm.length < MIN_SEARCH_LEN) {
 			setListItems([]);
 			return;
 		}
@@ -54,10 +59,8 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 	}, [selectedIndex]);
 
 	return (
-		<div
-			className='filterable-select'
-		>
-			<input
+		<Form.Group controlId={inputId} className='position-relative'>
+			<Form.Control
 				type='text'
 				name='filterable_select'
 				placeholder='Search...'
@@ -98,7 +101,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 					}
 				}}
 			/>
-			{isOpen &&
+			{isOpen && searchTerm.length >= MIN_SEARCH_LEN &&
 				<div
 					className='filterable-dropdown'
 				>
@@ -124,7 +127,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 					)}
 				</div>
 			}
-		</div>
+		</Form.Group>
 	);
 }
 
