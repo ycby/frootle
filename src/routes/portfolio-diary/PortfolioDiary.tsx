@@ -1,6 +1,4 @@
 import './PortfolioDiary.css';
-import {SectionContainerItem} from "#root/src/helpers/section-container/SectionContainer.tsx";
-import {ListItem} from "#root/src/helpers/list-container/ListContainer.tsx";
 import {useEffect, useState} from "react";
 import {
     TransactionData,
@@ -17,11 +15,13 @@ import {useNavigate} from "react-router-dom";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 
-type StockDataContainerItem = SectionContainerItem & StockData;
+type StockDataContainerItem = StockData & {
+    title: string;
+};
 
-export type DiaryEntryListItem = ListItem & DiaryEntryData;
+export type DiaryEntryListItem = DiaryEntryData;
 
-export type TransactionDataListItem = ListItem & TransactionData;
+export type TransactionDataListItem = TransactionData;
 
 const exampleStocks: StockDataContainerItem[] = [
     {

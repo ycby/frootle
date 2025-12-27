@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Loading from '#root/src/helpers/loading/Loading.tsx';
-import {TableGenerator} from '#root/src/helpers/table-generator/TableGenerator.tsx';
 import { FilterableSelect } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
 
 import { Chart, registerables } from 'chart.js';
@@ -16,6 +15,7 @@ import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import {APIResponse} from '#root/src/types.ts';
+import {Table} from "react-bootstrap";
 
 type ShortReportingMapping = {
 	value: string;
@@ -223,7 +223,32 @@ export default function ShortReporting() {
 				<div></div> :
 				currentStatus === 'LOADING' ?
 				<Loading /> :
-				<TableGenerator headers={headers} data={data}></TableGenerator>
+				<Table>
+					<thead>
+						<tr>
+							{Object.values(headers).map((header, index) => <th key={`${header.value}_${index}`}>{header.label}</th>)}
+						</tr>
+					</thead>
+					<tbody>
+						{data.map((item, index) => {
+
+							return (
+								<tr key={`${item.id}_${index}`}>
+									{Object.values(headers).map((mapping, mappingIndex) => {
+
+										return (
+											<td
+												key={`${item.id}_${index}_${mappingIndex}`}
+											>
+												{`${item[mapping.value as keyof ShortData]}`}
+											</td>
+										);
+									})}
+								</tr>
+							);
+						})}
+					</tbody>
+				</Table>
 			}
 		</div>
 	)
