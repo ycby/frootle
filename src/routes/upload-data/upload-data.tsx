@@ -1,9 +1,9 @@
 import {useState, useRef, FormEvent,} from 'react';
 import Papa, {LocalFile} from 'papaparse';
-import {TableGenerator} from "#root/src/helpers/table-generator/TableGenerator.tsx";
 import {postShortData} from "#root/src/apis/ShortDataAPI.ts";
 import {APIStatus} from "#root/src/types.ts";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
+import {Table} from "react-bootstrap";
 
 type UploadDataMapping = { [p: string]: UploadDataMappingElement };
 type UploadDataMappingElement = { label: string; value: string };
@@ -84,14 +84,23 @@ export default function UploadData() {
 			{isFileParsed && <span>File Loaded Successfully!</span>}
 
 			{isFileParsed &&
-				<TableGenerator
-					style={{width:'100%'}}
-					headers={Object.values(mapping)}
-					data={fileAsArray.slice(0, 3)}
-					options={{
-						hiddenColumns: ['id']
-					}}
-				></TableGenerator>
+				<Table striped bordered hover>
+					<thead>
+						<tr>
+							{Object.values(mapping).map((item, index) => <th key={`${item.value}_${index}`}>{item.label}</th>)}
+						</tr>
+					</thead>
+					<tbody>
+						{fileAsArray.slice(0, 3).map((item, index) => {
+
+							return (
+								<tr key={`${item.id}_${index}`}>
+									{Object.values(mapping).map((mapping, mappingIndex) => <td key={`${mapping.value}_${mappingIndex}_${index}`}>{item[mapping.value]}</td>)}
+								</tr>
+							);
+						})}
+					</tbody>
+				</Table>
 			}
 			{
 				isFileParsed &&
