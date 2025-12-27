@@ -1,0 +1,44 @@
+.transaction-component {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.transaction-component__classification-strip {
+    width: 5px;
+}
+
+.transaction-component__data-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.25em 1em;
+    width: 100%;
+}
+
+.transaction-component__button-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.transaction-component__date {
+    font-weight: bold;
+    color: #403D39;
+    font-size: 0.75em;
+    padding: 0.5em 0;
+}
+
+.transaction-component__calculation {
+    color: #252422;
+    font-size: 0.9em;
+    padding: 0.5em 0;
+}
+
+.transaction-component__amount {
+    color: #403D39;
+    font-size: 0.75em;
+    padding: 0.5em 0;
+}

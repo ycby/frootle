@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Loading from '#root/src/helpers/Loading.tsx';
+import Loading from '#root/src/helpers/loading/Loading.tsx';
 import {TableGenerator} from '#root/src/helpers/table-generator/TableGenerator.tsx';
-import { FilterableSelect, FilterableSelectData } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
+import { FilterableSelect } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
 
 import { Chart, registerables } from 'chart.js';
 import { Chart as ReactChartJS } from 'react-chartjs-2';
@@ -9,8 +9,13 @@ import { Chart as ReactChartJS } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
 import './short-reporting.css';
-import {DatePicker} from "../../helpers/date-picker/DatePicker.tsx";
-import {dateToStringConverter} from "../../helpers/DateHelpers.ts";
+import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
+import * as Stock from "#root/src/apis/StockAPI.ts";
+import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
+import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import {APIResponse} from '#root/src/types.ts';
 
 type ShortReportingMapping = {
 	value: string;
@@ -24,8 +29,8 @@ type ChartPoint = {
 
 const headers = [
 	{
-		label: 'Stock Code',
-		value: 'stock_code'
+		label: 'Stock Id',
+		value: 'stock_id'
 	},
 	{
 		label: 'Reporting Date',
@@ -55,7 +60,7 @@ const jsonMapping: ShortReportingMapping[] = [
 		type: 'String'
 	},
 	{
-		value: 'stock_code',
+		value: 'stock_id',
 		type: 'String'
 	},
 	{
@@ -82,8 +87,7 @@ const jsonMapping: ShortReportingMapping[] = [
 
 export default function ShortReporting() {
 
-	const [data, setData] = useState([]);
-	const [stockData, setStockData] = useState<FilterableSelectData[]>([]);
+	const [data, setData] = useState<ShortData[]>([]);
 	const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
 	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
@@ -103,44 +107,16 @@ export default function ShortReporting() {
 
 	useEffect(() => {
 
-		async function getStockData() {
-
-			const response = await fetch('http://localhost:3000/stock', {
-				method: 'GET'
-			})
-
-			if (!response.ok) throw new Error(`Response Status: ${response.status}`);
-
-			const jsonResponse = await response.json();
-
-			setStockData(jsonResponse.data.map((json: any): FilterableSelectData => {
-
-				return {
-					label: json.name,
-					value: json.code,
-					subtext: json.code
-				}
-			}));
-		}
-
-		getStockData();
-	}, [])
-
-	useEffect(() => {
-
 		async function getShortData() {
 
-			const response = await fetch(`http://localhost:3000/short?stock_code=${selectedStock.value}&start_date=${dateToStringConverter(startDate)}&end_date=${dateToStringConverter(endDate)}`, {
-				method: 'GET'
-			})
+			if (!selectedStock.value) return;
 
-			if (!response.ok) throw new Error(`Response Status: ${response.status}`)
+			const response = await ShortDataAPI.getShortData(selectedStock.value, dateToStringConverter(startDate), dateToStringConverter(endDate));
 
-			//TODO: custom set object json
-			const jsonResponse = await response.json()
+			const processedData: ShortData[] = response.data.map((json: any) => processJSON(jsonMapping, json) as ShortData);
 
-			setData(jsonResponse.data.map((json: any) => processJSON(jsonMapping, json)));
-			setChartData(jsonResponse.data.map((d: any): ChartPoint => {
+			setData(processedData);
+			setChartData(response.data.map((d: any): ChartPoint => {
 				return {
 					x: d.reporting_date,
 					y: d.shorted_shares
@@ -177,7 +153,22 @@ export default function ShortReporting() {
 		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
-			<FilterableSelect dataList={ stockData } onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) } />
+			<FilterableSelect
+				queryFn={async (args: string) => {
+
+					const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
+					//TODO: handle the fail state
+					return response.data.map((data: StockData): FilterableSelectData => {
+
+						return ({
+							label: data.name,
+							value: data.id.toString(),
+							subtext: data.ticker_no
+						} as FilterableSelectData);
+					});
+				}}
+				onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) }
+			/>
 			<div id='filter-group'>
 				<div className='filter-element'>
 					<DatePicker label='Start Date' value={startDate} onChange={(date) => setStartDate(date)} />

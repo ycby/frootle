@@ -1,0 +1,7 @@
+.new-transaction-component__preview {
+    border-top: 1px solid #252422;
+    border-bottom: 1px solid #252422;
+    padding: 1em 0;
+    margin-top: 2rem;
+    text-align: center;
+}

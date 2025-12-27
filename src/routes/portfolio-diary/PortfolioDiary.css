@@ -1,0 +1,72 @@
+#portfolio-diary {
+    width: 100%;
+    height: 100%;
+}
+
+#portfolio-diary .portfolio-diary__container {
+    width: 100%;
+    height: 100%;
+    padding: 0 0 80px;
+}
+
+#portfolio-diary .portfolio-diary__main {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+}
+
+#portfolio-diary .portfolio-diary__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+}
+
+#portfolio-diary > h1 {
+    margin: 0;
+    padding: 0.4em 0;
+}
+
+#portfolio-diary .thesis {
+    height: 100px;
+    max-height: 200px;
+    min-height: 4lh;
+    border: solid 1px black;
+    margin: 20px;
+}
+
+#portfolio-diary .diary-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 20px;
+    max-height: 70%;
+}
+
+#portfolio-diary .content-tabs {
+    border-radius: 0;
+}
+
+#portfolio-diary table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#portfolio-diary td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+#portfolio-diary tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.stock-card:hover {
+    background-color: #dddddd;
+    cursor: pointer;
+    transition: background-color 0.2s linear;
+}

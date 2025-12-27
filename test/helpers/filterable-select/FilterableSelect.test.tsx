@@ -1,6 +1,7 @@
-import {FilterableSelect, FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {render, waitFor} from "@testing-library/react";
-import {page, userEvent} from "@vitest/browser/context";
+import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import {render, waitFor, cleanup} from "@testing-library/react";
+import {page, userEvent} from "vitest/browser";
 
 const dataList: FilterableSelectData[] = [
     {
@@ -20,13 +21,20 @@ const dataList: FilterableSelectData[] = [
     }
 ];
 
+const mockFunction = async (arg: string): Promise<FilterableSelectData[]> => {
+
+    return dataList.filter((element) => element.label?.includes(arg) || element.subtext?.includes(arg));
+}
+
 describe('FilterableSelect', () => {
+
+    afterEach(cleanup);
 
     test('Checks if typing can filter results to single result', async () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): FilterableSelectData => {
 
                     return value;
@@ -34,13 +42,13 @@ describe('FilterableSelect', () => {
             />
         );
 
-        const filterableSelect = page.getByPlaceholder('Search...' );
+        const searchBar = page.getByPlaceholder('Search...');
 
         await waitFor(async () => {
 
-            await userEvent.click(filterableSelect);
+            await searchBar.click();
 
-            await userEvent.keyboard('{Shift>}L{/Shift}abel 1');
+            await userEvent.keyboard('{Shift>}L{/Shift}abel 1')
         });
 
         await expect.element(page.getByRole('listitem')
@@ -60,7 +68,7 @@ describe('FilterableSelect', () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): FilterableSelectData => {
 
                     return value;
@@ -96,7 +104,7 @@ describe('FilterableSelect', () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): void => {
 
                     result = value;
@@ -109,6 +117,8 @@ describe('FilterableSelect', () => {
         await waitFor(async () => {
 
             await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{Shift>}L{/Shift}a');
 
             const filterableItem1 = page.getByRole('listitem')
                 .filter({
@@ -129,7 +139,7 @@ describe('FilterableSelect', () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): void => {
 
                     result = value;
@@ -142,6 +152,8 @@ describe('FilterableSelect', () => {
         await waitFor(async () => {
 
             await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{Shift>}L{/Shift}a');
 
             await userEvent.keyboard('{ArrowDown>2/}{Enter}');
         })
@@ -157,7 +169,7 @@ describe('FilterableSelect', () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): void => {
 
                     result = value;
@@ -170,6 +182,8 @@ describe('FilterableSelect', () => {
         await waitFor(async () => {
 
             await userEvent.click(filterableSelect);
+
+            await userEvent.keyboard('{Shift>}L{/Shift}a');
 
             await userEvent.keyboard('{ArrowDown>4/}{Enter}');
         })
@@ -185,7 +199,7 @@ describe('FilterableSelect', () => {
 
         render(
             <FilterableSelect
-                dataList={dataList}
+                queryFn={mockFunction}
                 onSelect={(value: FilterableSelectData): void => {
 
                     result = value;
@@ -199,9 +213,10 @@ describe('FilterableSelect', () => {
 
             await userEvent.click(filterableSelect);
 
+            await userEvent.keyboard('{Shift>}L{/Shift}a');
             await userEvent.keyboard('{ArrowDown>4/}');
             await userEvent.keyboard('{ArrowUp>3/}');
-            await userEvent.keyboard('{Shift>}L{/Shift}ab');
+            await userEvent.keyboard('b');
         })
 
         expect(result === null);

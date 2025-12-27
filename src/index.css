@@ -1,10 +1,13 @@
-@font-face {
-  font-family: 'Inconsolata';
-  src: local('Inconsolata'), url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
-}
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900');
+
+/*@font-face {*/
+/*  font-family: 'Inconsolata';*/
+/*  src: local('Inconsolata'), url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900');*/
+/*}*/
 
 html {
   box-sizing: border-box;
+  font-size: 16px; /*baseline font size*/
 }
 
 *,
@@ -39,4 +42,19 @@ body {
   flex: 1;
   padding: 5rem max(20px, 15rem);
   overflow: scroll;
+}
+
+/*========================================================
+Generic
+========================================================= */
+.display-none {
+  display: none !important;
+}
+
+.enable-scroll {
+  overflow: scroll;
+}
+
+.disable-scroll {
+  overflow: hidden;
 }
