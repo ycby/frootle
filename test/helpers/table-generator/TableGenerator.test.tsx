@@ -1,7 +1,7 @@
 import {afterEach} from "vitest";
 import {cleanup, render} from "@testing-library/react";
 import { TableGenerator, Header, TableData } from "#root/src/helpers/table-generator/TableGenerator.tsx";
-import {page} from "@vitest/browser/context";
+import {page} from "vitest/browser";
 
 const headerData: Header[] = [
     {

@@ -1,3 +1,4 @@
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -12,7 +13,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html']
     },
     browser: {
-      provider: 'playwright',
+      provider: playwright(),
       enabled: true,
       instances: [
         {browser: 'firefox'},

@@ -96,7 +96,6 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 							}
 							break;
 						default:
-							setIsOpen(true);
 							console.log('Other key');
 					}
 				}}
