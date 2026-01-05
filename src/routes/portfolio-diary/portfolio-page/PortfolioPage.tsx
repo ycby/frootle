@@ -238,7 +238,7 @@ const PortfolioPage = () => {
                                             unit: 'month',
                                             tooltipFormat: 'dd-MM-yyyy',
                                             displayFormats: {
-                                                month: 'MM-yyyy'
+                                                month: 'MM/yy'
                                             }
                                         }
                                     },
