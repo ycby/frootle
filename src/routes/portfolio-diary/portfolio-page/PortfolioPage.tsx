@@ -293,7 +293,7 @@ const PortfolioPage = () => {
                 </div>
                 <Tabs defaultActiveKey='transactions' className="mb-3">
                     <Tab eventKey='transactions' title='Transactions'>
-                        <Carousel interval={null} variant={"dark"}>
+                        <Carousel interval={null} data-bs-theme="dark">
                             <Carousel.Item>
                                 <Line
                                     data={{
@@ -323,55 +323,57 @@ const PortfolioPage = () => {
                                     }}
                                 />
                             </Carousel.Item>
-                            <Carousel.Item className='d-flex justify-content-start flex-wrap'>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Expenditure</h1>
-                                    <h4>${aggregateValues?.expenditure.toFixed(2)}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Income</h1>
-                                    <h4>${aggregateValues?.income.toFixed(2)}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Profit</h1>
-                                    <h4>{aggregateValues && aggregateValues?.profit > 0 ? `$${aggregateValues?.profit.toFixed(2)}` : 'No Profit'}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Fees</h1>
-                                    <h4>${aggregateValues?.fee.toFixed(2)}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Scrip</h1>
-                                    <h4>{aggregateValues?.scrip}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Cash</h1>
-                                    <h4>${aggregateValues?.cashDiv.toFixed(2)}</h4>
-                                </div>
-                                <div
-                                    className='d-flex flex-column align-items-center'
-                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
-                                >
-                                    <h1>Cost Basis</h1>
-                                    <h4>${aggregateValues?.perShare.toFixed(2)}</h4>
+                            <Carousel.Item>
+                                <div className='d-flex justify-content-start flex-wrap px-5 row-gap-4'>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Expenditure</h2>
+                                        <h4>${aggregateValues?.expenditure.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Income</h2>
+                                        <h4>${aggregateValues?.income.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Profit</h2>
+                                        <h4>{aggregateValues && aggregateValues?.profit > 0 ? `$${aggregateValues?.profit.toFixed(2)}` : 'No Profit'}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Fees</h2>
+                                        <h4>${aggregateValues?.fee.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Scrip</h2>
+                                        <h4>{aggregateValues?.scrip}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Cash</h2>
+                                        <h4>${aggregateValues?.cashDiv.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Cost Basis</h2>
+                                        <h4>${aggregateValues?.perShare.toFixed(2)}</h4>
+                                    </div>
                                 </div>
                             </Carousel.Item>
                         </Carousel>
