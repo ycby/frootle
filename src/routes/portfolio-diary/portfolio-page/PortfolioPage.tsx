@@ -18,7 +18,7 @@ import {
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {Button, Modal, Stack, Tab, Table, Tabs} from "react-bootstrap";
+import {Button, Carousel, Modal, Stack, Tab, Table, Tabs} from "react-bootstrap";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 import {Chart, Point, registerables} from "chart.js";
@@ -94,6 +94,17 @@ type DeletionObject = {
     type: string
 }
 
+type AggregateObject = {
+    expenditure: number,
+    income: number,
+    fee: number,
+    scrip: number,
+    cashDiv: number,
+    profit: number,
+    perShare: number,
+    quantity: number
+}
+
 const PortfolioPage = () => {
 
     let params = useParams();
@@ -106,9 +117,11 @@ const PortfolioPage = () => {
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
 
+    const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
+
     const [deletionObject, setDeletionObject] = useState<DeletionObject | null>(null);
 
-    const [dataPoints, setDataPoints] = useState<Point[]>([]);
+    const [quantityDataPoints, setQuantityDataPoints] = useState<Point[]>([]);
 
     const [showTransactionModal, setShowTransactionModal] = useState(false);
     const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
@@ -181,7 +194,66 @@ const PortfolioPage = () => {
 
     useEffect(() => {
 
-        setDataPoints(getHoldingsOverTimeSeries(transactionData));
+        const transactionDataInTimeOrder = transactionData.toReversed();
+
+        const holdingsOverTime: Point[] = [];
+        let quantityAccumulator = 0;
+
+        let totalExpenditure = 0;
+        let totalGain = 0;
+        let totalProfit = 0;
+        let totalFee = 0;
+        let totalScrip = 0;
+        let totalCashDiv = 0;
+
+        for (let element of transactionDataInTimeOrder) {
+
+            switch (element.type) {
+                case 'buy':
+                    quantityAccumulator += element.quantity;
+
+                    totalExpenditure += Number(element.amount);
+                    break;
+                case 'sell':
+                    quantityAccumulator -= element.quantity;
+
+                    totalGain += Number(element.amount);
+                    break;
+                case 'scrip_dividend':
+                    quantityAccumulator += element.quantity;
+
+                    totalScrip += Number(element.quantity);
+                    break;
+                case 'cash_dividend':
+                    totalGain += Number(element.amount);
+                    totalCashDiv += Number(element.amount);
+
+                    break;
+                default:
+                    break;
+            }
+
+            totalFee += Number(element.fee);
+
+            holdingsOverTime.unshift({
+                x: element.transactionDate.valueOf(),
+                y: quantityAccumulator
+            });
+        }
+
+        totalProfit = totalGain - totalExpenditure - totalFee;
+
+        setQuantityDataPoints(holdingsOverTime);
+        setAggregateValues({
+            expenditure: totalExpenditure,
+            income: totalGain,
+            fee: totalFee,
+            scrip: totalScrip,
+            cashDiv: totalCashDiv,
+            profit: totalProfit,
+            perShare: (totalExpenditure - totalGain) / quantityAccumulator,
+            quantity: quantityAccumulator
+        });
     }, [transactionData]);
 
     Chart.register(...registerables,
@@ -221,33 +293,88 @@ const PortfolioPage = () => {
                 </div>
                 <Tabs defaultActiveKey='transactions' className="mb-3">
                     <Tab eventKey='transactions' title='Transactions'>
-                        <Line
-                            data={{
-                                datasets: [
-                                    {
-                                        label: 'Quantity',
-                                        data: dataPoints
-                                    }
-                                ]
-                            }}
-                            options={{
-                                scales: {
-                                    x: {
-                                        type: 'time',
-                                        time: {
-                                            unit: 'month',
-                                            tooltipFormat: 'dd-MM-yyyy',
-                                            displayFormats: {
-                                                month: 'MM/yy'
+                        <Carousel interval={null} variant={"dark"}>
+                            <Carousel.Item>
+                                <Line
+                                    data={{
+                                        datasets: [
+                                            {
+                                                label: 'Quantity',
+                                                data: quantityDataPoints
+                                            }
+                                        ]
+                                    }}
+                                    options={{
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'month',
+                                                    tooltipFormat: 'dd-MM-yyyy',
+                                                    displayFormats: {
+                                                        month: 'MM/yy'
+                                                    }
+                                                }
+                                            },
+                                            y: {
+                                                min: 0,
                                             }
                                         }
-                                    },
-                                    y: {
-                                        min: 0,
-                                    }
-                                }
-                            }}
-                        />
+                                    }}
+                                />
+                            </Carousel.Item>
+                            <Carousel.Item className='d-flex justify-content-start flex-wrap'>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Expenditure</h1>
+                                    <h4>${aggregateValues?.expenditure.toFixed(2)}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Income</h1>
+                                    <h4>${aggregateValues?.income.toFixed(2)}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Profit</h1>
+                                    <h4>{aggregateValues && aggregateValues?.profit > 0 ? `$${aggregateValues?.profit.toFixed(2)}` : 'No Profit'}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Fees</h1>
+                                    <h4>${aggregateValues?.fee.toFixed(2)}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Scrip</h1>
+                                    <h4>{aggregateValues?.scrip}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Cash</h1>
+                                    <h4>${aggregateValues?.cashDiv.toFixed(2)}</h4>
+                                </div>
+                                <div
+                                    className='d-flex flex-column align-items-center'
+                                    style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                >
+                                    <h1>Cost Basis</h1>
+                                    <h4>${aggregateValues?.perShare.toFixed(2)}</h4>
+                                </div>
+                            </Carousel.Item>
+                        </Carousel>
                         <Button
                             className='mt-3 mb-2'
                             onClick={() => {
@@ -643,34 +770,6 @@ const getDeleteModalButtonText: (type: string | undefined) => string = (type: st
             return 'Unknown';
     }
 };
-
-
-const getHoldingsOverTimeSeries = (transactionData: TransactionData[]): Point[] => {
-
-    let accumulator: number = 0;
-
-    return transactionData.toReversed().map((element): Point => {
-
-        switch (element.type) {
-            case 'buy':
-                accumulator += element.quantity;
-                break;
-            case 'sell':
-                accumulator -= element.quantity;
-                break;
-            case 'scrip_dividend':
-                accumulator += element.quantity;
-                break;
-            default:
-                break;
-        }
-
-        return ({
-            x: element.transactionDate.valueOf(),
-            y: accumulator
-        });
-    });
-}
 
 export {
     PortfolioPage
