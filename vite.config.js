@@ -19,6 +19,7 @@ export default defineConfig({
       instances: [
         {browser: 'firefox'},
       ]
-    }
+    },
+    repeatEach: 10
   }
 })

@@ -28,7 +28,7 @@ const mockFunction = async (arg: string): Promise<FilterableSelectData[]> => {
 
 describe('FilterableSelect', () => {
 
-    afterEach(cleanup);
+    beforeEach(cleanup);
 
     test('Checks if typing can filter results to single result', async () => {
 
@@ -42,13 +42,13 @@ describe('FilterableSelect', () => {
             />
         );
 
-        const searchBar = page.getByPlaceholder('Search...');
+        const filterableSelect = page.getByPlaceholder('Search...' );
 
         await waitFor(async () => {
 
-            await searchBar.click();
+            await userEvent.click(filterableSelect);
 
-            await userEvent.keyboard('{Shift>}L{/Shift}abel 1')
+            await userEvent.keyboard('{Shift>}L{/Shift}abel 1');
         });
 
         await expect.element(page.getByRole('listitem')
