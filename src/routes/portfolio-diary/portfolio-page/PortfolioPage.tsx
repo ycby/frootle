@@ -18,7 +18,7 @@ import {
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import {Button, Modal, Stack, Tab, Table, Tabs} from "react-bootstrap";
+import {Button, Carousel, Modal, Stack, Tab, Table, Tabs} from "react-bootstrap";
 import NewTransactionComponent
     from "#root/src/routes/portfolio-diary/new-transaction-component/NewTransactionComponent.tsx";
 import {Chart, Point, registerables} from "chart.js";
@@ -28,6 +28,9 @@ import * as DiaryEntryAPI from "#root/src/apis/DiaryEntryAPI.ts";
 import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewDiaryEntry.tsx";
 import {MdModeEdit} from "react-icons/md";
 import {IoMdTrash} from "react-icons/io";
+
+import './PortfolioPage.css';
+// import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -70,7 +73,8 @@ const exampleDiaryEntry: DiaryEntryData[] = [
         id: 1,
         stockId: 1,
         title: 'Initial thoughts',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
+        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices.' +
+            '\nPhasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
         postedDate: new Date(2025, 1, 1)
     },
     {
@@ -94,6 +98,17 @@ type DeletionObject = {
     type: string
 }
 
+type AggregateObject = {
+    expenditure: number,
+    income: number,
+    fee: number,
+    scrip: number,
+    cashDiv: number,
+    profit: number,
+    perShare: number,
+    quantity: number
+}
+
 const PortfolioPage = () => {
 
     let params = useParams();
@@ -106,15 +121,18 @@ const PortfolioPage = () => {
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
 
+    const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
+
     const [deletionObject, setDeletionObject] = useState<DeletionObject | null>(null);
 
-    const [dataPoints, setDataPoints] = useState<Point[]>([]);
+    const [quantityDataPoints, setQuantityDataPoints] = useState<Point[]>([]);
 
     const [showTransactionModal, setShowTransactionModal] = useState(false);
     const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     let navigate = useNavigate();
+    // const { addAlert } = useAlert(); TODO: use this for alerts
 
     useEffect(() => {
 
@@ -181,7 +199,66 @@ const PortfolioPage = () => {
 
     useEffect(() => {
 
-        setDataPoints(getHoldingsOverTimeSeries(transactionData));
+        const transactionDataInTimeOrder = transactionData.toReversed();
+
+        const holdingsOverTime: Point[] = [];
+        let quantityAccumulator = 0;
+
+        let totalExpenditure = 0;
+        let totalGain = 0;
+        let totalProfit = 0;
+        let totalFee = 0;
+        let totalScrip = 0;
+        let totalCashDiv = 0;
+
+        for (let element of transactionDataInTimeOrder) {
+
+            switch (element.type) {
+                case 'buy':
+                    quantityAccumulator += element.quantity;
+
+                    totalExpenditure += Number(element.amount);
+                    break;
+                case 'sell':
+                    quantityAccumulator -= element.quantity;
+
+                    totalGain += Number(element.amount);
+                    break;
+                case 'scrip_dividend':
+                    quantityAccumulator += element.quantity;
+
+                    totalScrip += Number(element.quantity);
+                    break;
+                case 'cash_dividend':
+                    totalGain += Number(element.amount);
+                    totalCashDiv += Number(element.amount);
+
+                    break;
+                default:
+                    break;
+            }
+
+            totalFee += Number(element.fee);
+
+            holdingsOverTime.unshift({
+                x: element.transactionDate.valueOf(),
+                y: quantityAccumulator
+            });
+        }
+
+        totalProfit = totalGain - totalExpenditure - totalFee;
+
+        setQuantityDataPoints(holdingsOverTime);
+        setAggregateValues({
+            expenditure: totalExpenditure,
+            income: totalGain,
+            fee: totalFee,
+            scrip: totalScrip,
+            cashDiv: totalCashDiv,
+            profit: totalProfit,
+            perShare: (totalExpenditure - totalGain) / quantityAccumulator,
+            quantity: quantityAccumulator
+        });
     }, [transactionData]);
 
     Chart.register(...registerables,
@@ -191,16 +268,6 @@ const PortfolioPage = () => {
     );
     return (
         <>
-            {/*<Alert TODO: MOVE TO USE CONTEXT*/}
-            {/*    show={showStockNotLoadedAlert}*/}
-            {/*    variant='danger'*/}
-            {/*    onClose={() => setShowStockNotLoadedAlert(false)}*/}
-            {/*    className='position-sticky'*/}
-            {/*    dismissible*/}
-            {/*>*/}
-            {/*    Stock Data not loaded properly! Please refresh!*/}
-            {/*</Alert>*/}
-
             <Container fluid>
                 <Button variant='link' onClick={() => navigate(-1)}>
                     Back
@@ -221,33 +288,90 @@ const PortfolioPage = () => {
                 </div>
                 <Tabs defaultActiveKey='transactions' className="mb-3">
                     <Tab eventKey='transactions' title='Transactions'>
-                        <Line
-                            data={{
-                                datasets: [
-                                    {
-                                        label: 'Quantity',
-                                        data: dataPoints
-                                    }
-                                ]
-                            }}
-                            options={{
-                                scales: {
-                                    x: {
-                                        type: 'time',
-                                        time: {
-                                            unit: 'month',
-                                            tooltipFormat: 'dd-MM-yyyy',
-                                            displayFormats: {
-                                                month: 'MM-yyyy'
+                        <Carousel interval={null} data-bs-theme="dark">
+                            <Carousel.Item>
+                                <Line
+                                    data={{
+                                        datasets: [
+                                            {
+                                                label: 'Quantity',
+                                                data: quantityDataPoints
+                                            }
+                                        ]
+                                    }}
+                                    options={{
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'month',
+                                                    tooltipFormat: 'dd-MM-yyyy',
+                                                    displayFormats: {
+                                                        month: 'MM/yy'
+                                                    }
+                                                }
+                                            },
+                                            y: {
+                                                min: 0,
                                             }
                                         }
-                                    },
-                                    y: {
-                                        min: 0,
-                                    }
-                                }
-                            }}
-                        />
+                                    }}
+                                />
+                            </Carousel.Item>
+                            <Carousel.Item>
+                                <div className='d-flex justify-content-start flex-wrap px-5 row-gap-4'>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Expenditure</h2>
+                                        <h4>${aggregateValues?.expenditure.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Income</h2>
+                                        <h4>${aggregateValues?.income.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Profit</h2>
+                                        <h4>{aggregateValues && aggregateValues?.profit > 0 ? `$${aggregateValues?.profit.toFixed(2)}` : 'No Profit'}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Fees</h2>
+                                        <h4>${aggregateValues?.fee.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Scrip</h2>
+                                        <h4>{aggregateValues?.scrip}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Cash</h2>
+                                        <h4>${aggregateValues?.cashDiv.toFixed(2)}</h4>
+                                    </div>
+                                    <div
+                                        className='d-flex flex-column align-items-center'
+                                        style={{maxWidth: '100%', minWidth: '150px', width: '25%'}}
+                                    >
+                                        <h2 className='text-center'>Cost Basis</h2>
+                                        <h4>${aggregateValues?.perShare.toFixed(2)}</h4>
+                                    </div>
+                                </div>
+                            </Carousel.Item>
+                        </Carousel>
                         <Button
                             className='mt-3 mb-2'
                             onClick={() => {
@@ -371,7 +495,7 @@ const PortfolioPage = () => {
                                                 />
                                             </div>
                                             <Card.Text>
-                                                {element.content}
+                                                <div style={{whiteSpace: 'pre-line'}}>{element.content}</div>
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
@@ -643,34 +767,6 @@ const getDeleteModalButtonText: (type: string | undefined) => string = (type: st
             return 'Unknown';
     }
 };
-
-
-const getHoldingsOverTimeSeries = (transactionData: TransactionData[]): Point[] => {
-
-    let accumulator: number = 0;
-
-    return transactionData.toReversed().map((element): Point => {
-
-        switch (element.type) {
-            case 'buy':
-                accumulator += element.quantity;
-                break;
-            case 'sell':
-                accumulator -= element.quantity;
-                break;
-            case 'scrip_dividend':
-                accumulator += element.quantity;
-                break;
-            default:
-                break;
-        }
-
-        return ({
-            x: element.transactionDate.valueOf(),
-            y: accumulator
-        });
-    });
-}
 
 export {
     PortfolioPage

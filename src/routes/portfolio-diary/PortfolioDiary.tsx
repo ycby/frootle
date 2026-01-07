@@ -14,6 +14,7 @@ import {Button, Form, Modal, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import {getRandomNumber} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 
 type StockDataContainerItem = StockData & {
     title: string;
@@ -112,7 +113,8 @@ const PortfolioDiary = () => {
 
                             return (
                                 <Card
-                                    key={element.id} style={{height: '9rem', minWidth: '10rem'}}
+                                    key={element.id}
+                                    style={{height: '9rem', minWidth: '10rem', backgroundColor: `rgba(${getRandomNumber(255)}, ${getRandomNumber(255)}, ${getRandomNumber(255)}, ${0.2})`}}
                                     onClick={() => navigate(`/portfolio/${element.ticker_no}`)}
                                     className='stock-card flex-fill'
                                 >

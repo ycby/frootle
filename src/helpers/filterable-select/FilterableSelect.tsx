@@ -51,7 +51,6 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 
 	useEffect(() => {
 
-		console.log(selectedIndex);
 		if (!isOpen) return;
 		if (selectedIndex < 0 || selectedIndex > itemRefs.current.length) return;
 
@@ -96,7 +95,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 							}
 							break;
 						default:
-							console.log('Other key');
+							console.log(e.key);
 					}
 				}}
 			/>

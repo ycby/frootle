@@ -8,7 +8,7 @@ import {
     TransactionType,
     TransactionTypeKeys
 } from "#root/src/types.ts";
-import {capitaliseWord, replaceUndescoreWithSpace} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
+import {capitaliseWord, replaceUnderscoreWithSpace} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {NewTransactionInputs} from "#root/src/routes/portfolio-diary/types.ts";
 import {Col, Form, Row} from 'react-bootstrap';
 import Container from "react-bootstrap/Container";
@@ -154,7 +154,7 @@ const generateTypeOptions = (transactionTypeId: string) => {
 
     return Object.values(TransactionType).map((transactionType: TransactionTypeKeys) => {
 
-        return(<option key={`${transactionTypeId}-${transactionType}`} value={transactionType}>{replaceUndescoreWithSpace(capitaliseWord(transactionType))}</option>)
+        return(<option key={`${transactionTypeId}-${transactionType}`} value={transactionType}>{replaceUnderscoreWithSpace(capitaliseWord(transactionType))}</option>)
     })
 }
 
