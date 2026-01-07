@@ -29,6 +29,8 @@ import NewDiaryEntry from "#root/src/routes/portfolio-diary/new-diary-entry/NewD
 import {MdModeEdit} from "react-icons/md";
 import {IoMdTrash} from "react-icons/io";
 
+import './PortfolioPage.css';
+
 const exampleTransactions: TransactionData[] = [
     {
         id: 1,
