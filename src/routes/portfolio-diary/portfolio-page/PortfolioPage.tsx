@@ -30,6 +30,7 @@ import {MdModeEdit} from "react-icons/md";
 import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
+// import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -131,6 +132,7 @@ const PortfolioPage = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     let navigate = useNavigate();
+    // const { addAlert } = useAlert(); TODO: use this for alerts
 
     useEffect(() => {
 
@@ -266,16 +268,6 @@ const PortfolioPage = () => {
     );
     return (
         <>
-            {/*<Alert TODO: MOVE TO USE CONTEXT*/}
-            {/*    show={showStockNotLoadedAlert}*/}
-            {/*    variant='danger'*/}
-            {/*    onClose={() => setShowStockNotLoadedAlert(false)}*/}
-            {/*    className='position-sticky'*/}
-            {/*    dismissible*/}
-            {/*>*/}
-            {/*    Stock Data not loaded properly! Please refresh!*/}
-            {/*</Alert>*/}
-
             <Container fluid>
                 <Button variant='link' onClick={() => navigate(-1)}>
                     Back
