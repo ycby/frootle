@@ -13,6 +13,7 @@ export interface ShortData {
     shortedShares: number;
     shortedAmount: number;
     reportingDate: Date;
+    tickerNo?: string;
 }
 
 export interface TransactionData {

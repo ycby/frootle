@@ -20,6 +20,11 @@ const Sidebar = () => {
                     >
                         Upload Data
                     </NavLink>
+                    <NavLink
+                        to={'/data-fix'}
+                    >
+                        Fix Data
+                    </NavLink>
                 </nav>
             </div>
             <div id='sidebar-thumbnail'>
