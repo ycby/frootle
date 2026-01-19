@@ -1,5 +1,5 @@
 import './PortfolioDiary.css';
-import {useEffect, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import {
     TransactionData,
     DiaryEntryData,
@@ -13,7 +13,6 @@ import Card from "react-bootstrap/Card";
 import {Button, Form, Modal, Stack} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import {getRandomNumber} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 
 type StockDataContainerItem = StockData & {
@@ -56,7 +55,7 @@ const PortfolioDiary = () => {
 
     const [showTrackNewStock, setShowTrackNewStock] = useState<boolean>(false);
 
-    const [newTrackedStock, setNewTrackedStock] = useState<FilterableSelectData | null>(null);
+    const [newTrackedStock, setNewTrackedStock] = useState<StockData | null>(null);
 
     useEffect(() => {
 
@@ -141,20 +140,21 @@ const PortfolioDiary = () => {
 
                             const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
                             //TODO: handle the fail state
-                            return response.data.map((data: StockData): FilterableSelectData => {
-
-                                return ({
-                                    label: data.name,
-                                    value: data.id.toString(),
-                                    subtext: data.ticker_no
-                                } as FilterableSelectData);
-                            });
+                            return response.data;
                         }}
-                        onSelect={ (selectedValue: FilterableSelectData) => setNewTrackedStock(selectedValue) }
-                    />
+                        onSelect={ (selectedValue: StockData) => setNewTrackedStock(selectedValue) }
+                        setInputValue={ (data: StockData): string => data.name}
+                        renderItem={ (data: StockData): ReactElement => (
+                            <>
+                                <span className='main-text'>{ data.name }</span>
+                                <span className='sub-text'>{ data.ticker_no }</span>
+                            </>
+                        )}
+                    >
+                    </FilterableSelect>
                     <Stack gap={2} className='mt-2'>
-                        <div>Name: {newTrackedStock?.label}</div>
-                        <div>Ticker: {newTrackedStock?.subtext}</div>
+                        <div>Name: {newTrackedStock?.name}</div>
+                        <div>Ticker: {newTrackedStock?.ticker_no}</div>
                     </Stack>
                 </Modal.Body>
                 <Modal.Footer>
@@ -164,9 +164,9 @@ const PortfolioDiary = () => {
                     <Button onClick={async () => {
 
                         if (!newTrackedStock) return;
-                        if (!newTrackedStock.value) return;
+                        if (!newTrackedStock.id) return;
 
-                        const result = await StockAPI.setTrackedStock(Number(newTrackedStock.value));
+                        const result = await StockAPI.setTrackedStock(Number(newTrackedStock.id));
 
                         if (result.status === APIStatus.FAIL) {
                             //TODO: handle fail case

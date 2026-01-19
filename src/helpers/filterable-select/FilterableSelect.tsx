@@ -1,22 +1,26 @@
-import {useState, useRef, useEffect, useId} from 'react';
-import FilterableSelectItem, {FilterableSelectData} from './FilterableSelectItem';
+import {useState, useRef, useEffect, useId, ReactElement} from 'react';
+import FilterableSelectItem from './FilterableSelectItem';
 //import { MdOutlineSearch } from "react-icons/md";
 
-import './FilterableSelect.css'
 import {Form} from "react-bootstrap";
+import './FilterableSelect.css'
 
-interface FilterableSelectProps {
-	queryFn: (args: string) => Promise<FilterableSelectData[]>,
-	onSelect: (value: FilterableSelectData) => void
+interface FilterableSelectProps<T> {
+	queryFn: (args: string) => Promise<T[]>,
+	onSelect: (value: T) => void,
+	setInputValue: (value: T) => string,
+	renderItem: (data: T) => ReactElement
 }
 
 const MIN_SEARCH_LEN = 2;
 
-export const FilterableSelect = (props: FilterableSelectProps) => {
+export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 
 	const {
 		queryFn,
-		onSelect
+		onSelect,
+		setInputValue,
+		renderItem,
 	} = props;
 
 	const [searchTerm, setSearchTerm] = useState<string>('');
@@ -25,9 +29,9 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 	const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 	const itemRefs = useRef<HTMLDivElement[]>([]);
 
-	const [listItems, setListItems] = useState<FilterableSelectData[]>([]);
+	const [listItems, setListItems] = useState<T[]>([]);
 
-	const inputId = useId();
+	const inputId: string = useId();
 
 	useEffect(() => {
 
@@ -38,9 +42,7 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 
 		const getData = async () => {
 
-			const data = await queryFn(searchTerm);
-
-			if (data.length === 0) data.push({label: 'No results found...', value: null, subtext: null});
+			const data: T[] = await queryFn(searchTerm);
 
 			setListItems(data);
 		}
@@ -87,10 +89,10 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 						case 'Enter':
 							console.log('Enter Pressed');
 							if (selectedIndex < 0 || selectedIndex > itemRefs.current.length) return;
-							if (isOpen && listItems[selectedIndex].value !== null) {
+							if (isOpen && listItems[selectedIndex] !== null) {
 								const childItem = listItems[selectedIndex];
 								setIsOpen(false);
-								setSearchTerm(childItem?.label !== null ? childItem.label : '');
+								setSearchTerm(setInputValue(childItem));
 								onSelect(childItem);
 							}
 							break;
@@ -103,26 +105,33 @@ export const FilterableSelect = (props: FilterableSelectProps) => {
 				<div
 					className='filterable-dropdown'
 				>
-					{ listItems.map((item, index) =>
-						<FilterableSelectItem
-							setRef={(el: HTMLDivElement) => {
-								itemRefs.current[index] = el
-							}}
-							key={ item.value }
-							className={`${index === selectedIndex ? 'focused-item' : ''}`}
-							tabIndex={ index }
-							data={ item }
-							setData={ (id) => {
-								const childItem = listItems.find((item) => item.value == id);
-								const currentSearchTerm = childItem != null && childItem?.label !== null ? childItem.label : '';
+					{ listItems.length > 0 ?
+						listItems.map((item: T, index: number) =>
+							<FilterableSelectItem
+								setRef={(el: HTMLDivElement) => {
+									itemRefs.current[index] = el
+								}}
+								key={ `${inputId}_${index}` }
+								className={`${index === selectedIndex ? 'focused-item' : ''}`}
+								tabIndex={ index }
+								data={ item }
+								setData={ (item: T): void => {
 
-								setIsOpen(false);
-								setSearchTerm(currentSearchTerm);
-								if (childItem != null) onSelect(childItem);
-							}}
-							onMouseEnter={() => setSelectedIndex(index)}
-						/>
-					)}
+									setIsOpen(false);
+									setSearchTerm(setInputValue(item));
+									if (item != null) onSelect(item);
+								}}
+								onMouseEnter={() => setSelectedIndex(index)}
+							>
+								{ renderItem(item) }
+							</FilterableSelectItem>
+						):
+						<div
+							className='dropdown-item'
+						>
+							No results found...
+						</div>
+					}
 				</div>
 			}
 		</Form.Group>

@@ -1,5 +1,5 @@
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx.js";
 import {render, waitFor, cleanup} from "@testing-library/react";
 import {page, userEvent} from "vitest/browser";
 

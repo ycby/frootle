@@ -1,21 +1,16 @@
-import * as React from "react";
+import {ReactElement} from "react";
 
-export interface FilterableSelectData {
-	label: string | null;
-	value: string | null;
-	subtext: string | null;
-}
-
-interface FilterableSelectItemProps {
+interface FilterableSelectItemProps<T> {
 	setRef: (element: HTMLDivElement) => void;
-	data: FilterableSelectData;
+	data: T;
 	tabIndex: number;
 	className?: string;
-	setData: (data: string | undefined) => void;
-	onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
+	setData: (data: T) => void;
+	onMouseEnter: () => void;
+	children?: ReactElement;
 }
 
-const FilterableSelectItem = (props:FilterableSelectItemProps) => {
+const FilterableSelectItem = <T,>(props:FilterableSelectItemProps<T>) => {
 
 	const {
 		setRef,
@@ -23,24 +18,20 @@ const FilterableSelectItem = (props:FilterableSelectItemProps) => {
 		tabIndex = 0,
 		className = '',
 		setData,
-		onMouseEnter
+		onMouseEnter,
+		children
 	} = props;
 
 	return (
 		<div
 			ref={setRef}
-			data-value={ data.value }
 			tabIndex={ tabIndex }
 			className={`dropdown-item ${className}`}
 			role='listitem'
-			onMouseDown={ (e) => setData(e.currentTarget?.dataset?.value) }
-			onMouseEnter={ (e) => {
-
-				onMouseEnter(e);
-			}}
+			onMouseDown={ () => setData(data) }
+			onMouseEnter={ () => onMouseEnter() }
 		>
-			<span className='main-text'>{ data.label }</span>
-			<span className='sub-text'>{ data.subtext }</span>
+			{children}
 		</div>
 	);
 }

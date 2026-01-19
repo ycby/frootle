@@ -13,7 +13,7 @@ import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import * as Stock from "#root/src/apis/StockAPI.ts";
 import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
+import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx.js";
 import {APIResponse} from '#root/src/types.ts';
 import {Table} from "react-bootstrap";
 

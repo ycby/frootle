@@ -1,8 +1,9 @@
 import Container from "react-bootstrap/Container";
-import {Col, Row, Stack} from "react-bootstrap";
+import {Button, Col, Row, Stack} from "react-bootstrap";
 import {ShortData} from "#root/src/routes/portfolio-diary/types.js";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.js";
+import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 
 const data1: string[] = [
     '00001',
@@ -49,39 +50,83 @@ const DataFixPage = () => {
 
     const [selectedTicker, setSelectedTicker] = useState<string>('');
 
+    const [selectedChildren, setSelectedChildren] = useState<number[]>([]);
+
+    useEffect(() => {
+
+        setSelectedChildren([]);
+    }, [selectedTicker]);
+
+    //TODO: Cleanup by splitting up components - its too ass rn
     return (
         <Container fluid>
             <h1>Fix the data</h1>
             <Row>
                 <Col>
-                    <Stack>
-                        {data1.map((element, index) => (
-                            <div
-                                key={`${element}_${index}`}
-                                className='p-2 border'
-                                onClick={() => setSelectedTicker(element)}
-                            >
-                                {element}
-                            </div>
-                        ))}
-                    </Stack>
-                </Col>
-                <Col>
                     <Container>
-
-                    </Container>
-                    <Stack>
-                        {data2
-                            .filter(element => element.tickerNo === selectedTicker)
-                            .map((element, index) => (
+                        <h3>Pending Fix</h3>
+                        <Stack
+                            className='border'
+                        >
+                            {data1.map((element, index) => (
                                 <div
-                                    key={`${element.tickerNo}_${element.id}_${index}`}
-                                    className='p-2 border'
+                                    key={`${element}_${index}`}
+                                    className={`p-2 border ${selectedTicker === element ? 'bg-secondary': ''}`}
+                                    onClick={() => setSelectedTicker(element)}
                                 >
-                                    {`${element.id} | ${dateToStringConverter(element.reportingDate)} | ${ element.shortedShares}`}
+                                    {element}
                                 </div>
                             ))}
-                    </Stack>
+                        </Stack>
+                    </Container>
+                </Col>
+                <Col>
+                    <h3>Children</h3>
+                    <div
+                        className='border'
+                    >
+                        <Container
+                            className='d-flex direction-horizontal justify-content-between align-items-center p-2 mb-1 border-bottom shadow'
+                        >
+                            <div
+                                className='d-flex align-items-center'
+                            >
+                                <FilterableSelect />
+                                <Button>
+                                    Set
+                                </Button>
+                            </div>
+                            <Button variant='danger'>
+                                Clear
+                            </Button>
+                        </Container>
+                        <Stack>
+                            {data2
+                                .filter(element => element.tickerNo === selectedTicker)
+                                .map((element, index) => (
+                                    <div
+                                        key={`${element.tickerNo}_${element.id}_${index}`}
+                                        className={`p-2 border ${selectedChildren.includes(element.id) ? 'bg-secondary': ''}`}
+                                        onClick={() => {
+
+                                            if (!element.id) return;
+
+                                            if (selectedChildren.includes(element.id)) {
+
+                                                const removalIndex = selectedChildren.indexOf(element.id);
+                                                if (removalIndex < 0) return;
+                                                setSelectedChildren(selectedChildren.toSpliced(removalIndex, 1));
+                                            } else {
+
+                                                setSelectedChildren([...selectedChildren, element.id]);
+                                            }
+                                        }}
+                                    >
+                                        {`${element.id} | ${dateToStringConverter(element.reportingDate)} | ${ element.shortedShares}`}
+                                    </div>
+                                ))}
+                        </Stack>
+                    </div>
                 </Col>
             </Row>
         </Container>
