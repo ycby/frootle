@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect, useId, ReactElement} from 'react';
+import {useState, useRef, useEffect, useId, ReactElement, CSSProperties} from 'react';
 import FilterableSelectItem from './FilterableSelectItem';
 //import { MdOutlineSearch } from "react-icons/md";
 
@@ -9,7 +9,10 @@ interface FilterableSelectProps<T> {
 	queryFn: (args: string) => Promise<T[]>,
 	onSelect: (value: T) => void,
 	setInputValue: (value: T) => string,
-	renderItem: (data: T) => ReactElement
+	renderItem: (data: T) => ReactElement,
+	initialValue?: string,
+	className?: string,
+	style?: CSSProperties,
 }
 
 const MIN_SEARCH_LEN = 2;
@@ -21,9 +24,12 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 		onSelect,
 		setInputValue,
 		renderItem,
+		initialValue,
+		className,
+		style
 	} = props;
 
-	const [searchTerm, setSearchTerm] = useState<string>('');
+	const [searchTerm, setSearchTerm] = useState<string>(initialValue ?? '');
 	const [isOpen, setIsOpen] = useState(false);
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(-1);
@@ -59,8 +65,17 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 		itemRefs.current[selectedIndex].scrollIntoView({block: 'nearest'});
 	}, [selectedIndex]);
 
+	useEffect(() => {
+
+		setSearchTerm(initialValue ?? '');
+	}, [initialValue]);
+
 	return (
-		<Form.Group controlId={inputId} className='position-relative'>
+		<Form.Group
+			controlId={inputId}
+			className={`position-relative ${className ?? ''}`}
+			style={style}
+		>
 			<Form.Control
 				type='text'
 				name='filterable_select'

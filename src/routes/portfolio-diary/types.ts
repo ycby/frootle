@@ -5,6 +5,7 @@ export interface StockData {
     ticker_no: string;
     name: string;
     full_name?: string;
+    is_active: boolean;
 }
 
 export interface ShortData {

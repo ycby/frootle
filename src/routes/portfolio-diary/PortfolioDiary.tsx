@@ -136,7 +136,7 @@ const PortfolioDiary = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <FilterableSelect
-                        queryFn={async (args: string) => {
+                        queryFn={async (args: string): Promise<StockData[]> => {
 
                             const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
                             //TODO: handle the fail state
