@@ -166,9 +166,11 @@ const PortfolioPage = () => {
             //TODO: make a mapping function for backend objects to front end
             if (response.status === APIStatus.SUCCESS) {
 
+                console.log(response.data);
                 const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFETransaction(data));
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
+                console.log(transactionDataLineItems);
                 setTransactionData(transactionDataLineItems);
             }//Handle if failed to retrieve
         }
@@ -494,8 +496,8 @@ const PortfolioPage = () => {
                                                     }}
                                                 />
                                             </div>
-                                            <Card.Text>
-                                                <div style={{whiteSpace: 'pre-line'}}>{element.content}</div>
+                                            <Card.Text style={{whiteSpace: 'pre-line'}}>
+                                                {element.content}
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>

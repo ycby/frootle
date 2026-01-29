@@ -10,7 +10,7 @@ import 'chartjs-adapter-date-fns';
 import './short-reporting.css';
 import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import * as Stock from "#root/src/apis/StockAPI.ts";
+import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse} from '#root/src/types.ts';
@@ -154,7 +154,7 @@ export default function ShortReporting() {
 			<FilterableSelect
 				queryFn={async (args: string): Promise<StockData[]> => {
 
-					const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
+					const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
 					//TODO: handle the fail state
 					return response.data;
 				}}

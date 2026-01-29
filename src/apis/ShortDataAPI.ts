@@ -1,10 +1,10 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
-import {stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
-const shortMapper: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+const shortMapperFE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
 
     const parsedReportingDate: Date | null = stringToDateConverter(extObj.reporting_date);
 
@@ -18,6 +18,20 @@ const shortMapper: (extObj: any) => ShortData | null = (extObj: any): ShortData 
         reportingDate: parsedReportingDate,
         tickerNo: extObj.ticker_no
     };
+}
+
+const shortMapperBE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+
+    const result: any = {};
+
+    if (extObj.id !== undefined) result.id = extObj.id;
+    if (extObj.stockId !== undefined) result.stock_id = extObj.stockId;
+    if (extObj.reportingDate !== undefined) result.reporting_date = dateToStringConverter(extObj.reportingDate);
+    if (extObj.tickerNo !== undefined) result.ticker_no = extObj.tickerNo;
+    if (extObj.shortedShares !== undefined) result.shorted_shares = extObj.shortedShares;
+    if (extObj.shortedAmount !== undefined) result.shorted_amount = extObj.shortedAmount;
+
+    return result;
 }
 
 const getShortData = async (stockId: string, startDate: string, endDate: string): Promise<APIResponse<StockData[]>> => {
@@ -73,6 +87,36 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
     }
 }
 
+const putShortData = async (payload: any[]): Promise<APIResponse<any>> => {
+
+    const response = await fetch(`${baseUrl}`, {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload.map(shortMapperBE))
+    });
+
+    const responseJSON = await response.json();
+
+    console.log(responseJSON.data);
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: responseJSON.data
+    };
+
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.SUCCESS,
+        data: []
+    }
+
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    }
+}
+
 const getShortDataTickersWithNoStock = async (limit: number = 10, offset: number = 0): Promise<APIResponse<string[]>> => {
 
     const response = await fetch(`${baseUrl}/mismatch?limit=${limit}&offset=${offset}`, {
@@ -110,7 +154,7 @@ const getShortDataWithNoStock = async (tickerNo: string = ''): Promise<APIRespon
     const processedData: ShortData[] = [];
     responseJSON.data.forEach((element: any): void => {
 
-        const shortData = shortMapper(element);
+        const shortData = shortMapperFE(element);
 
         if (shortData) processedData.push(shortData);
     });
@@ -125,6 +169,7 @@ const getShortDataWithNoStock = async (tickerNo: string = ''): Promise<APIRespon
 export {
     getShortData,
     postShortData,
+    putShortData,
     getShortDataTickersWithNoStock,
     getShortDataWithNoStock
 }

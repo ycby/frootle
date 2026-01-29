@@ -13,6 +13,7 @@ interface FilterableSelectProps<T> {
 	initialValue?: string,
 	className?: string,
 	style?: CSSProperties,
+	disabled?: boolean
 }
 
 const MIN_SEARCH_LEN = 2;
@@ -26,7 +27,8 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 		renderItem,
 		initialValue,
 		className,
-		style
+		style,
+		disabled
 	} = props;
 
 	const [searchTerm, setSearchTerm] = useState<string>(initialValue ?? '');
@@ -80,6 +82,7 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 				type='text'
 				name='filterable_select'
 				placeholder='Search...'
+				disabled={disabled ?? false}
 				onChange={(e) => {
 					setSearchTerm(e.target.value)
 				}}

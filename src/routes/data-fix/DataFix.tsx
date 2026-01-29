@@ -5,7 +5,7 @@ import {ReactElement, useEffect, useState} from "react";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.js";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
-import {APIResponse} from "#root/src/types.ts";
+import {APIResponse, APIStatus} from "#root/src/types.ts";
 import * as ShortAPI from "#root/src/apis/ShortDataAPI.ts";
 
 // const data1: string[] = [
@@ -55,7 +55,7 @@ const DataFixPage = () => {
     const [selectedTicker, setSelectedTicker] = useState<string>('');
 
     const [unparentedShortData, setUnparentedShortData] = useState<ShortData[]>([]);
-    const [selectedChildren, setSelectedChildren] = useState<number[]>([]);
+    const [selectedChildrenIndex, setSelectedChildrenIndex] = useState<number[]>([]);
 
     const [fixStockData, setFixStockData] = useState<StockData | null>();
 
@@ -89,7 +89,7 @@ const DataFixPage = () => {
     useEffect(() => {
 
         //reset state
-        setSelectedChildren([]);
+        setSelectedChildrenIndex([]);
         setFixStockData(null);
     }, [selectedTicker]);
 
@@ -153,10 +153,25 @@ const DataFixPage = () => {
                                             )}
                                             initialValue={selectedTicker}
                                             className='me-1 w-100'
+                                            disabled={!selectedTicker}
                                         />
                                         <Button
-                                            disabled={selectedChildren.length === 0 || !fixStockData}
-                                            onClick={() => null}
+                                            disabled={selectedChildrenIndex.length === 0 || !fixStockData}
+                                            onClick={() => {
+
+                                                //set alert here
+                                                if (fixStockData === null) return;
+                                                if (!fixStockData?.id) return;
+
+                                                const newShortDataList = [...unparentedShortData];
+
+                                                selectedChildrenIndex.forEach((element) => {
+                                                    //TODO: change types to match expected bigint now (string)
+                                                    newShortDataList[element].stockId = fixStockData.id.toString();
+                                                });
+
+                                                setUnparentedShortData(newShortDataList);
+                                            }}
                                         >
                                             Set
                                         </Button>
@@ -173,9 +188,40 @@ const DataFixPage = () => {
                                 <Col>
                                     <Button
                                         variant='danger my-1'
-                                        onClick={() => setSelectedChildren([])}
+                                        onClick={() => {
+                                            setUnparentedShortData(unparentedShortData.map((element) => ({...element, stockId: null})));
+                                            setSelectedChildrenIndex([]);
+                                        }}
                                     >
                                         Clear
+                                    </Button>
+                                    <Button
+                                        variant='primary'
+                                        onClick={async () => {
+
+                                            const updatedList = [];
+
+                                            selectedChildrenIndex.forEach((element) => {
+
+                                                updatedList.push(unparentedShortData[element]);
+                                            });
+
+                                            const response = await ShortAPI.putShortData(updatedList);
+
+                                            if (response.status === APIStatus.SUCCESS) {
+                                                //set alert here
+                                                //disappear them
+                                                console.log('Successful PUT!');
+                                                setUnparentedShortData(unparentedShortData.filter((_element, index) => !selectedChildrenIndex.includes(index)));
+                                                setSelectedChildrenIndex([]);
+                                            } else {
+                                                //set fail alert here
+                                                //do NOT disappear them
+                                                console.error('Failed PUT!');
+                                            }
+                                        }}
+                                    >
+                                        Save
                                     </Button>
                                 </Col>
                             </Row>
@@ -186,19 +232,19 @@ const DataFixPage = () => {
                                 .map((element, index) => (
                                     <div
                                         key={`${element.tickerNo}_${element.id}_${index}`}
-                                        className={`p-2 border ${selectedChildren.includes(element.id) ? 'bg-secondary': ''}`}
+                                        className={`p-2 border ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
                                         onClick={() => {
 
                                             if (!element.id) return;
 
-                                            if (selectedChildren.includes(element.id)) {
+                                            if (selectedChildrenIndex.includes(index)) {
 
-                                                const removalIndex = selectedChildren.indexOf(element.id);
+                                                const removalIndex = selectedChildrenIndex.indexOf(index);
                                                 if (removalIndex < 0) return;
-                                                setSelectedChildren(selectedChildren.toSpliced(removalIndex, 1));
+                                                setSelectedChildrenIndex(selectedChildrenIndex.toSpliced(removalIndex, 1));
                                             } else {
 
-                                                setSelectedChildren([...selectedChildren, element.id]);
+                                                setSelectedChildrenIndex([...selectedChildrenIndex, index]);
                                             }
                                         }}
                                     >
