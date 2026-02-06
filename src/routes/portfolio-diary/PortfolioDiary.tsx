@@ -150,8 +150,7 @@ const PortfolioDiary = () => {
                                 <span className='sub-text'>{ data.ticker_no }</span>
                             </>
                         )}
-                    >
-                    </FilterableSelect>
+                    />
                     <Stack gap={2} className='mt-2'>
                         <div>Name: {newTrackedStock?.name}</div>
                         <div>Ticker: {newTrackedStock?.ticker_no}</div>

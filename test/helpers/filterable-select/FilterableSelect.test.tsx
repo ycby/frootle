@@ -1,29 +1,17 @@
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx.js";
 import {render, waitFor, cleanup} from "@testing-library/react";
+import { ReactElement } from "react";
 import {page, userEvent} from "vitest/browser";
 
-const dataList: FilterableSelectData[] = [
-    {
-        label: 'Label 1',
-        value: 'Value 1',
-        subtext: 'Subtext 1',
-    },
-    {
-        label: 'Label 2',
-        value: 'Value 2',
-        subtext: 'Subtext 2',
-    },
-    {
-        label: 'Label 3',
-        value: 'Value 3',
-        subtext: 'Subtext 3',
-    }
+const dataList: string[] = [
+    'Label 1',
+    'Label 2',
+    'Label 3',
 ];
 
-const mockFunction = async (arg: string): Promise<FilterableSelectData[]> => {
+const mockFunction = async (arg: string): Promise<string[]> => {
 
-    return dataList.filter((element) => element.label?.includes(arg) || element.subtext?.includes(arg));
+    return dataList.filter((element: string): boolean => element.includes(arg));
 }
 
 describe('FilterableSelect', () => {
@@ -35,10 +23,9 @@ describe('FilterableSelect', () => {
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): FilterableSelectData => {
-
-                    return value;
-                }}
+                onSelect={(value: string): string => value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 
@@ -69,10 +56,9 @@ describe('FilterableSelect', () => {
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): FilterableSelectData => {
-
-                    return value;
-                }}
+                onSelect={(value: string): string => value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 
@@ -85,30 +71,21 @@ describe('FilterableSelect', () => {
             await userEvent.keyboard('{Shift>}L{/Shift}abel z');
         });
 
-        await expect.element(page.getByRole('listitem')
-            .filter({
-                hasText: 'No results found'
-            })
-        ).toBeInTheDocument();
+        await expect.element(page.getByText('No results found...')).toBeInTheDocument();
 
-        await expect.element(page.getByRole('listitem')
-            .filter({
-                hasText: 'Label 1'
-            })
-        ).not.toBeInTheDocument();
+        await expect.element(page.getByText('Label 1')).not.toBeInTheDocument();
     });
 
     test('Checks if returns the right value by clicks', async () => {
 
-        let result: FilterableSelectData | null = null;
+        let result: string | null = null;
 
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): void => {
-
-                    result = value;
-                }}
+                onSelect={(value: string): string => result = value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 
@@ -118,32 +95,25 @@ describe('FilterableSelect', () => {
 
             await userEvent.click(filterableSelect);
 
-            await userEvent.keyboard('{Shift>}L{/Shift}a');
+            await userEvent.keyboard('{Shift>}L{/Shift}ab');
 
-            const filterableItem1 = page.getByRole('listitem')
-                .filter({
-                    hasText: 'Label 1'
-                });
-
-            await userEvent.click(filterableItem1);
+            await userEvent.click(page.getByText('Label 1'));
         });
 
-        // @ts-ignore
-        expect(result !== null && result.label === 'Label 1');
+        expect(result !== null && result === 'Label 1');
         await expect.element(filterableSelect).toHaveValue('Label 1');
     });
 
     test('Checks if returns the right value by arrow keys', async () => {
 
-        let result: FilterableSelectData | null = null;
+        let result: string | null = null;
 
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): void => {
-
-                    result = value;
-                }}
+                onSelect={(value: string): string => result = value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 
@@ -159,21 +129,20 @@ describe('FilterableSelect', () => {
         })
 
         // @ts-ignore
-        expect(result !== null && result.label === 'Label 2');
+        expect(result !== null && result === 'Label 2');
         await expect.element(filterableSelect).toHaveValue('Label 2');
     });
 
     test('Checks if returns the right value by arrow keys after exceeding list length', async () => {
 
-        let result: FilterableSelectData | null = null;
+        let result: string | null = null;
 
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): void => {
-
-                    result = value;
-                }}
+                onSelect={(value: string): string => result = value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 
@@ -189,21 +158,20 @@ describe('FilterableSelect', () => {
         })
 
         // @ts-ignore
-        expect(result !== null && result.label === 'Label 3');
+        expect(result !== null && result === 'Label 3');
         await expect.element(filterableSelect).toHaveValue('Label 3');
     });
 
     test('Checks if returns the right value by arrow keys after exceeding list start', async () => {
 
-        let result: FilterableSelectData | null = null;
+        let result: string | null = null;
 
         render(
             <FilterableSelect
                 queryFn={mockFunction}
-                onSelect={(value: FilterableSelectData): void => {
-
-                    result = value;
-                }}
+                onSelect={(value: string): string => result = value}
+                setInputValue={(value: string): string => value}
+                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
             />
         );
 

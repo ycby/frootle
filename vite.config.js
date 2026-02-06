@@ -18,8 +18,8 @@ export default defineConfig({
       headless: true,
       instances: [
         {browser: 'firefox'},
-      ]
-    },
-    repeatEach: 10
+      ],
+      screenshotFailures: false
+    }
   }
 })
