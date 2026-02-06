@@ -9,8 +9,8 @@ export interface StockData {
 }
 
 export interface ShortData {
-    id: number;
-    stockId: number;
+    id: string;
+    stockId?: string;
     shortedShares: number;
     shortedAmount: number;
     reportingDate: Date;

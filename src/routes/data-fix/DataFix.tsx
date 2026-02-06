@@ -7,47 +7,7 @@ import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSe
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import * as ShortAPI from "#root/src/apis/ShortDataAPI.ts";
-
-// const data1: string[] = [
-//     '00001',
-//     '00002',
-//     '00003',
-// ]
-//
-// const data2: ShortData[] = [
-//     {
-//         id: 1,
-//         stockId: null,
-//         shortedShares: 100,
-//         shortedAmount: 123,
-//         reportingDate: new Date(2025, 1, 1),
-//         tickerNo: '00001'
-//     },
-//     {
-//         id: 2,
-//         stockId: null,
-//         shortedShares: 100,
-//         shortedAmount: 123,
-//         reportingDate: new Date(2025, 1, 1),
-//         tickerNo: '00001'
-//     },
-//     {
-//         id: 3,
-//         stockId: null,
-//         shortedShares: 100,
-//         shortedAmount: 123,
-//         reportingDate: new Date(2025, 1, 1),
-//         tickerNo: '00002'
-//     },
-//     {
-//         id: 4,
-//         stockId: null,
-//         shortedShares: 100,
-//         shortedAmount: 123,
-//         reportingDate: new Date(2025, 1, 1),
-//         tickerNo: '00003'
-//     }
-// ]
+import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 
 const DataFixPage = () => {
 
@@ -58,6 +18,10 @@ const DataFixPage = () => {
     const [selectedChildrenIndex, setSelectedChildrenIndex] = useState<number[]>([]);
 
     const [fixStockData, setFixStockData] = useState<StockData | null>();
+
+    const {
+        addAlert
+    } = useAlert();
 
     useEffect(() => {
 
@@ -186,43 +150,62 @@ const DataFixPage = () => {
                             </Row>
                             <Row>
                                 <Col>
-                                    <Button
-                                        variant='danger my-1'
-                                        onClick={() => {
-                                            setUnparentedShortData(unparentedShortData.map((element) => ({...element, stockId: null})));
-                                            setSelectedChildrenIndex([]);
-                                        }}
-                                    >
-                                        Clear
-                                    </Button>
-                                    <Button
-                                        variant='primary'
-                                        onClick={async () => {
-
-                                            const updatedList = [];
-
-                                            selectedChildrenIndex.forEach((element) => {
-
-                                                updatedList.push(unparentedShortData[element]);
-                                            });
-
-                                            const response = await ShortAPI.putShortData(updatedList);
-
-                                            if (response.status === APIStatus.SUCCESS) {
-                                                //set alert here
-                                                //disappear them
-                                                console.log('Successful PUT!');
-                                                setUnparentedShortData(unparentedShortData.filter((_element, index) => !selectedChildrenIndex.includes(index)));
+                                    <div className='d-flex justify-content-between'>
+                                        <Button
+                                            variant='danger my-1'
+                                            onClick={() => {
+                                                setUnparentedShortData(unparentedShortData.map((element: ShortData): ShortData => ({...element, stockId: undefined})));
                                                 setSelectedChildrenIndex([]);
-                                            } else {
-                                                //set fail alert here
-                                                //do NOT disappear them
-                                                console.error('Failed PUT!');
-                                            }
-                                        }}
-                                    >
-                                        Save
-                                    </Button>
+                                            }}
+                                        >
+                                            Clear
+                                        </Button>
+                                        <Button
+                                            variant='primary'
+                                            disabled={selectedChildrenIndex.length === 0 || !fixStockData}
+                                            onClick={async () => {
+
+                                                const shortDataToUpdate: ShortData[] = unparentedShortData.filter(element => element.stockId !== null && element.stockId !== undefined);
+
+                                                if (shortDataToUpdate.length === 0) {
+                                                    addAlert({
+                                                        message: 'No Short Data to sync! Please set the parent Stock first!',
+                                                        type: 'warning',
+                                                        duration: 8000
+                                                    });
+                                                    return;
+                                                }
+
+                                                const response = await ShortAPI.putShortData(shortDataToUpdate);
+
+                                                if (response.status === APIStatus.SUCCESS) {
+                                                    //set alert here
+                                                    addAlert({
+                                                        name: 'Short Data saved successfully!',
+                                                        message: 'Short Data saved successfully!',
+                                                        type: 'success',
+                                                        duration: 5000
+                                                    });
+                                                    //disappear them
+                                                    console.log('Successful PUT!');
+                                                    setUnparentedShortData(unparentedShortData.filter((element) => element.stockId === null || element.stockId === undefined));
+                                                    setSelectedChildrenIndex([]);
+                                                } else {
+                                                    //set fail alert here
+                                                    addAlert({
+                                                        name: 'Short Data failed to save!',
+                                                        message: 'Short Data failed to save!',
+                                                        type: 'danger',
+                                                        duration: 5000
+                                                    });
+                                                    //do NOT disappear them
+                                                    console.error('Failed PUT!');
+                                                }
+                                            }}
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
                                 </Col>
                             </Row>
                         </Container>
@@ -232,7 +215,7 @@ const DataFixPage = () => {
                                 .map((element, index) => (
                                     <div
                                         key={`${element.tickerNo}_${element.id}_${index}`}
-                                        className={`p-2 border ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
+                                        className={`p-2 border d-flex justify-content-between ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
                                         onClick={() => {
 
                                             if (!element.id) return;
