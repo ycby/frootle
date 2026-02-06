@@ -2,7 +2,7 @@ import './PortfolioDiary.css';
 import {ReactElement, useEffect, useState} from "react";
 import {
     TransactionData,
-    DiaryEntryData,
+    DiaryEntry,
     StockData
 } from "#root/src/routes/portfolio-diary/types.ts";
 
@@ -19,7 +19,7 @@ type StockDataContainerItem = StockData & {
     title: string;
 };
 
-export type DiaryEntryListItem = DiaryEntryData;
+export type DiaryEntryListItem = DiaryEntry;
 
 export type TransactionDataListItem = TransactionData;
 

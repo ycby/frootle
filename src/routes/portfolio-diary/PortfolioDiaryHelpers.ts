@@ -1,10 +1,9 @@
 import {
     TransactionData,
     TransactionDataBE,
-    NewTransactionInputs,
-    DiaryEntryData, DiaryEntryBE
+    NewTransactionInputs
 } from "#root/src/routes/portfolio-diary/types.ts";
-import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import {TransactionType} from "#root/src/types.ts";
 
 const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
@@ -37,31 +36,6 @@ const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (
         amountPerShare: Number(data.amount_per_share).toFixed(2),
         transactionDate: new Date(data.transaction_date),
         currency: data.currency,
-    };
-}
-
-const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sourceObj: DiaryEntryData): DiaryEntryBE  => {
-
-    const result: DiaryEntryBE = {
-        stock_id: sourceObj.stockId,
-        title: sourceObj.title,
-        content: sourceObj.content,
-        posted_date: dateToStringConverter(sourceObj.postedDate)
-    };
-
-    if (sourceObj?.id) result.id = sourceObj.id;
-
-    return result;
-}
-
-const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData => {
-
-    return {
-        id: sourceObj.id,
-        stockId: sourceObj.stock_id,
-        title: sourceObj.title,
-        content: sourceObj.content,
-        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1)
     };
 }
 
@@ -99,8 +73,6 @@ const getRandomNumber: (max: number) => number = (max: number): number => {
 export {
     convertFEtoBETransaction,
     convertBEtoFETransaction,
-    convertFEtoBEDiaryEntry,
-    convertBEtoFEDiaryEntry,
     convertTransactionToNewTransaction,
     capitaliseWord,
     replaceUnderscoreWithSpace,

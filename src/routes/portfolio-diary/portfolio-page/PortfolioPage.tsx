@@ -3,7 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {APIResponse, APIStatus, ComponentStatus, ComponentStatusKeys} from "#root/src/types.ts";
 import {
-    DiaryEntryBE, DiaryEntryData,
+    DiaryEntry,
     NewTransactionInputs,
     StockData,
     TransactionData,
@@ -12,8 +12,7 @@ import {
 import * as StockTransactionAPI from "#root/src/apis/StockTransactionAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {
-    convertBEtoFEDiaryEntry,
-    convertBEtoFETransaction, convertFEtoBEDiaryEntry,
+    convertBEtoFETransaction,
     convertFEtoBETransaction, convertTransactionToNewTransaction
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
@@ -30,7 +29,6 @@ import {MdModeEdit} from "react-icons/md";
 import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
-// import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 
 const exampleTransactions: TransactionData[] = [
     {
@@ -68,25 +66,25 @@ const exampleTransactions: TransactionData[] = [
     }
 ];
 
-const exampleDiaryEntry: DiaryEntryData[] = [
+const exampleDiaryEntry: DiaryEntry[] = [
     {
-        id: 1,
-        stockId: 1,
+        id: '1',
+        stockId: '1',
         title: 'Initial thoughts',
         content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices.' +
             '\nPhasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
         postedDate: new Date(2025, 1, 1)
     },
     {
-        id: 2,
-        stockId: 1,
+        id: '2',
+        stockId: '1',
         title: 'Update 1',
         content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
         postedDate: new Date(2025, 2, 1)
     },
     {
-        id: 3,
-        stockId: 1,
+        id: '3',
+        stockId: '1',
         title: 'Update 2',
         content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
         postedDate: new Date(2025, 3, 1)
@@ -94,7 +92,7 @@ const exampleDiaryEntry: DiaryEntryData[] = [
 ];
 
 type DeletionObject = {
-    id: number,
+    id: string,
     type: string
 }
 
@@ -119,7 +117,7 @@ const PortfolioPage = () => {
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
-    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntryData>(resetDiaryEntryData());
+    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntry>(resetDiaryEntryData());
 
     const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
 
@@ -185,11 +183,11 @@ const PortfolioPage = () => {
 
         const getDiaryEntries = async () => {
 
-            const response: APIResponse<DiaryEntryBE[]> = await DiaryEntryAPI.getDiaryEntries(stockData.id);
+            const response: APIResponse<DiaryEntry[]> = await DiaryEntryAPI.getDiaryEntries(stockData.id);
 
             if (response.status === APIStatus.SUCCESS) {
 
-                const diaryEntryData: DiaryEntryData[] = response.data.map((data: DiaryEntryBE): DiaryEntryData => convertBEtoFEDiaryEntry(data));
+                const diaryEntryData: DiaryEntry[] = response.data;
 
                 const diaryEntryLineItems: DiaryEntryListItem[] = processDiaryEntries(diaryEntryData);
                 setDiaryEntries(diaryEntryLineItems);
@@ -567,11 +565,10 @@ const PortfolioPage = () => {
                         //validate input and generate correct values
 
                         //generate the value
-                        const de = convertFEtoBEDiaryEntry(newDiaryEntry);
-                        console.log(de);
+                        const de = {...newDiaryEntry};
 
                         //send to back end
-                        const response = de.id ? await DiaryEntryAPI.putDiaryEntry(de.id, de) : await DiaryEntryAPI.postDiaryEntries(de);
+                        const response = de.id ? await DiaryEntryAPI.putDiaryEntry({...de, id: de.id}) : await DiaryEntryAPI.postDiaryEntries(de);
 
                         if (response.status === APIStatus.FAIL) {
                             console.error('Failed to create diary entry: ' + response.data);
@@ -581,12 +578,15 @@ const PortfolioPage = () => {
                         //set the id of the transaction - assume only 1
                         if (!de?.id) de.id = response.data[0];
                         //parse response and append to list
-                        let newArray: DiaryEntryData[] = [...diaryEntries];
+                        let newArray: DiaryEntry[] = [...diaryEntries];
 
                         //new items won't impact the array since the id won't be found in the array
                         const editedIndex = newArray.findIndex(element => element.id === de.id);
+
                         if (editedIndex !== -1) newArray.splice(editedIndex, 1);
-                        newArray.unshift(convertBEtoFEDiaryEntry(de));
+
+                        newArray.unshift(de);
+
                         setDiaryEntries(processDiaryEntries(newArray).sort(diaryEntrySortingFn));
                         //just clear extra here in case
                         if (stockData?.id) setNewDiaryEntry({...resetDiaryEntryData(), stockId: stockData.id});
@@ -660,7 +660,7 @@ const PortfolioPage = () => {
 
                                 if (diaryResult.status === APIStatus.SUCCESS) {
 
-                                    let newArray: DiaryEntryData[] = [...diaryEntries];
+                                    let newArray: DiaryEntry[] = [...diaryEntries];
 
                                     //new items won't impact the array since the id won't be found in the array
                                     const editedIndex = newArray.findIndex(element => element.id === deletionObject.id);
@@ -710,9 +710,9 @@ const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionIn
     }
 }
 
-const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntryData[]): DiaryEntryListItem[] => {
+const processDiaryEntries: (diaryEntries: DiaryEntry[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntry[]): DiaryEntryListItem[] => {
 
-    return diaryEntries.map((element: DiaryEntryData, index: number) => {
+    return diaryEntries.map((element: DiaryEntry, index: number) => {
 
         return {
             ...element,
@@ -722,10 +722,11 @@ const processDiaryEntries: (diaryEntries: DiaryEntryData[]) => DiaryEntryListIte
     });
 }
 
-const resetDiaryEntryData: () => DiaryEntryData = (): DiaryEntryData => {
+const resetDiaryEntryData = (): DiaryEntry => {
 
     return {
-        stockId: 0,
+        id: null,
+        stockId: null,
         title: '',
         content: '',
         postedDate: new Date(),
@@ -737,7 +738,7 @@ const transactionSortingFn: (a: TransactionData, b: TransactionData) => number =
     return b.transactionDate.getTime() - a.transactionDate.getTime();
 }
 
-const diaryEntrySortingFn: (a: DiaryEntryData, b: DiaryEntryData) => number = (a: DiaryEntryData, b: DiaryEntryData):number => {
+const diaryEntrySortingFn: (a: DiaryEntry, b: DiaryEntry) => number = (a: DiaryEntry, b: DiaryEntry):number => {
 
     return b.postedDate.getTime() - a.postedDate.getTime();
 }

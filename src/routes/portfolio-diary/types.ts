@@ -1,6 +1,6 @@
 import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
 
-export interface StockData {
+export type StockData = {
     id: number;
     ticker_no: string;
     name: string;
@@ -8,7 +8,7 @@ export interface StockData {
     is_active: boolean;
 }
 
-export interface ShortData {
+export type ShortData = {
     id: string;
     stockId?: string;
     shortedShares: number;
@@ -17,7 +17,7 @@ export interface ShortData {
     tickerNo?: string;
 }
 
-export interface TransactionData {
+export type TransactionData = {
     id?: number,
     stockId: number,
     type: TransactionTypeKeys;
@@ -29,7 +29,7 @@ export interface TransactionData {
     currency: CurrencyKeys;
 }
 
-export interface TransactionDataBE {
+export type TransactionDataBE = {
     id?: number,
     stock_id: number;
     type: TransactionTypeKeys;
@@ -41,7 +41,7 @@ export interface TransactionDataBE {
     currency: CurrencyKeys;
 }
 
-export interface NewTransactionInputs {
+export type NewTransactionInputs = {
     id?: number;
     stockId: number;
     type: TransactionTypeKeys;
@@ -52,17 +52,17 @@ export interface NewTransactionInputs {
     currency: CurrencyKeys;
 }
 
-export interface DiaryEntryData {
-    id?: number,
-    stockId: number,
+export type DiaryEntry = {
+    id: string | null,
+    stockId: string | null,
     title: string,
     content: string,
     postedDate: Date
 }
 
-export interface DiaryEntryBE {
-    id?: number,
-    stock_id: number,
+export type DiaryEntryBE = {
+    id: string,
+    stock_id: string,
     title: string,
     content: string,
     posted_date: string

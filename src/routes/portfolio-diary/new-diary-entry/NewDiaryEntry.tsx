@@ -1,11 +1,11 @@
 import {useId} from "react";
-import {DiaryEntryData} from "#root/src/routes/portfolio-diary/types.ts";
+import {DiaryEntry} from "#root/src/routes/portfolio-diary/types.ts";
 import {NewItemView} from "#root/src/types.ts";
 
 import './NewDiaryEntry.css';
 import {Form, Stack} from "react-bootstrap";
 
-const NewDiaryEntry = (props: NewItemView<DiaryEntryData>) => {
+const NewDiaryEntry = (props: NewItemView<DiaryEntry>) => {
 
     const {
         sourceObject,
