@@ -29,67 +29,6 @@ import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
 
-const exampleTransactions: TransactionData[] = [
-    {
-        id: 1,
-        stockId: 1,
-        amount: "100.00",
-        type: 'buy',
-        amountPerShare: "10.00",
-        quantity: 5,
-        fee: "0.10",
-        transactionDate: new Date(2025, 1, 1),
-        currency: 'HKD',
-    },
-    {
-        id: 2,
-        stockId: 1,
-        amount: "200.00",
-        type: 'scrip_dividend',
-        amountPerShare: "1.00",
-        quantity: 5,
-        fee: "0.10",
-        transactionDate: new Date(2025, 4, 13),
-        currency: "HKD",
-    },
-    {
-        id: 3,
-        stockId: 1,
-        amount: "300.00",
-        type: 'sell',
-        amountPerShare: "10.00",
-        quantity: 5,
-        fee: "0.10",
-        transactionDate: new Date(2025, 6, 21),
-        currency: 'HKD',
-    }
-];
-
-const exampleDiaryEntry: DiaryEntry[] = [
-    {
-        id: '1',
-        stockId: '1',
-        title: 'Initial thoughts',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices.' +
-            '\nPhasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 1, 1)
-    },
-    {
-        id: '2',
-        stockId: '1',
-        title: 'Update 1',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 2, 1)
-    },
-    {
-        id: '3',
-        stockId: '1',
-        title: 'Update 2',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus libero vitae tristique ultrices. Phasellus tempus condimentum mauris vel convallis. Integer pellentesque erat ut rutrum hendrerit. Pellentesque eros ligula, egestas eu posuere ac, feugiat in massa. Nulla suscipit velit sed ex sollicitudin eleifend id ac lacus. Pellentesque eu lacus ut massa volutpat posuere non ac nisi. Praesent ullamcorper sit amet quam laoreet pharetra. Nunc elementum tincidunt efficitur. Cras ut lacinia quam. Nunc interdum iaculis lacus in mollis. Duis sit amet est vel felis faucibus ultrices non quis metus. ',
-        postedDate: new Date(2025, 3, 1)
-    }
-];
-
 type DeletionObject = {
     id: string,
     type: string
@@ -112,10 +51,10 @@ const PortfolioPage = () => {
 
     const [stockData, setStockData] = useState<StockData | null>(null);
 
-    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>();
+    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>([]);
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
-    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>();
+    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>([]);
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntry>(resetDiaryEntryData());
 
     const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
@@ -144,7 +83,7 @@ const PortfolioPage = () => {
                 if (response.data.length !== 1) console.error('More than one stock data found...');
 
                 setStockData(response.data[0]);
-            } //Handle error if have
+            } //Handle error if error
         }
 
         getStock();

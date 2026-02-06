@@ -16,7 +16,6 @@ const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<S
 
     const responseJSON = await response.json();
 
-    console.log(responseJSON.data);
     if (responseJSON.status !== 1) return {
         status: APIStatus.FAIL,
         data: []
@@ -77,7 +76,7 @@ const setTrackedStock = async (id: number): Promise<APIResponse<StockData[]>> =>
     };
 }
 
-const setUntrackedStock = async (id: number): Promise<APIResponse<StockData[]>> => {
+const setUntrackedStock = async (id: string): Promise<APIResponse<StockData[]>> => {
 
     const response = await fetch(`${baseUrl}/tracked/${id}/untrack`, {
         method: 'POST'

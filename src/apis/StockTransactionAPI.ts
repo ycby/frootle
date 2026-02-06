@@ -36,7 +36,7 @@ const transactionMapperFE = (data: TransactionDataBE): TransactionData => {
     };
 }
 
-const getStockTransactions = async (stockId: number): Promise<APIResponse<TransactionData[]>> => {
+const getStockTransactions = async (stockId: string): Promise<APIResponse<TransactionData[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'

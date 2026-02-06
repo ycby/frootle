@@ -1,7 +1,12 @@
-import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
+import {ComponentStatusKeys, CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
+
+export type ListItem = {
+    index: number;
+    status: ComponentStatusKeys
+}
 
 export type StockData = {
-    id: number;
+    id: string;
     ticker_no: string;
     name: string;
     full_name?: string;

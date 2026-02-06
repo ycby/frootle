@@ -3,7 +3,7 @@ import {ReactElement, useEffect, useState} from "react";
 import {
     TransactionData,
     DiaryEntry,
-    StockData
+    StockData, ListItem
 } from "#root/src/routes/portfolio-diary/types.ts";
 
 import {APIStatus, APIResponse} from "#root/src/types.ts";
@@ -19,34 +19,13 @@ type StockDataContainerItem = StockData & {
     title: string;
 };
 
-export type DiaryEntryListItem = DiaryEntry;
+export type DiaryEntryListItem = DiaryEntry & ListItem;
 
-export type TransactionDataListItem = TransactionData;
-
-const exampleStocks: StockDataContainerItem[] = [
-    {
-        id: 1,
-        ticker_no: '00001',
-        name: 'Stock 1',
-        title: '00001'
-    },
-    {
-        id: 2,
-        ticker_no: '00002',
-        name: 'Stock 2',
-        title: '00002'
-    },
-    {
-        id: 3,
-        ticker_no: '00003',
-        name: 'Stock 3',
-        title: '00003'
-    }
-]
+export type TransactionDataListItem = TransactionData & ListItem;
 
 const PortfolioDiary = () => {
 
-    const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
+    const [stockData, setStockData] = useState<StockDataContainerItem[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
 
