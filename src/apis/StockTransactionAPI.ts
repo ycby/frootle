@@ -1,12 +1,42 @@
-import {TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
-import {APIResponse, APIStatus} from "#root/src/types.ts";
+import {NewTransactionInputs, TransactionData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
+import {APIResponse, APIStatus, TransactionType} from "#root/src/types.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/transaction`;
 
-//map to local format - most transactions will only require checking status
-//{ status, data }
+const transactionMapperBE = (sourceObj: NewTransactionInputs): Partial<TransactionDataBE>  => {
 
-const getStockTransactions = async (stockId: number): Promise<APIResponse<TransactionDataBE[]>> => {
+    const result: Partial<TransactionDataBE> = {
+        type: sourceObj.type,
+        amount: Number(sourceObj.amtWOFee),
+        quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
+        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)),
+        amount_per_share: Number(sourceObj.amtWOFee) / Number(sourceObj.quantity),
+        transaction_date: sourceObj.transactionDate,
+        currency: sourceObj.currency
+    };
+
+    if (sourceObj.id === undefined) result.id = sourceObj.id;
+    if (sourceObj.stockId === undefined) result.stock_id = sourceObj.stockId;
+
+    return result;
+}
+
+const transactionMapperFE = (data: TransactionDataBE): TransactionData => {
+
+    return {
+        id: data.id,
+        stockId: data.stock_id,
+        type: data.type,
+        amount: Number(data.amount).toFixed(2),
+        quantity: data.quantity,
+        fee: Number(data.fee).toFixed(2),
+        amountPerShare: Number(data.amount_per_share).toFixed(2),
+        transactionDate: new Date(data.transaction_date),
+        currency: data.currency,
+    };
+}
+
+const getStockTransactions = async (stockId: number): Promise<APIResponse<TransactionData[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}`, {
         method: 'GET'
@@ -15,24 +45,26 @@ const getStockTransactions = async (stockId: number): Promise<APIResponse<Transa
     if (!response.ok) return {
         status: APIStatus.FAIL,
         data: [],
-    } as APIResponse<TransactionDataBE[]>;
+    };
 
     const responseJSON = await response.json();
 
     if (responseJSON.status !== 1) return {
         status: APIStatus.FAIL,
         data: [],
-    } as APIResponse<TransactionDataBE[]>;
+    };
 
     return {
         status: APIStatus.SUCCESS,
-        data: responseJSON.data
+        data: responseJSON.data.map((element: TransactionDataBE) => transactionMapperFE(element))
     };
 }
 
-const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE[]): Promise<APIResponse<any[]>> => {
+const postStockTransactions = async (data: NewTransactionInputs | NewTransactionInputs[]): Promise<APIResponse<any[]>> => {
 
-    const processedData = data instanceof Array ? data : [data];
+    const processedData = data instanceof Array
+        ? data.map(element => transactionMapperBE(element))
+        : [transactionMapperBE(data)];
 
     const response = await fetch(`${baseUrl}`, {
         method: 'POST',
@@ -55,13 +87,15 @@ const postStockTransactions = async (data: TransactionDataBE | TransactionDataBE
     };
 }
 
-const putStockTransaction = async (id: number, data: TransactionDataBE): Promise<APIResponse<any[]>> => {
+const putStockTransaction = async (data: NewTransactionInputs | NewTransactionInputs[]): Promise<APIResponse<any[]>> => {
 
-    const processedData = {...data, id: id}
+    const processedData = data instanceof Array
+        ? data.map(element => transactionMapperBE(element))
+        : [transactionMapperBE(data)];
 
     console.log(processedData)
 
-    const response = await fetch(`${baseUrl}/${id}`, {
+    const response = await fetch(`${baseUrl}/`, {
         method: 'PUT',
         body: JSON.stringify(processedData),
         headers: {
@@ -82,7 +116,7 @@ const putStockTransaction = async (id: number, data: TransactionDataBE): Promise
     };
 }
 
-const deleteStockTransaction = async (id: number): Promise<APIResponse<any[]>> => {
+const deleteStockTransaction = async (id: string): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/${id}`, {
         method: 'DELETE'

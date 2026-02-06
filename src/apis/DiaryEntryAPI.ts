@@ -11,8 +11,8 @@ const diaryEntryMapperBE = (sourceObj: Partial<DiaryEntry>): Partial<DiaryEntryB
 
     const result: Partial<DiaryEntryBE> = {};
 
-    if (sourceObj?.id) result.id = sourceObj.id;
-    if (sourceObj?.stockId) result.stock_id = sourceObj.stockId;
+    if (sourceObj.id !== null) result.id = sourceObj.id;
+    if (sourceObj.stockId !== null) result.stock_id = sourceObj.stockId;
     if (sourceObj?.title) result.title = sourceObj.title;
     if (sourceObj?.content) result.content = sourceObj.content;
     if (sourceObj?.postedDate) result.posted_date = dateToStringConverter(sourceObj.postedDate);

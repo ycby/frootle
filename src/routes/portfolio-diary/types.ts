@@ -18,8 +18,8 @@ export type ShortData = {
 }
 
 export type TransactionData = {
-    id?: number,
-    stockId: number,
+    id: string | null;
+    stockId: string | null;
     type: TransactionTypeKeys;
     amount: string;
     amountPerShare: string;
@@ -30,8 +30,8 @@ export type TransactionData = {
 }
 
 export type TransactionDataBE = {
-    id?: number,
-    stock_id: number;
+    id: string;
+    stock_id: string;
     type: TransactionTypeKeys;
     amount: number;
     amount_per_share: number;
@@ -42,8 +42,8 @@ export type TransactionDataBE = {
 }
 
 export type NewTransactionInputs = {
-    id?: number;
-    stockId: number;
+    id: string | null;
+    stockId: string | null;
     type: TransactionTypeKeys;
     amtWFee: string;
     amtWOFee: string;

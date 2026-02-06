@@ -7,13 +7,12 @@ import {
     NewTransactionInputs,
     StockData,
     TransactionData,
-    TransactionDataBE
 } from "#root/src/routes/portfolio-diary/types.ts";
 import * as StockTransactionAPI from "#root/src/apis/StockTransactionAPI.ts";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {
-    convertBEtoFETransaction,
-    convertFEtoBETransaction, convertTransactionToNewTransaction
+    convertNewTransactionToTransaction,
+    convertTransactionToNewTransaction
 } from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 import {DiaryEntryListItem, TransactionDataListItem} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
@@ -113,10 +112,10 @@ const PortfolioPage = () => {
 
     const [stockData, setStockData] = useState<StockData | null>(null);
 
-    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>(() => processTransactionData(exampleTransactions));
+    const [transactionData, setTransactionData] = useState<TransactionDataListItem[]>();
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
-    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>(() => processDiaryEntries(exampleDiaryEntry));
+    const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>();
     const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntry>(resetDiaryEntryData());
 
     const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
@@ -159,13 +158,13 @@ const PortfolioPage = () => {
         //skip while making templates
         const getTransactions = async () => {
 
-            const response: APIResponse<TransactionDataBE[]> = await StockTransactionAPI.getStockTransactions(stockData.id);
+            const response: APIResponse<TransactionData[]> = await StockTransactionAPI.getStockTransactions(stockData.id);
 
             //TODO: make a mapping function for backend objects to front end
             if (response.status === APIStatus.SUCCESS) {
 
                 console.log(response.data);
-                const transactionData: TransactionData[] = response.data.map((data: TransactionDataBE): TransactionData => convertBEtoFETransaction(data));
+                const transactionData: TransactionData[] = response.data;
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
                 console.log(transactionDataLineItems);
@@ -519,10 +518,12 @@ const PortfolioPage = () => {
                     <Button variant='primary' onClick={async () => {
 
                         //generate the value
-                        const td = convertFEtoBETransaction(newTransactionData);
+                        const td = {...newTransactionData};
                         console.log(td);
                         //send to back end
-                        const response = td.id ? await StockTransactionAPI.putStockTransaction(td.id, td) : await StockTransactionAPI.postStockTransactions(td);
+                        const response = td.id
+                            ? await StockTransactionAPI.putStockTransaction({...td, id: td.id})
+                            : await StockTransactionAPI.postStockTransactions(td);
                         if (response.status === APIStatus.FAIL) {
                             console.error('Failed to create transaction: ' + response.data);
                             return;
@@ -537,11 +538,13 @@ const PortfolioPage = () => {
                         const editedIndex = newArray.findIndex(element => element.id === td.id);
                         if (editedIndex !== -1) newArray.splice(editedIndex, 1);
 
-                        newArray.unshift(convertBEtoFETransaction(td));
+                        newArray.unshift(convertNewTransactionToTransaction(td));
                         setTransactionData(processTransactionData(newArray).sort(transactionSortingFn));
 
                         //just clear extra here in case
-                        if (stockData?.id) setNewTransactionData({...resetNewTransactionData(), stockId: stockData.id});
+                        const resetNewTransaction = resetNewTransactionData();
+                        if (stockData?.id) resetNewTransaction.stockId = stockData.id;
+                        setNewTransactionData(resetNewTransaction);
 
                         setShowTransactionModal(false);
                     }}>
@@ -700,7 +703,8 @@ const processTransactionData: (transactionData: TransactionData[]) => Transactio
 const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionInputs => {
 
     return {
-        stockId: 0,
+        id: null,
+        stockId: null,
         type: 'buy',
         transactionDate: '',
         amtWOFee: '',
