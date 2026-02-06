@@ -5,11 +5,12 @@ export interface StockData {
     ticker_no: string;
     name: string;
     full_name?: string;
+    is_active: boolean;
 }
 
 export interface ShortData {
-    id: number;
-    stockId: number;
+    id: string;
+    stockId?: string;
     shortedShares: number;
     shortedAmount: number;
     reportingDate: Date;

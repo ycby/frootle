@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, ReactElement} from 'react';
 import Loading from '#root/src/helpers/loading/Loading.tsx';
 import { FilterableSelect } from '#root/src/helpers/filterable-select/FilterableSelect.tsx';
 
@@ -10,10 +10,9 @@ import 'chartjs-adapter-date-fns';
 import './short-reporting.css';
 import {DatePicker} from "#root/src/helpers/date-picker/DatePicker.tsx";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
-import * as Stock from "#root/src/apis/StockAPI.ts";
+import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
-import {FilterableSelectData} from "#root/src/helpers/filterable-select/FilterableSelectItem.tsx";
 import {APIResponse} from '#root/src/types.ts';
 import {Table} from "react-bootstrap";
 
@@ -90,14 +89,14 @@ export default function ShortReporting() {
 	const [data, setData] = useState<ShortData[]>([]);
 	const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
-	const [selectedStock, setSelectedStock] = useState<FilterableSelectData>({label: null, value: null, subtext: null});
+	const [selectedStock, setSelectedStock] = useState<StockData | null>();
 
 	const dateToday = new Date();
 	const [startDate, setStartDate] = useState<Date | null>(new Date(dateToday.getFullYear() - 1, dateToday.getMonth(), dateToday.getDate()));
 	const [endDate, setEndDate] = useState<Date | null>(dateToday);
 
 	let currentStatus = '';
-	if (selectedStock == null || selectedStock.value == null) {
+	if (selectedStock == null) {
 		currentStatus = 'UNLOADED';
 	} else if (data.length === 0) {
 		currentStatus = 'LOADING';
@@ -109,9 +108,9 @@ export default function ShortReporting() {
 
 		async function getShortData() {
 
-			if (!selectedStock.value) return;
+			if (!selectedStock) return;
 
-			const response = await ShortDataAPI.getShortData(selectedStock.value, dateToStringConverter(startDate), dateToStringConverter(endDate));
+			const response = await ShortDataAPI.getShortData(selectedStock.id.toString(), dateToStringConverter(startDate), dateToStringConverter(endDate));
 
 			const processedData: ShortData[] = response.data.map((json: any) => processJSON(jsonMapping, json) as ShortData);
 
@@ -150,24 +149,23 @@ export default function ShortReporting() {
 	);
 
 	return (
-		
 		<div id='short-reporting'>
 			<h1>This is the Short Reporting Page</h1>
 			<FilterableSelect
-				queryFn={async (args: string) => {
+				queryFn={async (args: string): Promise<StockData[]> => {
 
-					const response: APIResponse<StockData[]> = await Stock.getStocksByNameOrTicker(args);
+					const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
 					//TODO: handle the fail state
-					return response.data.map((data: StockData): FilterableSelectData => {
-
-						return ({
-							label: data.name,
-							value: data.id.toString(),
-							subtext: data.ticker_no
-						} as FilterableSelectData);
-					});
+					return response.data;
 				}}
-				onSelect={ (selectedValue: FilterableSelectData) => setSelectedStock(selectedValue) }
+				onSelect={ (selectedValue: StockData): void => setSelectedStock(selectedValue) }
+				setInputValue={ (item: StockData): string => item.name }
+				renderItem={ (data: StockData): ReactElement => (
+					<>
+						<span className='main-text'>{ data.name }</span>
+						<span className='sub-text'>{ data.ticker_no }</span>
+					</>
+				)}
 			/>
 			<div id='filter-group'>
 				<div className='filter-element'>

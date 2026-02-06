@@ -1,14 +1,16 @@
 import {createContext, useContext, useState, Context} from "react";
-import {AlertContainer} from "#root/src/helpers/alerts/Alert.tsx";
+import {AlertContainer} from "#root/src/helpers/alerts/AlertContainer.tsx";
+import {Variant} from "react-bootstrap/types";
 
 
-export type AlertContent = {
+export interface AlertContent {
     name?: string;
     message: string;
-    type: string;
+    type: Variant;
+    duration?: number;
 }
 
-type AlertContextType = {
+interface AlertContextType {
     alerts: AlertContent[];
     addAlert: (newAlert: AlertContent) => void;
     removeAlert: (index: number) => void;
