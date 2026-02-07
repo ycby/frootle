@@ -1,13 +1,20 @@
 import Container from "react-bootstrap/Container";
-import {Badge, Button, Col, Row, Stack} from "react-bootstrap";
+import {Badge, Button, Col, Pagination, Row, Stack} from "react-bootstrap";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.js";
-import {ReactElement, useEffect, useState} from "react";
+import {ReactElement, useEffect, useRef, useState} from "react";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.js";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import * as ShortAPI from "#root/src/apis/ShortDataAPI.ts";
 import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
+
+type MismatchTickerResponse = {
+    total_rows: string;
+    tickers: string[];
+    offset: number;
+    limit: number;
+}
 
 const DataFixPage = () => {
 
@@ -19,20 +26,23 @@ const DataFixPage = () => {
 
     const [fixStockData, setFixStockData] = useState<StockData | null>();
 
+    const totalRows = useRef<number>(0);
+    const currentPage = useRef<number>(0);
+
     const {
         addAlert
     } = useAlert();
 
+    const getTickerList = async (limit: number = 10, offset: number = 0) => {
+
+        const response: APIResponse<MismatchTickerResponse> = await ShortAPI.getShortDataTickersWithNoStock(limit, offset);
+
+        setTickersWithUnparentedShorts(response.data.tickers);
+        totalRows.current = Number(response.data.total_rows);
+    }
     useEffect(() => {
 
-        const getTickerList = async () => {
-
-            const response: APIResponse<string[]> = await ShortAPI.getShortDataTickersWithNoStock(10, 0);
-
-            setTickersWithUnparentedShorts(response.data);
-        }
-
-        getTickerList();
+        getTickerList(10, 0);
     }, []);
 
     useEffect(() => {
@@ -78,6 +88,25 @@ const DataFixPage = () => {
                                 </div>
                             ))}
                         </Stack>
+                        <Pagination>
+                            <Pagination.Prev />
+                            {
+                                //TODO: remove hardcode limit 10 later
+                                // Use ellipses to make it less shit
+                                Array.from({length: (totalRows.current / 10) + (totalRows.current % 10 == 0 ? 0 : 1)}, (_, index) => (
+                                    <Pagination.Item
+                                        active={index === currentPage.current}
+                                        onClick={() => {
+                                            getTickerList(10, index * 10);
+                                            currentPage.current = index;
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </Pagination.Item>
+                                ))
+                            }
+                            <Pagination.Next />
+                        </Pagination>
                     </Container>
                 </Col>
                 <Col>

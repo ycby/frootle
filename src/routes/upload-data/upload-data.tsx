@@ -2,10 +2,10 @@ import {useState, useRef, FormEvent,} from 'react';
 import Papa, {LocalFile} from 'papaparse';
 import {postShortData} from "#root/src/apis/ShortDataAPI.ts";
 import {APIStatus} from "#root/src/types.ts";
-import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 import {Table} from "react-bootstrap";
 import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 import {ListItem, ShortData} from "#root/src/routes/portfolio-diary/types.ts";
+import {dateToStringConverter} from "#root/src/helpers/DateHelpers.ts";
 
 type UploadDataMapping = { [p: string]: UploadDataMappingElement };
 type UploadDataMappingElement = { label: string; value: string };
@@ -97,7 +97,11 @@ export default function UploadData() {
 
 							return (
 								<tr key={`${item.index}_${index}`}>
-									{Object.values(mapping).map((mapping, mappingIndex) => <td key={`${mapping.value}_${mappingIndex}_${index}`}>{item[mapping.value]}</td>)}
+									{Object.values(mapping).map((mapping, mappingIndex) => (
+										<td key={`${mapping.value}_${mappingIndex}_${index}`}>
+											{item[mapping.value] instanceof Date ? dateToStringConverter(item[mapping.value]) : item[mapping.value]}
+										</td>
+									))}
 								</tr>
 							);
 						})}
@@ -170,7 +174,7 @@ async function processData(e: FormEvent<HTMLFormElement>, fileData: LocalFile, s
 			if (field === 'reportingDate') {
 
 				const dateString = value.split('/');
-				return dateToStringConverter(new Date(parseInt(dateString[2]), parseInt(dateString[1]) - 1, parseInt(dateString[0])));
+				return new Date(parseInt(dateString[2]), parseInt(dateString[1]) - 1, parseInt(dateString[0]));
 			}
 
 			if (field === 'tickerNo') {

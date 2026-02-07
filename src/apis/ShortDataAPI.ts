@@ -1,6 +1,6 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {ShortData, ShortDataBE, StockData} from "#root/src/routes/portfolio-diary/types.ts";
-import {stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
@@ -26,7 +26,7 @@ const shortMapperBE = (extObj: ShortData): Partial<ShortDataBE> => {
 
     if (extObj.id !== undefined) result.id = extObj.id;
     if (extObj.stockId !== undefined) result.stock_id = extObj.stockId;
-    if (extObj.reportingDate !== undefined) result.reporting_date = extObj.reportingDate;
+    if (extObj.reportingDate !== undefined) result.reporting_date = dateToStringConverter(extObj.reportingDate);
     if (extObj.tickerNo !== undefined) result.ticker_no = extObj.tickerNo;
     if (extObj.shortedShares !== undefined) result.shorted_shares = extObj.shortedShares;
     if (extObj.shortedAmount !== undefined) result.shorted_amount = extObj.shortedAmount;
@@ -67,7 +67,7 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload.map(element => shortMapperBE(element))),
+        body: JSON.stringify(payload.map(shortMapperBE)),
     });
 
     const responseJSON = await response.json();
@@ -90,6 +90,7 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
 
 const putShortData = async (payload: any[]): Promise<APIResponse<any>> => {
 
+    console.log(payload)
     const response = await fetch(`${baseUrl}`, {
         method: 'PUT',
         mode: 'cors',
@@ -118,7 +119,7 @@ const putShortData = async (payload: any[]): Promise<APIResponse<any>> => {
     }
 }
 
-const getShortDataTickersWithNoStock = async (limit: number = 10, offset: number = 0): Promise<APIResponse<string[]>> => {
+const getShortDataTickersWithNoStock = async (limit: number = 10, offset: number = 0): Promise<APIResponse<any>> => {
 
     const response = await fetch(`${baseUrl}/mismatch?limit=${limit}&offset=${offset}`, {
         method: 'GET',
