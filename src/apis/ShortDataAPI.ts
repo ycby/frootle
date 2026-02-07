@@ -1,10 +1,10 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
-import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
-import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {ShortData, ShortDataBE, StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import {stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
-const shortMapperFE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+const shortMapperFE = (extObj: ShortDataBE): ShortData | null => {
 
     const parsedReportingDate: Date | null = stringToDateConverter(extObj.reporting_date);
 
@@ -20,16 +20,17 @@ const shortMapperFE: (extObj: any) => ShortData | null = (extObj: any): ShortDat
     };
 }
 
-const shortMapperBE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+const shortMapperBE = (extObj: ShortData): Partial<ShortDataBE> => {
 
     const result: any = {};
 
     if (extObj.id !== undefined) result.id = extObj.id;
     if (extObj.stockId !== undefined) result.stock_id = extObj.stockId;
-    if (extObj.reportingDate !== undefined) result.reporting_date = dateToStringConverter(extObj.reportingDate);
+    if (extObj.reportingDate !== undefined) result.reporting_date = extObj.reportingDate;
     if (extObj.tickerNo !== undefined) result.ticker_no = extObj.tickerNo;
     if (extObj.shortedShares !== undefined) result.shorted_shares = extObj.shortedShares;
     if (extObj.shortedAmount !== undefined) result.shorted_amount = extObj.shortedAmount;
+    if (extObj.name !== undefined) result.name = extObj.name;
 
     return result;
 }
@@ -54,7 +55,7 @@ const getShortData = async (stockId: string, startDate: string, endDate: string)
 
     return {
         status: APIStatus.SUCCESS,
-        data: responseJSON.data
+        data: responseJSON.data.map((element: ShortDataBE) => shortMapperFE(element))
     }
 }
 
@@ -66,7 +67,7 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload.map(element => shortMapperBE(element))),
     });
 
     const responseJSON = await response.json();

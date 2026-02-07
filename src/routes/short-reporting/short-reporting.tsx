@@ -163,7 +163,7 @@ export default function ShortReporting() {
 				renderItem={ (data: StockData): ReactElement => (
 					<>
 						<span className='main-text'>{ data.name }</span>
-						<span className='sub-text'>{ data.ticker_no }</span>
+						<span className='sub-text'>{ data.tickerNo }</span>
 					</>
 				)}
 			/>

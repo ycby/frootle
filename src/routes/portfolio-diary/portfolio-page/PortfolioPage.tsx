@@ -463,6 +463,7 @@ const PortfolioPage = () => {
                         const response = td.id
                             ? await StockTransactionAPI.putStockTransaction({...td, id: td.id})
                             : await StockTransactionAPI.postStockTransactions(td);
+
                         if (response.status === APIStatus.FAIL) {
                             console.error('Failed to create transaction: ' + response.data);
                             return;

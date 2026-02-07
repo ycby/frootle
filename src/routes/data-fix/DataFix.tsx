@@ -110,9 +110,9 @@ const DataFixPage = () => {
                                                         className='d-flex flex-row justify-content-between'
                                                     >
                                                         <span className='main-text'>{ data.name }</span>
-                                                        { data.is_active && <Badge bg='success' className='align-content-center'>Active</Badge> }
+                                                        { data.isActive && <Badge bg='success' className='align-content-center'>Active</Badge> }
                                                     </div>
-                                                    <div className='sub-text'>{ data.ticker_no }</div>
+                                                    <div className='sub-text'>{ data.tickerNo }</div>
                                                 </div>
                                             )}
                                             initialValue={selectedTicker}
@@ -145,7 +145,7 @@ const DataFixPage = () => {
                             <Row>
                                 <Col>
                                     <div>Name: {`${fixStockData ? fixStockData.name : ''}`}</div>
-                                    <div>Ticker: {`${fixStockData ? fixStockData.ticker_no : ''}`}</div>
+                                    <div>Ticker: {`${fixStockData ? fixStockData.tickerNo : ''}`}</div>
                                 </Col>
                             </Row>
                             <Row>

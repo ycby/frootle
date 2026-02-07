@@ -7,6 +7,14 @@ export type ListItem = {
 
 export type StockData = {
     id: string;
+    tickerNo: string;
+    name: string;
+    full_name?: string;
+    isActive: boolean;
+}
+
+export type StockDataBE = {
+    id: string;
     ticker_no: string;
     name: string;
     full_name?: string;
@@ -20,6 +28,16 @@ export type ShortData = {
     shortedAmount: number;
     reportingDate: Date;
     tickerNo?: string;
+    name?: string;
+}
+
+export type ShortDataBE = {
+    id: string;
+    stock_id?: string;
+    shorted_shares: number;
+    shorted_amount: number;
+    reporting_date: string;
+    ticker_no: string;
 }
 
 export type TransactionData = {

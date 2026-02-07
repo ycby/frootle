@@ -15,8 +15,8 @@ const transactionMapperBE = (sourceObj: NewTransactionInputs): Partial<Transacti
         currency: sourceObj.currency
     };
 
-    if (sourceObj.id === undefined) result.id = sourceObj.id;
-    if (sourceObj.stockId === undefined) result.stock_id = sourceObj.stockId;
+    if (sourceObj.id !== null) result.id = sourceObj.id;
+    if (sourceObj.stockId !== null) result.stock_id = sourceObj.stockId;
 
     return result;
 }
