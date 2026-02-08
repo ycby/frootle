@@ -1,5 +1,5 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
-import {ShortData, ShortDataBE, StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import {ShortData, ShortDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
@@ -16,7 +16,9 @@ const shortMapperFE = (extObj: ShortDataBE): ShortData | null => {
         shortedShares: extObj.shorted_shares,
         shortedAmount: extObj.shorted_amount,
         reportingDate: parsedReportingDate,
-        tickerNo: extObj.ticker_no
+        tickerNo: extObj.ticker_no,
+        createdDatetime: new Date(extObj.created_datetime),
+        lastModifiedDatetime: new Date(extObj.last_modified_datetime),
     };
 }
 
@@ -35,7 +37,7 @@ const shortMapperBE = (extObj: ShortData): Partial<ShortDataBE> => {
     return result;
 }
 
-const getShortData = async (stockId: string, startDate: string, endDate: string): Promise<APIResponse<StockData[]>> => {
+const getShortData = async (stockId: string, startDate: string, endDate: string): Promise<APIResponse<ShortData[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}&start_date=${startDate}&end_date=${endDate}`, {
         method: 'GET',

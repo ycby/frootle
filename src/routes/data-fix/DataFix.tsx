@@ -27,7 +27,7 @@ const DataFixPage = () => {
     const [fixStockData, setFixStockData] = useState<StockData | null>();
 
     const totalRows = useRef<number>(0);
-    const currentPage = useRef<number>(0);
+    const currentPage = useRef<number>(1);
 
     const {
         addAlert
@@ -67,6 +67,37 @@ const DataFixPage = () => {
         setFixStockData(null);
     }, [selectedTicker]);
 
+    const numOfPages = (Math.floor(totalRows.current / 10)) + (totalRows.current % 10 == 0 ? 0 : 1);
+    const pageArray = [];
+
+    console.log(numOfPages);
+    if (numOfPages > 7) {
+
+        if (currentPage.current <= 2 || currentPage.current >= numOfPages - 1) {
+            for (let i = 1; i <= 3; i ++) {
+                pageArray.push(i);
+            }
+            pageArray.push('...');
+            for (let i = numOfPages - 2; i <= numOfPages; i++) {
+                pageArray.push(i);
+            }
+        } else {
+            pageArray.push(1);
+            pageArray.push('...');
+            for (let i = currentPage.current - 1; i <= currentPage.current + 1; i++) {
+                pageArray.push(i);
+            }
+            pageArray.push('...');
+            pageArray.push(numOfPages);
+        }
+    } else {
+
+        for (let i = 1; i <= numOfPages; i ++) {
+            pageArray.push(i);
+        }
+    }
+
+    console.log(pageArray);
     //TODO: Cleanup by splitting up components - its too ass rn
     return (
         <Container fluid>
@@ -93,16 +124,19 @@ const DataFixPage = () => {
                             {
                                 //TODO: remove hardcode limit 10 later
                                 // Use ellipses to make it less shit
-                                Array.from({length: (totalRows.current / 10) + (totalRows.current % 10 == 0 ? 0 : 1)}, (_, index) => (
-                                    <Pagination.Item
-                                        active={index === currentPage.current}
-                                        onClick={() => {
-                                            getTickerList(10, index * 10);
-                                            currentPage.current = index;
-                                        }}
-                                    >
-                                        {index + 1}
-                                    </Pagination.Item>
+                                //temp
+                                pageArray.map((element) => (
+                                    element !== '...'
+                                        ? <Pagination.Item
+                                            active={element === currentPage.current}
+                                            onClick={() => {
+                                                getTickerList(10, (Number(element) - 1) * 10);
+                                                currentPage.current = Number(element);
+                                            }}
+                                        >
+                                            {element}
+                                        </Pagination.Item>
+                                        : <Pagination.Ellipsis />
                                 ))
                             }
                             <Pagination.Next />

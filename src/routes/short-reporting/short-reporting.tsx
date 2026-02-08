@@ -16,11 +16,6 @@ import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse} from '#root/src/types.ts';
 import {Table} from "react-bootstrap";
 
-type ShortReportingMapping = {
-	value: string;
-	type: string;
-}
-
 type ChartPoint = {
 	x: number;
 	y: number;
@@ -29,58 +24,30 @@ type ChartPoint = {
 const headers = [
 	{
 		label: 'Stock Id',
-		value: 'stock_id'
+		value: 'stockId'
 	},
 	{
 		label: 'Reporting Date',
-		value: 'reporting_date'
+		value: 'reportingDate',
+		transform: (element:any) => dateToStringConverter(element)
 	},
 	{
 		label: 'Shorted Shares',
-		value: 'shorted_shares'
+		value: 'shortedShares'
 	},
 	{
 		label: 'Shorted Amount',
-		value: 'shorted_amount'
+		value: 'shortedAmount'
 	},
 	{
 		label: 'Created Date',
-		value: 'created_datetime'
+		value: 'createdDatetime',
+		transform: (element:any) => dateToStringConverter(element)
 	},
 	{
 		label: 'Last Modified Date',
-		value: 'last_modified_datetime'
-	}
-]
-
-const jsonMapping: ShortReportingMapping[] = [
-	{
-		value: 'id',
-		type: 'String'
-	},
-	{
-		value: 'stock_id',
-		type: 'String'
-	},
-	{
-		value: 'reporting_date',
-		type: 'Date'
-	},
-	{
-		value: 'shorted_shares',
-		type: 'Long'
-	},
-	{
-		value: 'shorted_amount',
-		type: 'Long'
-	},
-	{
-		value: 'created_datetime',
-		type: 'Date'
-	},
-	{
-		value: 'last_modified_datetime',
-		type: 'Date'
+		value: 'lastModifiedDatetime',
+		transform: (element:any) => dateToStringConverter(element)
 	}
 ]
 
@@ -112,7 +79,7 @@ export default function ShortReporting() {
 
 			const response = await ShortDataAPI.getShortData(selectedStock.id.toString(), dateToStringConverter(startDate), dateToStringConverter(endDate));
 
-			const processedData: ShortData[] = response.data.map((json: any) => processJSON(jsonMapping, json) as ShortData);
+			const processedData: ShortData[] = response.data;
 
 			setData(processedData);
 			setChartData(response.data.map((d: any): ChartPoint => {
@@ -238,7 +205,7 @@ export default function ShortReporting() {
 											<td
 												key={`${item.id}_${index}_${mappingIndex}`}
 											>
-												{`${item[mapping.value as keyof ShortData]}`}
+												{`${mapping.transform ? mapping.transform(item[mapping.value as keyof ShortData]) : item[mapping.value as keyof ShortData]}`}
 											</td>
 										);
 									})}
@@ -250,28 +217,4 @@ export default function ShortReporting() {
 			}
 		</div>
 	)
-}
-
-const processJSON = (mappings: ShortReportingMapping[], json: any) => {
-
-	let processedJSON: any = {}
-
-	for (const mapping of mappings) {
-
-		switch (mapping.type) {
-		case 'String':
-			processedJSON[mapping.value] = json[mapping.value]
-			break
-		case 'Date':
-			processedJSON[mapping.value] = new Date(json[mapping.value]).toLocaleDateString('en-HK')
-			break
-		case 'Long':
-			processedJSON[mapping.value] = json[mapping.value]
-			break
-		default:
-			console.log('Unexpected Type in Process JSON in Short Reporting')
-		}
-	}
-
-	return processedJSON;
 }

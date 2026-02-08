@@ -29,6 +29,8 @@ export type ShortData = {
     reportingDate: Date;
     tickerNo?: string;
     name?: string;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
 export type ShortDataBE = {
@@ -38,6 +40,8 @@ export type ShortDataBE = {
     shorted_amount: number;
     reporting_date: string;
     ticker_no: string;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
 
 export type TransactionData = {
