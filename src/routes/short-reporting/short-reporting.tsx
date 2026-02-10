@@ -15,6 +15,7 @@ import * as ShortDataAPI from "#root/src/apis/ShortDataAPI.ts";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse} from '#root/src/types.ts';
 import {Table} from "react-bootstrap";
+import {convertZeroesToKorM} from "#root/src/helpers/ChartHelpers.ts";
 
 type ChartPoint = {
 	x: number;
@@ -80,12 +81,13 @@ export default function ShortReporting() {
 			const response = await ShortDataAPI.getShortData(selectedStock.id.toString(), dateToStringConverter(startDate), dateToStringConverter(endDate));
 
 			const processedData: ShortData[] = response.data;
+			console.log(processedData);
 
 			setData(processedData);
 			setChartData(response.data.map((d: any): ChartPoint => {
 				return {
-					x: d.reporting_date,
-					y: d.shorted_shares
+					x: d.reportingDate,
+					y: d.shortedShares
 				}
 			}).reverse());
 		}
@@ -162,16 +164,22 @@ export default function ShortReporting() {
 								x: {
 									type: 'time',
 									time: {
-										unit: 'month'
+										unit: 'month',
+										displayFormats: {
+											'month': 'MM-yyyy'
+										}
 									}
 								},
 								y: {
-									min: 0
+									min: 0,
+									ticks: {
+										callback: (value) => convertZeroesToKorM(value as number)
+									}
 								}
 							},
 							plugins: {
 								legend: {
-									position: 'right'
+									display: false
 								}
 							},
 							interaction: {

@@ -11,6 +11,8 @@ export type StockData = {
     name: string;
     full_name?: string;
     isActive: boolean;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
 export type StockDataBE = {
@@ -54,6 +56,8 @@ export type TransactionData = {
     fee: string;
     transactionDate: Date;
     currency: CurrencyKeys;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
 export type TransactionDataBE = {
@@ -84,7 +88,9 @@ export type DiaryEntry = {
     stockId: string | null,
     title: string,
     content: string,
-    postedDate: Date
+    postedDate: Date,
+    createdDatetime: Date,
+    lastModifiedDatetime: Date,
 }
 
 export type DiaryEntryBE = {
