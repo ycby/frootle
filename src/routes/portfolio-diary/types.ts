@@ -21,6 +21,8 @@ export type StockDataBE = {
     name: string;
     full_name?: string;
     is_active: boolean;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
 
 export type ShortData = {
@@ -70,6 +72,8 @@ export type TransactionDataBE = {
     fee: number;
     transaction_date: string;
     currency: CurrencyKeys;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
 
 export type NewTransactionInputs = {
@@ -84,19 +88,21 @@ export type NewTransactionInputs = {
 }
 
 export type DiaryEntry = {
-    id: string | null,
-    stockId: string | null,
-    title: string,
-    content: string,
-    postedDate: Date,
-    createdDatetime: Date,
-    lastModifiedDatetime: Date,
+    id: string | null;
+    stockId: string | null;
+    title: string;
+    content: string;
+    postedDate: Date;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
 export type DiaryEntryBE = {
-    id: string,
-    stock_id: string,
-    title: string,
-    content: string,
-    posted_date: string
+    id: string;
+    stock_id: string;
+    title: string;
+    content: string;
+    posted_date: string;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }

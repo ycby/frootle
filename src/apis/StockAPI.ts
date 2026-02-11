@@ -10,7 +10,9 @@ const stockMapperFE = (sourceObj: StockDataBE): StockData => {
         name: sourceObj.name,
         tickerNo: sourceObj.ticker_no,
         full_name: sourceObj.full_name,
-        isActive: sourceObj.is_active
+        isActive: sourceObj.is_active,
+        createdDatetime: sourceObj.created_datetime,
+        lastModifiedDatetime: sourceObj.last_modified_datetime,
     }
 }
 

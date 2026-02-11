@@ -27,7 +27,9 @@ const diaryEntryMapperFE = (sourceObj: DiaryEntryBE): DiaryEntry => {
         stockId: sourceObj.stock_id,
         title: sourceObj.title,
         content: sourceObj.content,
-        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1)
+        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1),
+        createdDatetime: sourceObj.created_datetime,
+        lastModifiedDatetime: sourceObj.last_modified_datetime,
     };
 }
 

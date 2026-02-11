@@ -33,6 +33,8 @@ const transactionMapperFE = (data: TransactionDataBE): TransactionData => {
         amountPerShare: Number(data.amount_per_share).toFixed(2),
         transactionDate: new Date(data.transaction_date),
         currency: data.currency,
+        createdDatetime: data.created_datetime,
+        lastModifiedDatetime: data.last_modified_datetime,
     };
 }
 

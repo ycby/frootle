@@ -28,6 +28,7 @@ import {MdModeEdit} from "react-icons/md";
 import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
+import {convertZeroesToKorM} from "#root/src/helpers/ChartHelpers.ts";
 
 type DeletionObject = {
     id: string,
@@ -102,7 +103,6 @@ const PortfolioPage = () => {
             //TODO: make a mapping function for backend objects to front end
             if (response.status === APIStatus.SUCCESS) {
 
-                console.log(response.data);
                 const transactionData: TransactionData[] = response.data;
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
@@ -245,12 +245,15 @@ const PortfolioPage = () => {
                                                     unit: 'month',
                                                     tooltipFormat: 'dd-MM-yyyy',
                                                     displayFormats: {
-                                                        month: 'MM/yy'
+                                                        month: 'MM-yyyy'
                                                     }
                                                 }
                                             },
                                             y: {
                                                 min: 0,
+                                                ticks: {
+                                                    callback: (value, _index, ticks) => convertZeroesToKorM(value as number, ticks[ticks.length - 1].value as number)
+                                                }
                                             }
                                         }
                                     }}
