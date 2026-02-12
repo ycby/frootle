@@ -2,8 +2,8 @@ import './PortfolioDiary.css';
 import {ReactElement, useEffect, useState} from "react";
 import {
     TransactionData,
-    DiaryEntryData,
-    StockData
+    DiaryEntry,
+    StockData, ListItem
 } from "#root/src/routes/portfolio-diary/types.ts";
 
 import {APIStatus, APIResponse} from "#root/src/types.ts";
@@ -15,38 +15,13 @@ import {useNavigate} from "react-router-dom";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import {getRandomNumber} from "#root/src/routes/portfolio-diary/PortfolioDiaryHelpers.ts";
 
-type StockDataContainerItem = StockData & {
-    title: string;
-};
+export type DiaryEntryListItem = DiaryEntry & ListItem;
 
-export type DiaryEntryListItem = DiaryEntryData;
-
-export type TransactionDataListItem = TransactionData;
-
-const exampleStocks: StockDataContainerItem[] = [
-    {
-        id: 1,
-        ticker_no: '00001',
-        name: 'Stock 1',
-        title: '00001'
-    },
-    {
-        id: 2,
-        ticker_no: '00002',
-        name: 'Stock 2',
-        title: '00002'
-    },
-    {
-        id: 3,
-        ticker_no: '00003',
-        name: 'Stock 3',
-        title: '00003'
-    }
-]
+export type TransactionDataListItem = TransactionData & ListItem;
 
 const PortfolioDiary = () => {
 
-    const [stockData, setStockData] = useState<StockDataContainerItem[]>(exampleStocks);
+    const [stockData, setStockData] = useState<StockData[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -70,11 +45,7 @@ const PortfolioDiary = () => {
 
             //do some processing for response
 
-            const processedData:StockDataContainerItem[] = response.data.map((data: StockData): StockDataContainerItem => {
-                return {...data, title: data.ticker_no}
-            });
-
-            setStockData(processedData);
+            setStockData(response.data);
         }
 
         getTrackedStocks();
@@ -107,18 +78,18 @@ const PortfolioDiary = () => {
 
                             if (!searchTerm) return true;
 
-                            return element.ticker_no.includes(searchTerm);
+                            return element.tickerNo.includes(searchTerm);
                         }).map(element => {
 
                             return (
                                 <Card
                                     key={element.id}
                                     style={{height: '9rem', minWidth: '10rem', backgroundColor: `rgba(${getRandomNumber(255)}, ${getRandomNumber(255)}, ${getRandomNumber(255)}, ${0.2})`}}
-                                    onClick={() => navigate(`/portfolio/${element.ticker_no}`)}
+                                    onClick={() => navigate(`/portfolio/${element.tickerNo}`)}
                                     className='stock-card flex-fill'
                                 >
                                     <Card.Body>
-                                        <Card.Title>{element.ticker_no}-{element.name}</Card.Title>
+                                        <Card.Title>{element.tickerNo}-{element.name}</Card.Title>
                                         <Card.Text>Example Text</Card.Text>
                                     </Card.Body>
                                 </Card>
@@ -147,13 +118,13 @@ const PortfolioDiary = () => {
                         renderItem={ (data: StockData): ReactElement => (
                             <>
                                 <span className='main-text'>{ data.name }</span>
-                                <span className='sub-text'>{ data.ticker_no }</span>
+                                <span className='sub-text'>{ data.tickerNo }</span>
                             </>
                         )}
                     />
                     <Stack gap={2} className='mt-2'>
                         <div>Name: {newTrackedStock?.name}</div>
-                        <div>Ticker: {newTrackedStock?.ticker_no}</div>
+                        <div>Ticker: {newTrackedStock?.tickerNo}</div>
                     </Stack>
                 </Modal.Body>
                 <Modal.Footer>

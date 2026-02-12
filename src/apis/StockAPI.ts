@@ -1,7 +1,33 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
-import {StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import {StockData, StockDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/stock`;
+
+const stockMapperFE = (sourceObj: StockDataBE): StockData => {
+
+    return {
+        id: sourceObj.id.toString(),
+        name: sourceObj.name,
+        tickerNo: sourceObj.ticker_no,
+        full_name: sourceObj.full_name,
+        isActive: sourceObj.is_active,
+        createdDatetime: sourceObj.created_datetime,
+        lastModifiedDatetime: sourceObj.last_modified_datetime,
+    }
+}
+
+// const stockMapperBE = (sourceObj: StockData): Partial<StockDataBE> => {
+//
+//     const result: Partial<StockDataBE> = {};
+//
+//     if (sourceObj.id !== undefined) result.id = sourceObj.id;
+//     if (sourceObj.name !== undefined) result.name = sourceObj.name;
+//     if (sourceObj.tickerNo !== undefined) result.ticker_no = sourceObj.tickerNo;
+//     if (sourceObj.full_name !== undefined) result.full_name = sourceObj.full_name;
+//     if (sourceObj.isActive !== undefined) result.is_active = sourceObj.isActive;
+//
+//     return result;
+// }
 
 const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<StockData[]>> => {
 
@@ -16,7 +42,6 @@ const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<S
 
     const responseJSON = await response.json();
 
-    console.log(responseJSON.data);
     if (responseJSON.status !== 1) return {
         status: APIStatus.FAIL,
         data: []
@@ -24,7 +49,7 @@ const getStocksByNameOrTicker = async (queryTerm: string): Promise<APIResponse<S
 
     return {
         status: APIStatus.SUCCESS,
-        data: responseJSON.data
+        data: responseJSON.data.map((element: StockDataBE) => stockMapperFE(element))
     }
 }
 
@@ -49,11 +74,11 @@ const getTrackedStocks = async (): Promise<APIResponse<StockData[]>> => {
 
     return {
         status: APIStatus.SUCCESS,
-        data: responseJSON.data
+        data: responseJSON.data.map((element: StockDataBE) => stockMapperFE(element))
     };
 }
 
-const setTrackedStock = async (id: number): Promise<APIResponse<StockData[]>> => {
+const setTrackedStock = async (id: number): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/tracked/${id}/track`, {
         method: 'POST'
@@ -77,7 +102,7 @@ const setTrackedStock = async (id: number): Promise<APIResponse<StockData[]>> =>
     };
 }
 
-const setUntrackedStock = async (id: number): Promise<APIResponse<StockData[]>> => {
+const setUntrackedStock = async (id: string): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/tracked/${id}/untrack`, {
         method: 'POST'

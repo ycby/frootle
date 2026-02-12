@@ -1,10 +1,10 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
-import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.ts";
+import {ShortData, ShortDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
-const shortMapperFE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+const shortMapperFE = (extObj: ShortDataBE): ShortData | null => {
 
     const parsedReportingDate: Date | null = stringToDateConverter(extObj.reporting_date);
 
@@ -16,11 +16,13 @@ const shortMapperFE: (extObj: any) => ShortData | null = (extObj: any): ShortDat
         shortedShares: extObj.shorted_shares,
         shortedAmount: extObj.shorted_amount,
         reportingDate: parsedReportingDate,
-        tickerNo: extObj.ticker_no
+        tickerNo: extObj.ticker_no,
+        createdDatetime: new Date(extObj.created_datetime),
+        lastModifiedDatetime: new Date(extObj.last_modified_datetime),
     };
 }
 
-const shortMapperBE: (extObj: any) => ShortData | null = (extObj: any): ShortData | null => {
+const shortMapperBE = (extObj: ShortData): Partial<ShortDataBE> => {
 
     const result: any = {};
 
@@ -30,11 +32,12 @@ const shortMapperBE: (extObj: any) => ShortData | null = (extObj: any): ShortDat
     if (extObj.tickerNo !== undefined) result.ticker_no = extObj.tickerNo;
     if (extObj.shortedShares !== undefined) result.shorted_shares = extObj.shortedShares;
     if (extObj.shortedAmount !== undefined) result.shorted_amount = extObj.shortedAmount;
+    if (extObj.name !== undefined) result.name = extObj.name;
 
     return result;
 }
 
-const getShortData = async (stockId: string, startDate: string, endDate: string): Promise<APIResponse<StockData[]>> => {
+const getShortData = async (stockId: string, startDate: string, endDate: string): Promise<APIResponse<ShortData[]>> => {
 
     const response = await fetch(`${baseUrl}?stock_id=${stockId}&start_date=${startDate}&end_date=${endDate}`, {
         method: 'GET',
@@ -54,7 +57,7 @@ const getShortData = async (stockId: string, startDate: string, endDate: string)
 
     return {
         status: APIStatus.SUCCESS,
-        data: responseJSON.data
+        data: responseJSON.data.map((element: ShortDataBE) => shortMapperFE(element))
     }
 }
 
@@ -66,7 +69,7 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload.map(shortMapperBE)),
     });
 
     const responseJSON = await response.json();
@@ -89,6 +92,7 @@ const postShortData = async (payload: any[]): Promise<APIResponse<any>> => {
 
 const putShortData = async (payload: any[]): Promise<APIResponse<any>> => {
 
+    console.log(payload)
     const response = await fetch(`${baseUrl}`, {
         method: 'PUT',
         mode: 'cors',
@@ -117,7 +121,7 @@ const putShortData = async (payload: any[]): Promise<APIResponse<any>> => {
     }
 }
 
-const getShortDataTickersWithNoStock = async (limit: number = 10, offset: number = 0): Promise<APIResponse<string[]>> => {
+const getShortDataTickersWithNoStock = async (limit: number = 10, offset: number = 0): Promise<APIResponse<any>> => {
 
     const response = await fetch(`${baseUrl}/mismatch?limit=${limit}&offset=${offset}`, {
         method: 'GET',

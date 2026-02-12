@@ -2,14 +2,14 @@ import {useEffect} from "react";
 import {Alert} from "react-bootstrap";
 import {AlertContent, useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
 
-const GlobalAlert = (props: AlertContent & {index: number}) => {
+const GlobalAlert = (props: AlertContent) => {
 
     const {
+        id,
         name,
         message = 'Default message',
         type = 'info',
-        duration = 0,
-        index
+        duration = 0
     } = props
 
     const {removeAlert} = useAlert();
@@ -18,7 +18,8 @@ const GlobalAlert = (props: AlertContent & {index: number}) => {
 
         if (duration <= 0) return;
 
-        const alertTimer = setTimeout(() => removeAlert(index), duration);
+        console.log(id)
+        const alertTimer = setTimeout(() => removeAlert(id), duration);
         return () => clearTimeout(alertTimer);
     }, []);
 
@@ -26,7 +27,7 @@ const GlobalAlert = (props: AlertContent & {index: number}) => {
         <Alert
             className='col-12 col-sm-8 col-xl-6 z-3'
             variant={type}
-            onClose={() => removeAlert(index)}
+            onClose={() => removeAlert(id)}
             dismissible
         >
             {name && <Alert.Heading>{name}</Alert.Heading>}

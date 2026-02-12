@@ -1,13 +1,20 @@
 import Container from "react-bootstrap/Container";
-import {Badge, Button, Col, Row, Stack} from "react-bootstrap";
+import {Badge, Button, Col, Pagination, Row, Stack} from "react-bootstrap";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.js";
-import {ReactElement, useEffect, useState} from "react";
+import {ReactElement, useEffect, useRef, useState} from "react";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.js";
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
 import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import * as ShortAPI from "#root/src/apis/ShortDataAPI.ts";
 import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
+
+type MismatchTickerResponse = {
+    total_rows: string;
+    tickers: string[];
+    offset: number;
+    limit: number;
+}
 
 const DataFixPage = () => {
 
@@ -19,20 +26,23 @@ const DataFixPage = () => {
 
     const [fixStockData, setFixStockData] = useState<StockData | null>();
 
+    const totalRows = useRef<number>(0);
+    const currentPage = useRef<number>(1);
+
     const {
         addAlert
     } = useAlert();
 
+    const getTickerList = async (limit: number = 10, offset: number = 0) => {
+
+        const response: APIResponse<MismatchTickerResponse> = await ShortAPI.getShortDataTickersWithNoStock(limit, offset);
+
+        setTickersWithUnparentedShorts(response.data.tickers);
+        totalRows.current = Number(response.data.total_rows);
+    }
     useEffect(() => {
 
-        const getTickerList = async () => {
-
-            const response: APIResponse<string[]> = await ShortAPI.getShortDataTickersWithNoStock(10, 0);
-
-            setTickersWithUnparentedShorts(response.data);
-        }
-
-        getTickerList();
+        getTickerList(10, 0);
     }, []);
 
     useEffect(() => {
@@ -57,6 +67,35 @@ const DataFixPage = () => {
         setFixStockData(null);
     }, [selectedTicker]);
 
+    const numOfPages = (Math.floor(totalRows.current / 10)) + (totalRows.current % 10 == 0 ? 0 : 1);
+    const pageArray = [];
+
+    if (numOfPages > 7) {
+
+        if (currentPage.current <= 2 || currentPage.current >= numOfPages - 1) {
+            for (let i = 1; i <= 3; i ++) {
+                pageArray.push(i);
+            }
+            pageArray.push('...');
+            for (let i = numOfPages - 2; i <= numOfPages; i++) {
+                pageArray.push(i);
+            }
+        } else {
+            pageArray.push(1);
+            pageArray.push('...');
+            for (let i = currentPage.current - 1; i <= currentPage.current + 1; i++) {
+                pageArray.push(i);
+            }
+            pageArray.push('...');
+            pageArray.push(numOfPages);
+        }
+    } else {
+
+        for (let i = 1; i <= numOfPages; i ++) {
+            pageArray.push(i);
+        }
+    }
+
     //TODO: Cleanup by splitting up components - its too ass rn
     return (
         <Container fluid>
@@ -78,6 +117,29 @@ const DataFixPage = () => {
                                 </div>
                             ))}
                         </Stack>
+                        <Pagination>
+                            <Pagination.Prev />
+                            {
+                                //TODO: remove hardcode limit 10 later
+                                // Use ellipses to make it less shit
+                                //temp
+                                pageArray.map((element, index) => (
+                                    element !== '...'
+                                        ? <Pagination.Item
+                                            key={`p_${index}`}
+                                            active={element === currentPage.current}
+                                            onClick={() => {
+                                                getTickerList(10, (Number(element) - 1) * 10);
+                                                currentPage.current = Number(element);
+                                            }}
+                                        >
+                                            {element}
+                                        </Pagination.Item>
+                                        : <Pagination.Ellipsis key={`p_${index}`} />
+                                ))
+                            }
+                            <Pagination.Next />
+                        </Pagination>
                     </Container>
                 </Col>
                 <Col>
@@ -110,9 +172,9 @@ const DataFixPage = () => {
                                                         className='d-flex flex-row justify-content-between'
                                                     >
                                                         <span className='main-text'>{ data.name }</span>
-                                                        { data.is_active && <Badge bg='success' className='align-content-center'>Active</Badge> }
+                                                        { data.isActive && <Badge bg='success' className='align-content-center'>Active</Badge> }
                                                     </div>
-                                                    <div className='sub-text'>{ data.ticker_no }</div>
+                                                    <div className='sub-text'>{ data.tickerNo }</div>
                                                 </div>
                                             )}
                                             initialValue={selectedTicker}
@@ -145,7 +207,7 @@ const DataFixPage = () => {
                             <Row>
                                 <Col>
                                     <div>Name: {`${fixStockData ? fixStockData.name : ''}`}</div>
-                                    <div>Ticker: {`${fixStockData ? fixStockData.ticker_no : ''}`}</div>
+                                    <div>Ticker: {`${fixStockData ? fixStockData.tickerNo : ''}`}</div>
                                 </Col>
                             </Row>
                             <Row>
@@ -159,6 +221,14 @@ const DataFixPage = () => {
                                             }}
                                         >
                                             Clear
+                                        </Button>
+                                        <Button
+                                            variant='primary'
+                                            onClick={() => {
+                                                setSelectedChildrenIndex(unparentedShortData.map((_element, index) => index));
+                                            }}
+                                        >
+                                            Select All
                                         </Button>
                                         <Button
                                             variant='primary'
@@ -215,7 +285,7 @@ const DataFixPage = () => {
                                 .map((element, index) => (
                                     <div
                                         key={`${element.tickerNo}_${element.id}_${index}`}
-                                        className={`p-2 border d-flex justify-content-between ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
+                                        className={`p-2 border d-flex justify-content-between user-select-none ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
                                         onClick={() => {
 
                                             if (!element.id) return;

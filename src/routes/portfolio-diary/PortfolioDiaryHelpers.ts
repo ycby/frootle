@@ -1,73 +1,14 @@
 import {
     TransactionData,
-    TransactionDataBE,
-    NewTransactionInputs,
-    DiaryEntryData, DiaryEntryBE
+    NewTransactionInputs
 } from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 import {TransactionType} from "#root/src/types.ts";
 
-const convertFEtoBETransaction:(sourceObj: NewTransactionInputs) => TransactionDataBE = (sourceObj: NewTransactionInputs): TransactionDataBE  => {
-
-    const result: TransactionDataBE = {
-        stock_id: sourceObj.stockId,
-        type: sourceObj.type,
-        amount: Number(sourceObj.amtWOFee),
-        quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
-        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)),
-        amount_per_share: Number(sourceObj.amtWOFee) / Number(sourceObj.quantity),
-        transaction_date: sourceObj.transactionDate,
-        currency: sourceObj.currency
-    };
-
-    if (sourceObj?.id) result.id = sourceObj.id;
-
-    return result;
-}
-
-const convertBEtoFETransaction: (data: TransactionDataBE) => TransactionData = (data: TransactionDataBE): TransactionData => {
-
-    return {
-        id: data.id,
-        stockId: data.stock_id,
-        type: data.type,
-        amount: Number(data.amount).toFixed(2),
-        quantity: data.quantity,
-        fee: Number(data.fee).toFixed(2),
-        amountPerShare: Number(data.amount_per_share).toFixed(2),
-        transactionDate: new Date(data.transaction_date),
-        currency: data.currency,
-    };
-}
-
-const convertFEtoBEDiaryEntry:(sourceObj: DiaryEntryData) => DiaryEntryBE = (sourceObj: DiaryEntryData): DiaryEntryBE  => {
-
-    const result: DiaryEntryBE = {
-        stock_id: sourceObj.stockId,
-        title: sourceObj.title,
-        content: sourceObj.content,
-        posted_date: dateToStringConverter(sourceObj.postedDate)
-    };
-
-    if (sourceObj?.id) result.id = sourceObj.id;
-
-    return result;
-}
-
-const convertBEtoFEDiaryEntry:(sourceObj: DiaryEntryBE) => DiaryEntryData = (sourceObj: DiaryEntryBE): DiaryEntryData => {
+const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTransactionInputs = (sourceObj: TransactionData): NewTransactionInputs => {
 
     return {
         id: sourceObj.id,
-        stockId: sourceObj.stock_id,
-        title: sourceObj.title,
-        content: sourceObj.content,
-        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1)
-    };
-}
-
-const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTransactionInputs = (sourceObj: TransactionData): NewTransactionInputs => {
-
-    const result: NewTransactionInputs = {
         stockId: sourceObj.stockId,
         type: sourceObj.type,
         amtWFee: (Number(sourceObj.amount) + Number(sourceObj.fee)).toFixed(2),
@@ -76,10 +17,24 @@ const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTran
         transactionDate: dateToStringConverter(sourceObj.transactionDate),
         currency: sourceObj.currency
     }
+}
 
-    if (sourceObj?.id) result.id = sourceObj.id;
+//TODO: Temp while I convert to using cent base
+const convertNewTransactionToTransaction = (sourceObj: NewTransactionInputs): TransactionData => {
 
-    return result;
+    const result = {
+        id: sourceObj.id,
+        stockId: sourceObj.stockId,
+        type: sourceObj.type,
+        amount: Number(sourceObj.amtWOFee).toFixed(2),
+        amountPerShare: (Number(sourceObj.amtWOFee) / Number(sourceObj.quantity)).toFixed(2),
+        quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
+        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)).toFixed(2),
+        transactionDate: stringToDateConverter(sourceObj.transactionDate),
+        currency: sourceObj.currency
+    }
+
+    return <TransactionData>result;
 }
 
 const capitaliseWord: (word: string) => string = (word: string): string => {
@@ -97,11 +52,8 @@ const getRandomNumber: (max: number) => number = (max: number): number => {
     return Math.floor(Math.random() * max);
 }
 export {
-    convertFEtoBETransaction,
-    convertBEtoFETransaction,
-    convertFEtoBEDiaryEntry,
-    convertBEtoFEDiaryEntry,
     convertTransactionToNewTransaction,
+    convertNewTransactionToTransaction,
     capitaliseWord,
     replaceUnderscoreWithSpace,
     getRandomNumber

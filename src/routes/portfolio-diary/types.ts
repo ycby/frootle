@@ -1,25 +1,56 @@
-import {CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
+import {ComponentStatusKeys, CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
 
-export interface StockData {
-    id: number;
+export type ListItem = {
+    index: number;
+    status: ComponentStatusKeys
+}
+
+export type StockData = {
+    id: string;
+    tickerNo: string;
+    name: string;
+    full_name?: string;
+    isActive: boolean;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
+}
+
+export type StockDataBE = {
+    id: string;
     ticker_no: string;
     name: string;
     full_name?: string;
     is_active: boolean;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
 
-export interface ShortData {
+export type ShortData = {
     id: string;
     stockId?: string;
     shortedShares: number;
     shortedAmount: number;
     reportingDate: Date;
     tickerNo?: string;
+    name?: string;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
-export interface TransactionData {
-    id?: number,
-    stockId: number,
+export type ShortDataBE = {
+    id: string;
+    stock_id?: string;
+    shorted_shares: number;
+    shorted_amount: number;
+    reporting_date: string;
+    ticker_no: string;
+    created_datetime: Date;
+    last_modified_datetime: Date;
+}
+
+export type TransactionData = {
+    id: string | null;
+    stockId: string | null;
     type: TransactionTypeKeys;
     amount: string;
     amountPerShare: string;
@@ -27,11 +58,13 @@ export interface TransactionData {
     fee: string;
     transactionDate: Date;
     currency: CurrencyKeys;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
-export interface TransactionDataBE {
-    id?: number,
-    stock_id: number;
+export type TransactionDataBE = {
+    id: string;
+    stock_id: string;
     type: TransactionTypeKeys;
     amount: number;
     amount_per_share: number;
@@ -39,11 +72,13 @@ export interface TransactionDataBE {
     fee: number;
     transaction_date: string;
     currency: CurrencyKeys;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
 
-export interface NewTransactionInputs {
-    id?: number;
-    stockId: number;
+export type NewTransactionInputs = {
+    id: string | null;
+    stockId: string | null;
     type: TransactionTypeKeys;
     amtWFee: string;
     amtWOFee: string;
@@ -52,18 +87,22 @@ export interface NewTransactionInputs {
     currency: CurrencyKeys;
 }
 
-export interface DiaryEntryData {
-    id?: number,
-    stockId: number,
-    title: string,
-    content: string,
-    postedDate: Date
+export type DiaryEntry = {
+    id: string | null;
+    stockId: string | null;
+    title: string;
+    content: string;
+    postedDate: Date;
+    createdDatetime: Date;
+    lastModifiedDatetime: Date;
 }
 
-export interface DiaryEntryBE {
-    id?: number,
-    stock_id: number,
-    title: string,
-    content: string,
-    posted_date: string
+export type DiaryEntryBE = {
+    id: string;
+    stock_id: string;
+    title: string;
+    content: string;
+    posted_date: string;
+    created_datetime: Date;
+    last_modified_datetime: Date;
 }
