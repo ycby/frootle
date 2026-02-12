@@ -11,13 +11,13 @@ const AlertContainer = () => {
             className='position-absolute d-flex align-items-center start-0 end-0 container pt-2'
             gap={2}
         >
-            {alerts.map((alert, index: number) => <GlobalAlert
-                key={`g_alert_${index}`}
+            {alerts.map((alert) => <GlobalAlert
+                key={`g_alert_${alert.id}`}
+                id={alert.id}
                 name={alert.name}
                 message={alert.message}
                 type={alert.type}
                 duration={alert.duration}
-                index={index}
             />)}
         </Stack>
     );

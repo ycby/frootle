@@ -46,6 +46,8 @@ type AggregateObject = {
     quantity: number
 }
 
+type BaseDiaryEntry = Omit<DiaryEntry, 'createdDatetime' | 'lastModifiedDatetime'>;
+
 const PortfolioPage = () => {
 
     let params = useParams();
@@ -56,7 +58,7 @@ const PortfolioPage = () => {
     const [newTransactionData, setNewTransactionData] = useState<NewTransactionInputs>(resetNewTransactionData());
 
     const [diaryEntries, setDiaryEntries] = useState<DiaryEntryListItem[]>([]);
-    const [newDiaryEntry, setNewDiaryEntry] = useState<DiaryEntry>(resetDiaryEntryData());
+    const [newDiaryEntry, setNewDiaryEntry] = useState<BaseDiaryEntry>(resetDiaryEntryData());
 
     const [aggregateValues, setAggregateValues] = useState<AggregateObject | null>(null);
 
@@ -669,7 +671,7 @@ const processDiaryEntries: (diaryEntries: DiaryEntry[]) => DiaryEntryListItem[] 
     });
 }
 
-const resetDiaryEntryData = (): DiaryEntry => {
+const resetDiaryEntryData = (): BaseDiaryEntry => {
 
     return {
         id: null,

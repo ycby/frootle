@@ -4,6 +4,7 @@ import {Variant} from "react-bootstrap/types";
 
 
 export interface AlertContent {
+    id: string;
     name?: string;
     message: string;
     type: Variant;
@@ -12,14 +13,14 @@ export interface AlertContent {
 
 interface AlertContextType {
     alerts: AlertContent[];
-    addAlert: (newAlert: AlertContent) => void;
-    removeAlert: (index: number) => void;
+    addAlert: (newAlert: Omit<AlertContent, 'id'>) => void;
+    removeAlert: (index: string) => void;
 }
 
 const AlertContext: Context<AlertContextType> = createContext<AlertContextType>({
     alerts: [],
-    addAlert: (_: AlertContent) => null,
-    removeAlert: (_: number) => null
+    addAlert: (_: Omit<AlertContent, 'id'>) => null,
+    removeAlert: (_: string) => null
 });
 
 const useAlert = () => {
@@ -30,14 +31,14 @@ const AlertProvider = ({children}: any) => {
 
     const [alerts, setAlerts] = useState<AlertContent[]>([]);
 
-    const addAlert = (newAlert: AlertContent) => {
+    const addAlert = (newAlert: Omit<AlertContent, 'id'>) => {
 
-        setAlerts((prevAlerts) => [...prevAlerts, newAlert]);
+        setAlerts((prevAlerts) => [...prevAlerts, {...newAlert, id: crypto.randomUUID()}]);
     }
 
-    const removeAlert = (index: number) => {
+    const removeAlert = (id: string) => {
 
-        setAlerts((prevAlerts) => prevAlerts.filter((_, i) => i !== index));
+        setAlerts((prevAlerts) => prevAlerts.filter((alertContent) => alertContent.id !== id));
     }
 
     return (

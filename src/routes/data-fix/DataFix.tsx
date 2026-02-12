@@ -70,7 +70,6 @@ const DataFixPage = () => {
     const numOfPages = (Math.floor(totalRows.current / 10)) + (totalRows.current % 10 == 0 ? 0 : 1);
     const pageArray = [];
 
-    console.log(numOfPages);
     if (numOfPages > 7) {
 
         if (currentPage.current <= 2 || currentPage.current >= numOfPages - 1) {
@@ -97,7 +96,6 @@ const DataFixPage = () => {
         }
     }
 
-    console.log(pageArray);
     //TODO: Cleanup by splitting up components - its too ass rn
     return (
         <Container fluid>
@@ -125,9 +123,10 @@ const DataFixPage = () => {
                                 //TODO: remove hardcode limit 10 later
                                 // Use ellipses to make it less shit
                                 //temp
-                                pageArray.map((element) => (
+                                pageArray.map((element, index) => (
                                     element !== '...'
                                         ? <Pagination.Item
+                                            key={`p_${index}`}
                                             active={element === currentPage.current}
                                             onClick={() => {
                                                 getTickerList(10, (Number(element) - 1) * 10);
@@ -136,7 +135,7 @@ const DataFixPage = () => {
                                         >
                                             {element}
                                         </Pagination.Item>
-                                        : <Pagination.Ellipsis />
+                                        : <Pagination.Ellipsis key={`p_${index}`} />
                                 ))
                             }
                             <Pagination.Next />
@@ -225,6 +224,14 @@ const DataFixPage = () => {
                                         </Button>
                                         <Button
                                             variant='primary'
+                                            onClick={() => {
+                                                setSelectedChildrenIndex(unparentedShortData.map((_element, index) => index));
+                                            }}
+                                        >
+                                            Select All
+                                        </Button>
+                                        <Button
+                                            variant='primary'
                                             disabled={selectedChildrenIndex.length === 0 || !fixStockData}
                                             onClick={async () => {
 
@@ -278,7 +285,7 @@ const DataFixPage = () => {
                                 .map((element, index) => (
                                     <div
                                         key={`${element.tickerNo}_${element.id}_${index}`}
-                                        className={`p-2 border d-flex justify-content-between ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
+                                        className={`p-2 border d-flex justify-content-between user-select-none ${selectedChildrenIndex.includes(index) ? 'bg-secondary': ''}`}
                                         onClick={() => {
 
                                             if (!element.id) return;
