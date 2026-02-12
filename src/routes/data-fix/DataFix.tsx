@@ -160,10 +160,10 @@ const DataFixPage = () => {
 
                                                 const response: APIResponse<StockData[]> = await StockAPI.getStocksByNameOrTicker(args);
 
-                                                return response.data;
+                                                return response.data.toSorted((a, _b) => a.isActive ? -1 : 1);
                                             }}
                                             onSelect={(selectedStock: StockData): void => setFixStockData(selectedStock)}
-                                            setInputValue={(selectedStock: StockData): string => selectedStock.name}
+                                            setInputValue={(selectedStock: StockData): string => selectedStock.tickerNo}
                                             renderItem={(data: StockData): ReactElement => (
                                                 <div
                                                     className='d-flex flex-column'
@@ -172,7 +172,7 @@ const DataFixPage = () => {
                                                         className='d-flex flex-row justify-content-between'
                                                     >
                                                         <span className='main-text'>{ data.name }</span>
-                                                        { data.isActive && <Badge bg='success' className='align-content-center'>Active</Badge> }
+                                                        { Boolean(data.isActive) && <Badge bg='success' className='align-content-center'>Active</Badge> }
                                                     </div>
                                                     <div className='sub-text'>{ data.tickerNo }</div>
                                                 </div>
