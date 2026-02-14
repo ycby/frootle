@@ -26,7 +26,7 @@ jobs:
       run: npm ci
 
     - name: Setup Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install firefox --with-deps
 
     - name: Run Tests
       run: npm test
