@@ -46,7 +46,7 @@ type AggregateObject = {
     quantity: number
 }
 
-type BaseDiaryEntry = Omit<DiaryEntry, 'createdDatetime' | 'lastModifiedDatetime'>;
+export type BaseDiaryEntry = Omit<DiaryEntry, 'createdDatetime' | 'lastModifiedDatetime'>;
 
 const PortfolioPage = () => {
 
@@ -69,6 +69,11 @@ const PortfolioPage = () => {
     const [showTransactionModal, setShowTransactionModal] = useState(false);
     const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const currencyFormat = new Intl.NumberFormat('en-HK', {
+        style: 'currency',
+        currency: 'HKD'
+    });
 
     let navigate = useNavigate();
     // const { addAlert } = useAlert(); TODO: use this for alerts
@@ -352,8 +357,8 @@ const PortfolioPage = () => {
                                             <td>{index + 1}</td>
                                             <td>{element.type}</td>
                                             <td>{element.quantity}</td>
-                                            <td>{element.amount}</td>
-                                            <td>{element.fee}</td>
+                                            <td>{currencyFormat.format(element.amount.getNominalValue())}</td>
+                                            <td>{currencyFormat.format(element.fee.getNominalValue())}</td>
                                             <td>{dateToStringConverter(element.transactionDate)}</td>
                                             <td>
                                                 <MdModeEdit
@@ -513,7 +518,7 @@ const PortfolioPage = () => {
                         //validate input and generate correct values
 
                         //generate the value
-                        const de = {...newDiaryEntry};
+                        const de: BaseDiaryEntry = {...newDiaryEntry};
 
                         //send to back end
                         const response = de.id ? await DiaryEntryAPI.putDiaryEntry({...de, id: de.id}) : await DiaryEntryAPI.postDiaryEntries(de);
@@ -659,7 +664,7 @@ const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionIn
     }
 }
 
-const processDiaryEntries: (diaryEntries: DiaryEntry[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntry[]): DiaryEntryListItem[] => {
+const processDiaryEntries = (diaryEntries: DiaryEntry[]): DiaryEntryListItem[] => {
 
     return diaryEntries.map((element: DiaryEntry, index: number) => {
 

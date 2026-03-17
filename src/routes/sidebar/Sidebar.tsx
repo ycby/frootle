@@ -16,11 +16,6 @@ const Sidebar = () => {
                         Short Reporting
                     </NavLink>
                     <NavLink
-                        to={'upload-data'}
-                    >
-                        Upload Data
-                    </NavLink>
-                    <NavLink
                         to={'/data-fix'}
                     >
                         Fix Data

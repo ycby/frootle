@@ -9,7 +9,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ErrorPage from '#root/src/routes/error-page.tsx';
 import ShortReporting from '#root/src/routes/short-reporting/short-reporting.tsx';
-import UploadData from '#root/src/routes/upload-data/upload-data.tsx';
 import {PortfolioDiary} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {PortfolioPage} from "#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx";
 import {DataFixPage} from "#root/src/routes/data-fix/DataFix.js";
@@ -37,10 +36,6 @@ const router = createBrowserRouter([
 			{
 				path: 'short-reporting/',
 				element: <ShortReporting />
-			},
-			{
-				path: 'upload-data/',
-				element: <UploadData />
 			},
 			{
 				path: 'data-fix',

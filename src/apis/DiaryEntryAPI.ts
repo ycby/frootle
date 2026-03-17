@@ -4,6 +4,7 @@ import {
 } from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import {BaseDiaryEntry} from "#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/diary-entry`;
 
@@ -58,7 +59,7 @@ const getDiaryEntries = async (stockId: string): Promise<APIResponse<DiaryEntry[
     };
 }
 
-const postDiaryEntries = async (data: Omit<DiaryEntry, 'id'> | Omit<DiaryEntry, 'id'>[]): Promise<APIResponse<any[]>> => {
+const postDiaryEntries = async (data: Omit<BaseDiaryEntry, 'id'> | Omit<BaseDiaryEntry, 'id'>[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array
         ? data.map(element => diaryEntryMapperBE(element))

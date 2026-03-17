@@ -92,6 +92,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
                                 type='currency'
                                 value={sourceObject.amtWFee}
                                 onChange={(newValue) => {
+
                                     updateSource({...sourceObject, amtWFee: newValue});
                                 }}
                             />
@@ -104,6 +105,7 @@ const NewTransactionComponent = (props: NewItemView<NewTransactionInputs>) => {
                                 type='currency'
                                 value={sourceObject.amtWOFee}
                                 onChange={(newValue) =>  {
+
                                     updateSource({...sourceObject, amtWOFee: newValue});
                                 }}
                             />

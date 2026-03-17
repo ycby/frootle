@@ -1,5 +1,6 @@
 import {NewTransactionInputs, TransactionData, TransactionDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus, TransactionType} from "#root/src/types.ts";
+import Money from "money-type";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/transaction`;
 
@@ -7,9 +8,9 @@ const transactionMapperBE = (sourceObj: NewTransactionInputs): Partial<Transacti
 
     const result: Partial<TransactionDataBE> = {
         type: sourceObj.type,
-        amount: Number(sourceObj.amtWOFee),
+        amount: Money.fromNominalValue(Number(sourceObj.amtWOFee), 2, sourceObj.currency),
         quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
-        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)),
+        fee: Money.fromNominalValue(Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)), 2, sourceObj.currency),
         amount_per_share: Number(sourceObj.amtWOFee) / Number(sourceObj.quantity),
         transaction_date: sourceObj.transactionDate,
         currency: sourceObj.currency
@@ -27,9 +28,9 @@ const transactionMapperFE = (data: TransactionDataBE): TransactionData => {
         id: data.id,
         stockId: data.stock_id,
         type: data.type,
-        amount: Number(data.amount).toFixed(2),
+        amount: new Money(data.amount.whole, data.amount.fractional, data.amount.decimal_places, data.amount.iso_code),
         quantity: data.quantity,
-        fee: Number(data.fee).toFixed(2),
+        fee: new Money(data.fee.whole, data.fee.fractional, data.fee.decimal_places, data.fee.iso_code),
         amountPerShare: Number(data.amount_per_share).toFixed(2),
         transactionDate: new Date(data.transaction_date),
         currency: data.currency,
