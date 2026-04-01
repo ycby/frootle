@@ -162,28 +162,28 @@ const PortfolioPage = () => {
                 case 'buy':
                     quantityAccumulator += element.quantity;
 
-                    totalExpenditure += Number(element.amount);
+                    totalExpenditure += element.amount.getNominalValue();
                     break;
                 case 'sell':
                     quantityAccumulator -= element.quantity;
 
-                    totalGain += Number(element.amount);
+                    totalGain += element.amount.getNominalValue();
                     break;
                 case 'scrip_dividend':
                     quantityAccumulator += element.quantity;
 
-                    totalScrip += Number(element.quantity);
+                    totalScrip += element.quantity;
                     break;
                 case 'cash_dividend':
-                    totalGain += Number(element.amount);
-                    totalCashDiv += Number(element.amount);
+                    totalGain += element.amount.getNominalValue();
+                    totalCashDiv += element.amount.getNominalValue();
 
                     break;
                 default:
                     break;
             }
 
-            totalFee += Number(element.fee);
+            totalFee += element.fee.getNominalValue();
 
             holdingsOverTime.unshift({
                 x: element.transactionDate.valueOf(),
