@@ -12,8 +12,8 @@ const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTran
         id: sourceObj.id,
         stockId: sourceObj.stockId,
         type: sourceObj.type,
-        amtWFee: (Number(sourceObj.amount) + Number(sourceObj.fee)).toFixed(2),
-        amtWOFee: Number(sourceObj.amount).toFixed(2),
+        amtWFee: (sourceObj.amount.getNominalValue() + sourceObj.fee.getNominalValue()).toFixed(sourceObj.amount.decimal_places),
+        amtWOFee: sourceObj.amount.getNominalValue().toFixed(sourceObj.amount.decimal_places),
         quantity: sourceObj.quantity.toString(),
         transactionDate: dateToStringConverter(sourceObj.transactionDate),
         currency: sourceObj.currency
