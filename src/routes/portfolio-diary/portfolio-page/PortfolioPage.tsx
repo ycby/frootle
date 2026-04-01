@@ -489,6 +489,7 @@ const PortfolioPage = () => {
                         if (editedIndex !== -1) newArray.splice(editedIndex, 1);
 
                         newArray.unshift(convertNewTransactionToTransaction(td));
+                        console.log(newArray);
                         setTransactionData(processTransactionData(newArray).sort(transactionSortingFn));
 
                         //just clear extra here in case
