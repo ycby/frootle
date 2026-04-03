@@ -15,7 +15,7 @@ const shortMapperFE = (extObj: ShortDataBE): ShortData | null => {
         id: extObj.id,
         stockId: extObj.stock_id,
         shortedShares: extObj.shorted_shares,
-        shortedAmount: new Money(extObj.shorted_amount.whole, extObj.shorted_amount.fractional, extObj.shorted_amount.decimal_places, extObj.shorted_amount.iso_code),
+        shortedAmount: new Money(BigInt(extObj.shorted_amount.whole), extObj.shorted_amount.decimal_places, extObj.shorted_amount.iso_code),
         reportingDate: parsedReportingDate,
         tickerNo: extObj.ticker_no,
         createdDatetime: new Date(extObj.created_datetime),

@@ -6,6 +6,9 @@ const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/transaction`;
 
 const transactionMapperBE = (sourceObj: NewTransactionInputs): Partial<TransactionDataBE>  => {
 
+    console.log(Number(sourceObj.amtWOFee));
+    console.log(Number(sourceObj.amtWFee));
+    console.log(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee));
     const result: Partial<TransactionDataBE> = {
         type: sourceObj.type,
         amount: Money.fromNominalValue(Number(sourceObj.amtWOFee), 2, sourceObj.currency),
@@ -28,9 +31,9 @@ const transactionMapperFE = (data: TransactionDataBE): TransactionData => {
         id: data.id,
         stockId: data.stock_id,
         type: data.type,
-        amount: new Money(data.amount.whole, data.amount.fractional, data.amount.decimal_places, data.amount.iso_code),
+        amount: new Money(BigInt(data.amount.whole), data.amount.decimal_places, data.amount.iso_code),
         quantity: data.quantity,
-        fee: new Money(data.fee.whole, data.fee.fractional, data.fee.decimal_places, data.fee.iso_code),
+        fee: new Money(BigInt(data.fee.whole), data.fee.decimal_places, data.fee.iso_code),
         amountPerShare: Number(data.amount_per_share).toFixed(2),
         transactionDate: new Date(data.transaction_date),
         currency: data.currency,
@@ -65,6 +68,7 @@ const getStockTransactions = async (stockId: string): Promise<APIResponse<Transa
 
 const postStockTransactions = async (data: NewTransactionInputs | NewTransactionInputs[]): Promise<APIResponse<any[]>> => {
 
+    console.log(data);
     const processedData = data instanceof Array
         ? data.map(element => transactionMapperBE(element))
         : [transactionMapperBE(data)];

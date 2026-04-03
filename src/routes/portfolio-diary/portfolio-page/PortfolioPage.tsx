@@ -29,6 +29,7 @@ import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
 import {convertZeroesToKorM} from "#root/src/helpers/ChartHelpers.ts";
+import Money from "money-type";
 
 type DeletionObject = {
     id: string,
@@ -113,7 +114,6 @@ const PortfolioPage = () => {
                 const transactionData: TransactionData[] = response.data;
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
-                console.log(transactionDataLineItems);
                 setTransactionData(transactionDataLineItems);
             }//Handle if failed to retrieve
         }
@@ -149,12 +149,13 @@ const PortfolioPage = () => {
         const holdingsOverTime: Point[] = [];
         let quantityAccumulator = 0;
 
-        let totalExpenditure = 0;
-        let totalGain = 0;
-        let totalProfit = 0;
-        let totalFee = 0;
+        //hardcode first, should grab when stock is grabbed
+        let totalExpenditure = new Money(0n, 2, 'HKD');
+        let totalGain = new Money(0n, 2, 'HKD');
+        let totalProfit = new Money(0n, 2, 'HKD');
+        let totalFee = new Money(0n, 2, 'HKD');
         let totalScrip = 0;
-        let totalCashDiv = 0;
+        let totalCashDiv = new Money(0n, 2, 'HKD');
 
         for (let element of transactionDataInTimeOrder) {
 
@@ -162,12 +163,12 @@ const PortfolioPage = () => {
                 case 'buy':
                     quantityAccumulator += element.quantity;
 
-                    totalExpenditure += element.amount.getNominalValue();
+                    totalExpenditure = totalExpenditure.add(element.amount);
                     break;
                 case 'sell':
                     quantityAccumulator -= element.quantity;
 
-                    totalGain += element.amount.getNominalValue();
+                    totalGain = totalGain.add(element.amount);
                     break;
                 case 'scrip_dividend':
                     quantityAccumulator += element.quantity;
@@ -175,15 +176,15 @@ const PortfolioPage = () => {
                     totalScrip += element.quantity;
                     break;
                 case 'cash_dividend':
-                    totalGain += element.amount.getNominalValue();
-                    totalCashDiv += element.amount.getNominalValue();
+                    totalGain = totalGain.add(element.amount);
+                    totalCashDiv = totalCashDiv.add(element.amount);
 
                     break;
                 default:
                     break;
             }
 
-            totalFee += element.fee.getNominalValue();
+            totalFee = totalFee.add(element.fee);
 
             holdingsOverTime.unshift({
                 x: element.transactionDate.valueOf(),
@@ -191,17 +192,17 @@ const PortfolioPage = () => {
             });
         }
 
-        totalProfit = totalGain - totalExpenditure - totalFee;
+        totalProfit = totalGain.subtract(totalExpenditure).subtract(totalFee);
 
         setQuantityDataPoints(holdingsOverTime);
         setAggregateValues({
-            expenditure: totalExpenditure,
-            income: totalGain,
-            fee: totalFee,
+            expenditure: Number(totalExpenditure.getNominalValue()),
+            income: Number(totalGain.getNominalValue()),
+            fee: Number(totalFee.getNominalValue()),
             scrip: totalScrip,
-            cashDiv: totalCashDiv,
-            profit: totalProfit,
-            perShare: (totalExpenditure - totalGain) / quantityAccumulator,
+            cashDiv: Number(totalCashDiv.getNominalValue()),
+            profit: Number(totalProfit.getNominalValue()),
+            perShare: Number((totalExpenditure.subtract(totalGain)).getNominalValue()) / quantityAccumulator,
             quantity: quantityAccumulator
         });
     }, [transactionData]);
@@ -357,8 +358,8 @@ const PortfolioPage = () => {
                                             <td>{index + 1}</td>
                                             <td>{element.type}</td>
                                             <td>{element.quantity}</td>
-                                            <td>{currencyFormat.format(element.amount.getNominalValue())}</td>
-                                            <td>{currencyFormat.format(element.fee.getNominalValue())}</td>
+                                            <td>{currencyFormat.format(Number(element.amount.getNominalValue()))}</td>
+                                            <td>{currencyFormat.format(Number(element.fee.getNominalValue()))}</td>
                                             <td>{dateToStringConverter(element.transactionDate)}</td>
                                             <td>
                                                 <MdModeEdit
