@@ -1,5 +1,5 @@
 import {FilterableSelect} from "#root/src/helpers/filterable-select/FilterableSelect.tsx";
-import {render, waitFor, cleanup} from "@testing-library/react";
+import {render, waitFor, cleanup, screen} from "@testing-library/react";
 import { ReactElement } from "react";
 import {page, userEvent} from "vitest/browser";
 
@@ -25,7 +25,7 @@ describe('FilterableSelect', () => {
                 queryFn={mockFunction}
                 onSelect={(value: string): string => value}
                 setInputValue={(value: string): string => value}
-                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
+                renderItem={(value: string): ReactElement => (<>{value}</>)}
             />
         );
 
@@ -38,17 +38,9 @@ describe('FilterableSelect', () => {
             await userEvent.keyboard('{Shift>}L{/Shift}abel 1');
         });
 
-        await expect.element(page.getByRole('listitem')
-            .filter({
-                hasText: 'Label 1'
-            })
-        ).toBeInTheDocument();
+        expect(screen.queryByText('Label 1')).toBeInTheDocument();
 
-        await expect.element(page.getByRole('listitem')
-            .filter({
-                hasText: 'Label 2'
-            })
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText('Label 2')).not.toBeInTheDocument();
     });
 
     test('Checks if typing can filter results to no result', async () => {
@@ -58,7 +50,7 @@ describe('FilterableSelect', () => {
                 queryFn={mockFunction}
                 onSelect={(value: string): string => value}
                 setInputValue={(value: string): string => value}
-                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
+                renderItem={(value: string): ReactElement => (<>{value}</>)}
             />
         );
 
@@ -71,9 +63,9 @@ describe('FilterableSelect', () => {
             await userEvent.keyboard('{Shift>}L{/Shift}abel z');
         });
 
-        await expect.element(page.getByText('No results found...')).toBeInTheDocument();
+        expect(screen.queryByText('No results found...')).toBeInTheDocument();
 
-        await expect.element(page.getByText('Label 1')).not.toBeInTheDocument();
+        expect(screen.queryByText('Label 1')).not.toBeInTheDocument();
     });
 
     test('Checks if returns the right value by clicks', async () => {
@@ -85,7 +77,7 @@ describe('FilterableSelect', () => {
                 queryFn={mockFunction}
                 onSelect={(value: string): string => result = value}
                 setInputValue={(value: string): string => value}
-                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
+                renderItem={(value: string): ReactElement => (<>{value}</>)}
             />
         );
 
@@ -101,7 +93,7 @@ describe('FilterableSelect', () => {
         });
 
         expect(result !== null && result === 'Label 1');
-        await expect.element(filterableSelect).toHaveValue('Label 1');
+        expect(filterableSelect).toHaveValue('Label 1');
     });
 
     test('Checks if returns the right value by arrow keys', async () => {
@@ -113,7 +105,7 @@ describe('FilterableSelect', () => {
                 queryFn={mockFunction}
                 onSelect={(value: string): string => result = value}
                 setInputValue={(value: string): string => value}
-                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
+                renderItem={(value: string): ReactElement => (<>{value}</>)}
             />
         );
 
@@ -128,9 +120,8 @@ describe('FilterableSelect', () => {
             await userEvent.keyboard('{ArrowDown>2/}{Enter}');
         })
 
-        // @ts-ignore
         expect(result !== null && result === 'Label 2');
-        await expect.element(filterableSelect).toHaveValue('Label 2');
+        expect(filterableSelect).toHaveValue('Label 2');
     });
 
     test('Checks if returns the right value by arrow keys after exceeding list length', async () => {
@@ -142,7 +133,7 @@ describe('FilterableSelect', () => {
                 queryFn={mockFunction}
                 onSelect={(value: string): string => result = value}
                 setInputValue={(value: string): string => value}
-                renderItem={(value: string): ReactElement => (<div>{value}</div>)}
+                renderItem={(value: string): ReactElement => (<>{value}</>)}
             />
         );
 
@@ -157,9 +148,8 @@ describe('FilterableSelect', () => {
             await userEvent.keyboard('{ArrowDown>4/}{Enter}');
         })
 
-        // @ts-ignore
         expect(result !== null && result === 'Label 3');
-        await expect.element(filterableSelect).toHaveValue('Label 3');
+        expect(filterableSelect).toHaveValue('Label 3');
     });
 
     test('Checks if returns the right value by arrow keys after exceeding list start', async () => {
@@ -188,6 +178,6 @@ describe('FilterableSelect', () => {
         })
 
         expect(result === null);
-        await expect.element(filterableSelect).toHaveValue('Lab');
+        expect(filterableSelect).toHaveValue('Lab');
     });
 });

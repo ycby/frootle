@@ -34,11 +34,16 @@ const headers = [
 	},
 	{
 		label: 'Shorted Shares',
-		value: 'shortedShares'
+		value: 'shortedShares',
+		transform: (element: any): string => new Intl.NumberFormat("en-HK").format(element)
 	},
 	{
 		label: 'Shorted Amount',
-		value: 'shortedAmount'
+		value: 'shortedAmount',
+		transform: (element: any): string => new Intl.NumberFormat("en-HK", {
+			style: 'currency',
+			currency: element.iso_code
+		}).format(element.getNominalValue())
 	},
 	{
 		label: 'Created Date',
@@ -173,7 +178,7 @@ export default function ShortReporting() {
 								y: {
 									min: 0,
 									ticks: {
-										callback: (value) => convertZeroesToKorM(value as number)
+										callback: (value, _index, ticks) => convertZeroesToKorM(value as number, ticks[ticks.length - 1].value as number),
 									}
 								}
 							},

@@ -1,5 +1,5 @@
 import Container from "react-bootstrap/Container";
-import {Badge, Button, Col, Pagination, Row, Stack} from "react-bootstrap";
+import {Badge, Button, Col, Row, Stack} from "react-bootstrap";
 import {ShortData, StockData} from "#root/src/routes/portfolio-diary/types.js";
 import {ReactElement, useEffect, useRef, useState} from "react";
 import {dateToStringConverter} from "#root/src/helpers/DateHelpers.js";
@@ -8,6 +8,7 @@ import * as StockAPI from "#root/src/apis/StockAPI.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import * as ShortAPI from "#root/src/apis/ShortDataAPI.ts";
 import {useAlert} from "#root/src/helpers/alerts/AlertContext.tsx";
+import {WrappedPagination} from "#root/src/helpers/pagination/WrappedPagination.tsx";
 
 type MismatchTickerResponse = {
     total_rows: string;
@@ -25,9 +26,7 @@ const DataFixPage = () => {
     const [selectedChildrenIndex, setSelectedChildrenIndex] = useState<number[]>([]);
 
     const [fixStockData, setFixStockData] = useState<StockData | null>();
-
     const totalRows = useRef<number>(0);
-    const currentPage = useRef<number>(1);
 
     const {
         addAlert
@@ -67,35 +66,6 @@ const DataFixPage = () => {
         setFixStockData(null);
     }, [selectedTicker]);
 
-    const numOfPages = (Math.floor(totalRows.current / 10)) + (totalRows.current % 10 == 0 ? 0 : 1);
-    const pageArray = [];
-
-    if (numOfPages > 7) {
-
-        if (currentPage.current <= 2 || currentPage.current >= numOfPages - 1) {
-            for (let i = 1; i <= 3; i ++) {
-                pageArray.push(i);
-            }
-            pageArray.push('...');
-            for (let i = numOfPages - 2; i <= numOfPages; i++) {
-                pageArray.push(i);
-            }
-        } else {
-            pageArray.push(1);
-            pageArray.push('...');
-            for (let i = currentPage.current - 1; i <= currentPage.current + 1; i++) {
-                pageArray.push(i);
-            }
-            pageArray.push('...');
-            pageArray.push(numOfPages);
-        }
-    } else {
-
-        for (let i = 1; i <= numOfPages; i ++) {
-            pageArray.push(i);
-        }
-    }
-
     //TODO: Cleanup by splitting up components - its too ass rn
     return (
         <Container fluid>
@@ -117,29 +87,11 @@ const DataFixPage = () => {
                                 </div>
                             ))}
                         </Stack>
-                        <Pagination>
-                            <Pagination.Prev />
-                            {
-                                //TODO: remove hardcode limit 10 later
-                                // Use ellipses to make it less shit
-                                //temp
-                                pageArray.map((element, index) => (
-                                    element !== '...'
-                                        ? <Pagination.Item
-                                            key={`p_${index}`}
-                                            active={element === currentPage.current}
-                                            onClick={() => {
-                                                getTickerList(10, (Number(element) - 1) * 10);
-                                                currentPage.current = Number(element);
-                                            }}
-                                        >
-                                            {element}
-                                        </Pagination.Item>
-                                        : <Pagination.Ellipsis key={`p_${index}`} />
-                                ))
-                            }
-                            <Pagination.Next />
-                        </Pagination>
+                        <WrappedPagination
+                            totalRows={totalRows.current}
+                            limit={10}
+                            onPageClick={(pageNumber: number) => getTickerList(10, (pageNumber - 1) * 10)}
+                        />
                     </Container>
                 </Col>
                 <Col>

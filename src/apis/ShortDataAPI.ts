@@ -1,6 +1,7 @@
 import {APIResponse, APIStatus} from "#root/src/types.ts";
 import {ShortData, ShortDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
+import Money from "money-type";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/short`;
 
@@ -14,7 +15,7 @@ const shortMapperFE = (extObj: ShortDataBE): ShortData | null => {
         id: extObj.id,
         stockId: extObj.stock_id,
         shortedShares: extObj.shorted_shares,
-        shortedAmount: extObj.shorted_amount,
+        shortedAmount: new Money(BigInt(extObj.shorted_amount.whole), extObj.shorted_amount.decimal_places, extObj.shorted_amount.iso_code),
         reportingDate: parsedReportingDate,
         tickerNo: extObj.ticker_no,
         createdDatetime: new Date(extObj.created_datetime),

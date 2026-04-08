@@ -4,6 +4,7 @@ import {
 } from "#root/src/routes/portfolio-diary/types.ts";
 import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 import {TransactionType} from "#root/src/types.ts";
+import Money from "money-type";
 
 const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTransactionInputs = (sourceObj: TransactionData): NewTransactionInputs => {
 
@@ -11,8 +12,8 @@ const convertTransactionToNewTransaction:(sourceObj: TransactionData) => NewTran
         id: sourceObj.id,
         stockId: sourceObj.stockId,
         type: sourceObj.type,
-        amtWFee: (Number(sourceObj.amount) + Number(sourceObj.fee)).toFixed(2),
-        amtWOFee: Number(sourceObj.amount).toFixed(2),
+        amtWFee: sourceObj.amount.add(sourceObj.fee).getNominalValue(),
+        amtWOFee: sourceObj.amount.getNominalValue(),
         quantity: sourceObj.quantity.toString(),
         transactionDate: dateToStringConverter(sourceObj.transactionDate),
         currency: sourceObj.currency
@@ -26,10 +27,10 @@ const convertNewTransactionToTransaction = (sourceObj: NewTransactionInputs): Tr
         id: sourceObj.id,
         stockId: sourceObj.stockId,
         type: sourceObj.type,
-        amount: Number(sourceObj.amtWOFee).toFixed(2),
+        amount: Money.fromNominalValue(Number(sourceObj.amtWOFee), 2, sourceObj.currency),
         amountPerShare: (Number(sourceObj.amtWOFee) / Number(sourceObj.quantity)).toFixed(2),
         quantity: sourceObj.type === TransactionType.CASH_DIVIDEND ? 0 : Number(sourceObj.quantity),
-        fee: Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)).toFixed(2),
+        fee: Money.fromNominalValue(Math.abs(Number(sourceObj.amtWFee) - Number(sourceObj.amtWOFee)), 2, sourceObj.currency),
         transactionDate: stringToDateConverter(sourceObj.transactionDate),
         currency: sourceObj.currency
     }

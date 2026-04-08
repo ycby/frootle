@@ -1,4 +1,5 @@
 import {ComponentStatusKeys, CurrencyKeys, TransactionTypeKeys} from "#root/src/types.ts";
+import Money from "money-type";
 
 export type ListItem = {
     index: number;
@@ -11,8 +12,8 @@ export type StockData = {
     name: string;
     full_name?: string;
     isActive: boolean;
-    createdDatetime: Date;
-    lastModifiedDatetime: Date;
+    createdDatetime?: Date;
+    lastModifiedDatetime?: Date;
 }
 
 export type StockDataBE = {
@@ -29,19 +30,19 @@ export type ShortData = {
     id: string;
     stockId?: string;
     shortedShares: number;
-    shortedAmount: number;
+    shortedAmount: Money;
     reportingDate: Date;
     tickerNo?: string;
     name?: string;
-    createdDatetime: Date;
-    lastModifiedDatetime: Date;
+    createdDatetime?: Date;
+    lastModifiedDatetime?: Date;
 }
 
 export type ShortDataBE = {
     id: string;
     stock_id?: string;
     shorted_shares: number;
-    shorted_amount: number;
+    shorted_amount: Money;
     reporting_date: string;
     ticker_no: string;
     created_datetime: Date;
@@ -52,24 +53,24 @@ export type TransactionData = {
     id: string | null;
     stockId: string | null;
     type: TransactionTypeKeys;
-    amount: string;
+    amount: Money;
     amountPerShare: string;
     quantity: number;
-    fee: string;
+    fee: Money;
     transactionDate: Date;
     currency: CurrencyKeys;
-    createdDatetime: Date;
-    lastModifiedDatetime: Date;
+    createdDatetime?: Date;
+    lastModifiedDatetime?: Date;
 }
 
 export type TransactionDataBE = {
     id: string;
     stock_id: string;
     type: TransactionTypeKeys;
-    amount: number;
+    amount: Money;
     amount_per_share: number;
     quantity: number;
-    fee: number;
+    fee: Money;
     transaction_date: string;
     currency: CurrencyKeys;
     created_datetime: Date;
@@ -93,8 +94,8 @@ export type DiaryEntry = {
     title: string;
     content: string;
     postedDate: Date;
-    createdDatetime: Date;
-    lastModifiedDatetime: Date;
+    createdDatetime?: Date;
+    lastModifiedDatetime?: Date;
 }
 
 export type DiaryEntryBE = {

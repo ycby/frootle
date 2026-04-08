@@ -29,6 +29,7 @@ import {IoMdTrash} from "react-icons/io";
 
 import './PortfolioPage.css';
 import {convertZeroesToKorM} from "#root/src/helpers/ChartHelpers.ts";
+import Money from "money-type";
 
 type DeletionObject = {
     id: string,
@@ -46,7 +47,7 @@ type AggregateObject = {
     quantity: number
 }
 
-type BaseDiaryEntry = Omit<DiaryEntry, 'createdDatetime' | 'lastModifiedDatetime'>;
+export type BaseDiaryEntry = Omit<DiaryEntry, 'createdDatetime' | 'lastModifiedDatetime'>;
 
 const PortfolioPage = () => {
 
@@ -69,6 +70,11 @@ const PortfolioPage = () => {
     const [showTransactionModal, setShowTransactionModal] = useState(false);
     const [showDiaryEntryModal, setShowDiaryEntryModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const currencyFormat = new Intl.NumberFormat('en-HK', {
+        style: 'currency',
+        currency: 'HKD'
+    });
 
     let navigate = useNavigate();
     // const { addAlert } = useAlert(); TODO: use this for alerts
@@ -108,7 +114,6 @@ const PortfolioPage = () => {
                 const transactionData: TransactionData[] = response.data;
 
                 const transactionDataLineItems: TransactionDataListItem[] = processTransactionData(transactionData).sort(transactionSortingFn);
-                console.log(transactionDataLineItems);
                 setTransactionData(transactionDataLineItems);
             }//Handle if failed to retrieve
         }
@@ -144,12 +149,13 @@ const PortfolioPage = () => {
         const holdingsOverTime: Point[] = [];
         let quantityAccumulator = 0;
 
-        let totalExpenditure = 0;
-        let totalGain = 0;
-        let totalProfit = 0;
-        let totalFee = 0;
+        //hardcode first, should grab when stock is grabbed
+        let totalExpenditure = new Money(0n, 2, 'HKD');
+        let totalGain = new Money(0n, 2, 'HKD');
+        let totalProfit = new Money(0n, 2, 'HKD');
+        let totalFee = new Money(0n, 2, 'HKD');
         let totalScrip = 0;
-        let totalCashDiv = 0;
+        let totalCashDiv = new Money(0n, 2, 'HKD');
 
         for (let element of transactionDataInTimeOrder) {
 
@@ -157,28 +163,28 @@ const PortfolioPage = () => {
                 case 'buy':
                     quantityAccumulator += element.quantity;
 
-                    totalExpenditure += Number(element.amount);
+                    totalExpenditure = totalExpenditure.add(element.amount);
                     break;
                 case 'sell':
                     quantityAccumulator -= element.quantity;
 
-                    totalGain += Number(element.amount);
+                    totalGain = totalGain.add(element.amount);
                     break;
                 case 'scrip_dividend':
                     quantityAccumulator += element.quantity;
 
-                    totalScrip += Number(element.quantity);
+                    totalScrip += element.quantity;
                     break;
                 case 'cash_dividend':
-                    totalGain += Number(element.amount);
-                    totalCashDiv += Number(element.amount);
+                    totalGain = totalGain.add(element.amount);
+                    totalCashDiv = totalCashDiv.add(element.amount);
 
                     break;
                 default:
                     break;
             }
 
-            totalFee += Number(element.fee);
+            totalFee = totalFee.add(element.fee);
 
             holdingsOverTime.unshift({
                 x: element.transactionDate.valueOf(),
@@ -186,17 +192,17 @@ const PortfolioPage = () => {
             });
         }
 
-        totalProfit = totalGain - totalExpenditure - totalFee;
+        totalProfit = totalGain.subtract(totalExpenditure).subtract(totalFee);
 
         setQuantityDataPoints(holdingsOverTime);
         setAggregateValues({
-            expenditure: totalExpenditure,
-            income: totalGain,
-            fee: totalFee,
+            expenditure: Number(totalExpenditure.getNominalValue()),
+            income: Number(totalGain.getNominalValue()),
+            fee: Number(totalFee.getNominalValue()),
             scrip: totalScrip,
-            cashDiv: totalCashDiv,
-            profit: totalProfit,
-            perShare: (totalExpenditure - totalGain) / quantityAccumulator,
+            cashDiv: Number(totalCashDiv.getNominalValue()),
+            profit: Number(totalProfit.getNominalValue()),
+            perShare: Number((totalExpenditure.subtract(totalGain)).getNominalValue()) / quantityAccumulator,
             quantity: quantityAccumulator
         });
     }, [transactionData]);
@@ -352,8 +358,8 @@ const PortfolioPage = () => {
                                             <td>{index + 1}</td>
                                             <td>{element.type}</td>
                                             <td>{element.quantity}</td>
-                                            <td>{element.amount}</td>
-                                            <td>{element.fee}</td>
+                                            <td>{currencyFormat.format(Number(element.amount.getNominalValue()))}</td>
+                                            <td>{currencyFormat.format(Number(element.fee.getNominalValue()))}</td>
                                             <td>{dateToStringConverter(element.transactionDate)}</td>
                                             <td>
                                                 <MdModeEdit
@@ -484,6 +490,7 @@ const PortfolioPage = () => {
                         if (editedIndex !== -1) newArray.splice(editedIndex, 1);
 
                         newArray.unshift(convertNewTransactionToTransaction(td));
+                        console.log(newArray);
                         setTransactionData(processTransactionData(newArray).sort(transactionSortingFn));
 
                         //just clear extra here in case
@@ -513,7 +520,7 @@ const PortfolioPage = () => {
                         //validate input and generate correct values
 
                         //generate the value
-                        const de = {...newDiaryEntry};
+                        const de: BaseDiaryEntry = {...newDiaryEntry};
 
                         //send to back end
                         const response = de.id ? await DiaryEntryAPI.putDiaryEntry({...de, id: de.id}) : await DiaryEntryAPI.postDiaryEntries(de);
@@ -659,7 +666,7 @@ const resetNewTransactionData: () => NewTransactionInputs = (): NewTransactionIn
     }
 }
 
-const processDiaryEntries: (diaryEntries: DiaryEntry[]) => DiaryEntryListItem[] = (diaryEntries: DiaryEntry[]): DiaryEntryListItem[] => {
+const processDiaryEntries = (diaryEntries: DiaryEntry[]): DiaryEntryListItem[] => {
 
     return diaryEntries.map((element: DiaryEntry, index: number) => {
 
