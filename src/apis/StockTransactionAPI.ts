@@ -73,6 +73,7 @@ const postStockTransactions = async (data: NewTransactionInputs | NewTransaction
         ? data.map(element => transactionMapperBE(element))
         : [transactionMapperBE(data)];
 
+    console.log(JSON.stringify(processedData));
     const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         body: JSON.stringify(processedData),
