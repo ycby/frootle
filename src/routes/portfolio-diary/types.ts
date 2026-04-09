@@ -103,7 +103,7 @@ export type DiaryEntryBE = {
     stock_id: string;
     title: string;
     content: string;
-    posted_date: string;
+    posted_date: Date;
     created_datetime: Date;
     last_modified_datetime: Date;
 }
