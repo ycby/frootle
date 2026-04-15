@@ -90,7 +90,7 @@ const postDiaryEntries = async (data: Omit<BaseDiaryEntry, 'id'> | Omit<BaseDiar
     };
 }
 
-const putDiaryEntry = async (data: Pick<DiaryEntry, 'id'> | Pick<DiaryEntry, 'id'>[]): Promise<APIResponse<any[]>> => {
+const putDiaryEntry = async (data: DiaryEntry | DiaryEntry[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array
         ? data.map(element => diaryEntryMapperBE(element))
