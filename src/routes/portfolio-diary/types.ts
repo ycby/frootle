@@ -10,7 +10,7 @@ export type StockData = {
     id: string;
     tickerNo: string;
     name: string;
-    full_name?: string;
+    fullName?: string;
     isActive: boolean;
     createdDatetime?: Date;
     lastModifiedDatetime?: Date;
