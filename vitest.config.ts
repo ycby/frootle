@@ -3,6 +3,9 @@ import {defineConfig} from "vitest/config";
 
 export default defineConfig({
     test: {
+        coverage: {
+            provider: 'istanbul',
+        },
         projects: [{
             test: {
                 name: 'browser',
@@ -14,7 +17,8 @@ export default defineConfig({
                     instances: [
                         {browser: 'firefox'},
                     ],
-                    screenshotFailures: false
+                    screenshotFailures: false,
+
                 }
             }
         }, {
