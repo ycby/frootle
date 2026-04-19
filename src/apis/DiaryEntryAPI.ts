@@ -3,7 +3,6 @@ import {
     DiaryEntry,
 } from "#root/src/routes/portfolio-diary/types.ts";
 import {APIResponse, APIStatus} from "#root/src/types.ts";
-import {dateToStringConverter, stringToDateConverter} from "#root/src/helpers/DateHelpers.ts";
 import {BaseDiaryEntry} from "#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/diary-entry`;
@@ -16,7 +15,7 @@ const diaryEntryMapperBE = (sourceObj: Partial<DiaryEntry>): Partial<DiaryEntryB
     if (sourceObj.stockId !== null) result.stock_id = sourceObj.stockId;
     if (sourceObj?.title) result.title = sourceObj.title;
     if (sourceObj?.content) result.content = sourceObj.content;
-    if (sourceObj?.postedDate) result.posted_date = dateToStringConverter(sourceObj.postedDate);
+    if (sourceObj?.postedDate) result.posted_date = sourceObj.postedDate;
 
     return result;
 }
@@ -28,9 +27,9 @@ const diaryEntryMapperFE = (sourceObj: DiaryEntryBE): DiaryEntry => {
         stockId: sourceObj.stock_id,
         title: sourceObj.title,
         content: sourceObj.content,
-        postedDate: stringToDateConverter(sourceObj.posted_date) ?? new Date(1970, 1, 1),
-        createdDatetime: sourceObj.created_datetime,
-        lastModifiedDatetime: sourceObj.last_modified_datetime,
+        postedDate: new Date(sourceObj.posted_date),
+        createdDatetime: new Date(sourceObj.created_datetime),
+        lastModifiedDatetime: new Date(sourceObj.last_modified_datetime),
     };
 }
 
@@ -91,7 +90,7 @@ const postDiaryEntries = async (data: Omit<BaseDiaryEntry, 'id'> | Omit<BaseDiar
     };
 }
 
-const putDiaryEntry = async (data: Pick<DiaryEntry, 'id'> | Pick<DiaryEntry, 'id'>[]): Promise<APIResponse<any[]>> => {
+const putDiaryEntry = async (data: DiaryEntry | DiaryEntry[]): Promise<APIResponse<any[]>> => {
 
     const processedData = data instanceof Array
         ? data.map(element => diaryEntryMapperBE(element))

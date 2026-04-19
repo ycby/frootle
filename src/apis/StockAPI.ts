@@ -9,7 +9,7 @@ const stockMapperFE = (sourceObj: StockDataBE): StockData => {
         id: sourceObj.id.toString(),
         name: sourceObj.name,
         tickerNo: sourceObj.ticker_no,
-        full_name: sourceObj.full_name,
+        fullName: sourceObj.full_name,
         isActive: sourceObj.is_active,
         createdDatetime: sourceObj.created_datetime,
         lastModifiedDatetime: sourceObj.last_modified_datetime,
@@ -58,7 +58,6 @@ const getTrackedStocks = async (): Promise<APIResponse<StockData[]>> => {
     const response = await fetch(`${baseUrl}/tracked`, {
         method: 'GET',
     });
-    console.log(response.url);
 
     if (!response.ok) return {
         status: APIStatus.FAIL,
@@ -78,7 +77,7 @@ const getTrackedStocks = async (): Promise<APIResponse<StockData[]>> => {
     };
 }
 
-const setTrackedStock = async (id: number): Promise<APIResponse<any[]>> => {
+const setTrackedStock = async (id: string): Promise<APIResponse<any[]>> => {
 
     const response = await fetch(`${baseUrl}/tracked/${id}/track`, {
         method: 'POST'

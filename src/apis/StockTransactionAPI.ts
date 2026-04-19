@@ -68,12 +68,10 @@ const getStockTransactions = async (stockId: string): Promise<APIResponse<Transa
 
 const postStockTransactions = async (data: NewTransactionInputs | NewTransactionInputs[]): Promise<APIResponse<any[]>> => {
 
-    console.log(data);
     const processedData = data instanceof Array
         ? data.map(element => transactionMapperBE(element))
         : [transactionMapperBE(data)];
 
-    console.log(JSON.stringify(processedData));
     const response = await fetch(`${baseUrl}`, {
         method: 'POST',
         body: JSON.stringify(processedData),

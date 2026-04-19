@@ -4,22 +4,17 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  test: {
-    globals: true,
-    coverage: {
-      enabled: true,
-      provider: 'istanbul',
-      reporter: ['text', 'json', 'html']
-    },
-    browser: {
-      provider: playwright(),
-      enabled: true,
-      headless: true,
-      instances: [
-        {browser: 'firefox'},
-      ],
-      screenshotFailures: false
+    plugins: [react()],
+    build: {
+        minify: true,
+        rolldownOptions: {
+            output: {
+                minify: {
+                    compress: {
+                        drop_console: true
+                    }
+                }
+            }
+        }
     }
-  }
-})
+});
