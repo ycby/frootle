@@ -1,5 +1,5 @@
 import {playwright} from "@vitest/browser-playwright";
-import {defineConfig} from "vitest/config";
+import {defineConfig, defaultExclude} from "vitest/config";
 
 export default defineConfig({
     test: {
@@ -9,7 +9,10 @@ export default defineConfig({
         projects: [{
             test: {
                 name: 'browser',
-                include: ['**/*.browser.test.ts'],
+                include: ['**/*.browser.test.tsx'],
+                exclude: [
+                    ...defaultExclude
+                ],
                 browser: {
                     provider: playwright(),
                     enabled: true,
@@ -25,7 +28,10 @@ export default defineConfig({
             test: {
                 name: 'node',
                 include: ['**/*.test.ts'],
-                exclude: ['**/*.browser.test.ts'],
+                exclude: [
+                    ...defaultExclude,
+                    '**/*.browser.test.ts',
+                ],
                 environment: 'node'
             }
         }]
