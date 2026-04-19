@@ -78,7 +78,7 @@ const PortfolioDiary = () => {
 
                             if (!searchTerm) return true;
 
-                            return element.tickerNo.includes(searchTerm);
+                            return element.tickerNo.includes(searchTerm) || element.name.toLowerCase().includes(searchTerm.toLowerCase());
                         }).map(element => {
 
                             return (
@@ -136,7 +136,7 @@ const PortfolioDiary = () => {
                         if (!newTrackedStock) return;
                         if (!newTrackedStock.id) return;
 
-                        const result = await StockAPI.setTrackedStock(Number(newTrackedStock.id));
+                        const result = await StockAPI.setTrackedStock(newTrackedStock.id);
 
                         if (result.status === APIStatus.FAIL) {
                             //TODO: handle fail case
