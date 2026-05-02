@@ -1,17 +1,14 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from "#root/src/components/navigation-sidebar/Sidebar.tsx";
 
-import './Root.css';
 import {AlertProvider} from "#root/src/helpers/alerts/AlertContext.tsx";
 
 export default function Root() {
 	return(
 		<AlertProvider>
-			<div id='main'>
-				<Sidebar />
-				<div id='detail'>
-					<Outlet />
-				</div>
+			<Sidebar />
+			<div id='detail'>
+				<Outlet />
 			</div>
 		</AlertProvider>
 	)
