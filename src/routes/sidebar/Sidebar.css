@@ -1,32 +1,39 @@
-#sidebar {
-    z-index: 10;
-    position: absolute;
-    width: 15rem;
-    min-width: 270px;
-    max-width: 500px;
-    height: 100%;
-    left: clamp(-270px, -15rem, -500px);
-    transition: left 0.75s;
+.main-navigation {
+    .offcanvas-title {
+        font-size: 1.5rem;
+    }
+    .offcanvas-body {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    nav {
+        font-size: 1.125rem;
+        ul {
+            li {
+                list-style: none;
+                padding: var(--padding-base) 0;
+                color: #252422;
+            }
+            li a:visited {
+                color: #252422;
+            }
+            li .selected-nav, .active-nav {
+                display: none;
+                padding-left: 1rem;
+            }
+            li:not(:has(li)):hover .selected-nav {
+                display: inline-block;
+            }
+            li:not(:has(li)):has(a.active) .active-nav {
+                display: inline-block;
+            }
+        }
+    }
 }
 
-#sidebar:hover {
-    left: 0;
-    transition: left 0.75s;
-}
-
-#sidebar:hover #sidebar-thumbnail {
-    right: calc(-4rem + 1px);
-    border-left: none;
-    border-radius: 0 20% 20% 0;
-    transition:
-        border-radius 0.75s,
-        right 0.1s;
-}
-
-#sidebar #sidebar-thumbnail {
-    position: absolute;
-    top: 10px;
-    right: calc(-4rem + 1px - 10px);
+#sidebar-thumbnail {
+    position: fixed;
+    margin: calc(var(--padding-base) * 2);
     width: 4rem;
     height: 4rem;
     z-index: 10;
@@ -35,36 +42,4 @@
     justify-content: center;
     background-color: #CCC5B9;
     border-radius: 20%;
-    transition:
-            border-radius 0.75s,
-            right 0.1s;
-}
-
-#sidebar #sidebar-main {
-    background-color: #CCC5B9;
-    color: #252422;
-    height: 100%;
-}
-
-#sidebar #sidebar-main h1 {
-    margin: 0;
-    padding: 10px;
-}
-
-#sidebar #sidebar-main a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-decoration: none;
-    color: #252422;
-    padding: 0.5rem;
-    gap: 1rem;
-}
-
-#sidebar #sidebar-main a:visited {
-    color: #252422;
-}
-
-#sidebar #sidebar-main a.active {
-    background-color: #CCC5B9;
 }
