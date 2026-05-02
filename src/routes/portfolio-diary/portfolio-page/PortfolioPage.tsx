@@ -727,6 +727,4 @@ const getDeleteModalButtonText: (type: string | undefined) => string = (type: st
     }
 };
 
-export {
-    PortfolioPage
-}
+export default PortfolioPage;

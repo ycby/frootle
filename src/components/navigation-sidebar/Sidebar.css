@@ -14,7 +14,7 @@
                 padding: var(--padding-base) 0;
                 color: #252422;
             }
-            li a:visited {
+            li a:visited, a:link {
                 color: #252422;
             }
             li .selected-nav, .active-nav {

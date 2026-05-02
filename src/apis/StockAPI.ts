@@ -125,9 +125,34 @@ const setUntrackedStock = async (id: string): Promise<APIResponse<any[]>> => {
     };
 }
 
+const getStockDuplicates = async (limit: number = 10, offset: number = 0) => {
+
+    const response = await fetch(`${baseUrl}/duplicates?limit=${limit}&offset=${offset}`, {
+        method: 'GET'
+    });
+
+    if (!response.ok) return {
+        status: APIStatus.FAIL,
+        data: []
+    };
+
+    const responseJSON = await response.json();
+
+    if (responseJSON.status !== 1) return {
+        status: APIStatus.FAIL,
+        data: [],
+    };
+
+    return {
+        status: APIStatus.SUCCESS,
+        data: responseJSON.data
+    };
+}
+
 export {
     getStocksByNameOrTicker,
     getTrackedStocks,
     setTrackedStock,
-    setUntrackedStock
+    setUntrackedStock,
+    getStockDuplicates
 }

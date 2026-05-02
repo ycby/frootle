@@ -265,6 +265,4 @@ const DataFixPage = () => {
     );
 }
 
-export {
-    DataFixPage
-}
+export default DataFixPage;

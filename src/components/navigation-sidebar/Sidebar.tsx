@@ -20,6 +20,16 @@ const navigationData: BaseNavigationType[] = [
         children: []
     },
     {
+        navigationLabel: 'Stock Management',
+        children: [
+            {
+                navigationLabel: 'Duplicate Management',
+                navigationLink: '/stock-duplicates',
+                children: []
+            }
+        ]
+    },
+    {
         navigationLabel: 'Short Data',
         children: [
             {

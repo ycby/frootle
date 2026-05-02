@@ -8,10 +8,11 @@ import Root from './Root.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ErrorPage from '#root/src/routes/error-page.tsx';
-import ShortReporting from '#root/src/routes/short-reporting/short-reporting.tsx';
-import {PortfolioDiary} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
-import {PortfolioPage} from "#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx";
-import {DataFixPage} from "#root/src/routes/data-fix/DataFix.tsx";
+import ShortReportingPage from '#root/src/routes/short-reporting/ShortReportingPage.tsx';
+import PortfolioDiary from '#root/src/routes/portfolio-diary/PortfolioDiary.tsx';
+import PortfolioPage from '#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx';
+import DataFixPage from '#root/src/routes/data-fix/DataFixPage.tsx';
+import StockMergePage from "#root/src/routes/stocks-merge/StockMergePage.tsx";
 
 
 const router = createBrowserRouter([
@@ -34,8 +35,12 @@ const router = createBrowserRouter([
 				]
 			},
 			{
+				path: 'stock-duplicates/',
+				element: <StockMergePage />
+			},
+			{
 				path: 'short-reporting/',
-				element: <ShortReporting />
+				element: <ShortReportingPage />
 			},
 			{
 				path: 'data-fix',
