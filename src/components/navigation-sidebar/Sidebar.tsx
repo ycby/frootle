@@ -38,7 +38,7 @@ const navigationData: BaseNavigationType[] = [
 
 const Sidebar = () => {
 
-    const [show, setShow] = useState(true);
+    const [show, setShow] = useState(false);
 
     return (
         <>

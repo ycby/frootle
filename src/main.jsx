@@ -11,7 +11,7 @@ import ErrorPage from '#root/src/routes/error-page.tsx';
 import ShortReporting from '#root/src/routes/short-reporting/short-reporting.tsx';
 import {PortfolioDiary} from "#root/src/routes/portfolio-diary/PortfolioDiary.tsx";
 import {PortfolioPage} from "#root/src/routes/portfolio-diary/portfolio-page/PortfolioPage.tsx";
-import {DataFixPage} from "#root/src/routes/data-fix/DataFix.js";
+import {DataFixPage} from "#root/src/routes/data-fix/DataFix.tsx";
 
 
 const router = createBrowserRouter([
