@@ -1,4 +1,4 @@
-import {APIResponse, APIStatus} from "#root/src/types.ts";
+import {APIResponse, APIStatus, PaginationResponse} from "#root/src/types.ts";
 import {StockData, StockDataBE} from "#root/src/routes/portfolio-diary/types.ts";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/stock`;
@@ -125,7 +125,7 @@ const setUntrackedStock = async (id: string): Promise<APIResponse<any[]>> => {
     };
 }
 
-const getStockDuplicates = async (limit: number = 10, offset: number = 0) => {
+const getStockDuplicates = async (limit: number = 10, offset: number = 0): Promise<APIResponse<PaginationResponse<any>>> => {
 
     const response = await fetch(`${baseUrl}/duplicates?limit=${limit}&offset=${offset}`, {
         method: 'GET'
@@ -133,14 +133,24 @@ const getStockDuplicates = async (limit: number = 10, offset: number = 0) => {
 
     if (!response.ok) return {
         status: APIStatus.FAIL,
-        data: []
+        data: {
+            total_rows: '0',
+            limit: limit,
+            offset: offset,
+            data: []
+        }
     };
 
     const responseJSON = await response.json();
 
     if (responseJSON.status !== 1) return {
         status: APIStatus.FAIL,
-        data: [],
+        data: {
+            total_rows: '0',
+            limit: limit,
+            offset: offset,
+            data: []
+        }
     };
 
     return {

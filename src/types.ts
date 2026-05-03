@@ -7,9 +7,16 @@ const APIStatus = {
     FAIL: 'fail'
 } as const;
 
-export interface APIResponse <T>{
+export interface APIResponse<T> {
     status: APIStatusKeys;
     data: T;
+}
+
+export interface PaginationResponse<T> {
+    total_rows: string;
+    data: T[];
+    offset: number;
+    limit: number;
 }
 
 export type APIStatusKeys = typeof APIStatus[keyof typeof APIStatus];
