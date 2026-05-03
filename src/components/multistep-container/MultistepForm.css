@@ -1,0 +1,22 @@
+.header-container {
+    border-bottom: 1px solid black;
+    padding: 0.5rem 0;
+}
+
+.progress-bar-container {
+    margin: 1rem 0;
+}
+
+.stage-container {
+    padding: 0.5rem 0;
+}
+
+.controls-container {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+
+    .controls-btn {
+        margin-left: 1rem;
+    }
+}
