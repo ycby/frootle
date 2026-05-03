@@ -1,5 +1,5 @@
 import {Button, ProgressBar} from "react-bootstrap";
-import {createContext, ReactNode, useContext, useState} from "react";
+import {createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState, RefObject} from "react";
 
 import './MultistepForm.css';
 
@@ -13,6 +13,7 @@ type MultistepFormProps = {
 
 type StageProps = {
     index: number;
+    validation?: null | (() => boolean);
     children: ReactNode;
 }
 
@@ -21,13 +22,21 @@ type StageContextType = {
     setCurrentStage: (stage: number) => void;
     totalStages: number;
     onFinish?: () => Promise<void>;
+    validations: RefObject<MultistepValidation>,
+    registerValidation: (key: number, fn: (() => boolean) | null) => void
+}
+
+type MultistepValidation = {
+    [key: number]: null | (() => boolean);
 }
 
 const StageContext = createContext<StageContextType>({
     currentStage: 0,
     setCurrentStage: (_stage: number) => {},
     totalStages: 0,
-    onFinish: async () => {}
+    onFinish: async () => {},
+    validations: {current: {}},
+    registerValidation: (_key: number, _fn: (() => boolean) | null) => {}
 });
 
 const MultistepForm = ({
@@ -40,8 +49,15 @@ const MultistepForm = ({
 
     const [currentStage, setCurrentStage] = useState<number>(initialStage);
 
+    const validations = useRef<MultistepValidation>({});
+
+    const registerValidation = useCallback((key: number, fn: (() => boolean) | null) => {
+
+        validations.current[key] = fn;
+    }, [children]);
+
     return (
-        <StageContext value={{currentStage, setCurrentStage, totalStages, onFinish}}>
+        <StageContext value={{currentStage, setCurrentStage, totalStages, onFinish, validations, registerValidation}}>
             <div>
                 {
                     title ?
@@ -73,9 +89,28 @@ const Header = ({children}: Pick<StageProps, 'children'>) => {
     );
 }
 
-const Stage = ({index, children}: StageProps) => {
+const Stage = ({index, validation = null, children}: StageProps) => {
 
-    const {currentStage} = useContext(StageContext);
+    const {currentStage, registerValidation} = useContext(StageContext);
+
+    const validationRef = useRef(validation);
+
+    useEffect(() => {
+
+        validationRef.current = validation;
+    });
+
+    useEffect(() => {
+
+        const stableValidationRef = () => {
+
+            return validationRef.current?.() ?? false;
+        }
+
+        registerValidation(index, stableValidationRef);
+
+        return (() => registerValidation(index, null));
+    }, [index, validation]);
 
     return (
         currentStage === index ?
@@ -105,7 +140,9 @@ const Complete = ({children}: Pick<StageProps, 'children'>) => {
 
 const Controls = () => {
 
-    const {currentStage, setCurrentStage, totalStages, onFinish} = useContext(StageContext);
+    const {currentStage, setCurrentStage, totalStages, onFinish, validations} = useContext(StageContext);
+
+    const currentValidation = validations.current[currentStage];
 
     return (
         <div
@@ -122,6 +159,13 @@ const Controls = () => {
             <Button
                 variant='primary'
                 onClick={async () => {
+
+                    if (currentValidation !== null && !currentValidation()) {
+
+                        console.log(currentValidation.toString());
+                        //alert error
+                        return;
+                    }
 
                     if (currentStage < totalStages) {
 
