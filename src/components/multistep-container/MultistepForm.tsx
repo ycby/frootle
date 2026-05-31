@@ -14,6 +14,7 @@ type MultistepFormProps = {
 type StageProps = {
     index: number;
     validation?: null | (() => boolean);
+    onNext?: null | (() => void);
     children: ReactNode;
 }
 
@@ -23,11 +24,17 @@ type StageContextType = {
     totalStages: number;
     onFinish?: () => Promise<void>;
     validations: RefObject<MultistepValidation>,
-    registerValidation: (key: number, fn: (() => boolean) | null) => void
+    registerValidation: (key: number, fn: (() => boolean) | null) => void,
+    onNextFunctions: RefObject<MultistepOnNext>,
+    registerOnNext: (key: number, fn: (() => void) | null) => void
 }
 
 type MultistepValidation = {
     [key: number]: null | (() => boolean);
+}
+
+type MultistepOnNext = {
+    [key: number]: null | (() => void);
 }
 
 const StageContext = createContext<StageContextType>({
@@ -36,7 +43,9 @@ const StageContext = createContext<StageContextType>({
     totalStages: 0,
     onFinish: async () => {},
     validations: {current: {}},
-    registerValidation: (_key: number, _fn: (() => boolean) | null) => {}
+    registerValidation: (_key: number, _fn: (() => boolean) | null) => {},
+    onNextFunctions: {current: {}},
+    registerOnNext: (_key: number, _fn: (() => void) | null) => {}
 });
 
 const MultistepForm = ({
@@ -50,14 +59,31 @@ const MultistepForm = ({
     const [currentStage, setCurrentStage] = useState<number>(initialStage);
 
     const validations = useRef<MultistepValidation>({});
+    const onNextFunctions = useRef<MultistepOnNext>({});
 
     const registerValidation = useCallback((key: number, fn: (() => boolean) | null) => {
 
         validations.current[key] = fn;
     }, [children]);
 
+    const registerOnNext = useCallback((key: number, fn: (() => void) | null) => {
+
+        onNextFunctions.current[key] = fn;
+    }, [children]);
+
     return (
-        <StageContext value={{currentStage, setCurrentStage, totalStages, onFinish, validations, registerValidation}}>
+        <StageContext
+            value={{
+                currentStage,
+                setCurrentStage,
+                totalStages,
+                onFinish,
+                validations,
+                registerValidation,
+                onNextFunctions,
+                registerOnNext
+            }}
+        >
             <div>
                 {
                     title ?
@@ -89,28 +115,36 @@ const Header = ({children}: Pick<StageProps, 'children'>) => {
     );
 }
 
-const Stage = ({index, validation = null, children}: StageProps) => {
+const Stage = ({index, validation = null, onNext = null, children}: StageProps) => {
 
-    const {currentStage, registerValidation} = useContext(StageContext);
+    const {currentStage, registerValidation, registerOnNext} = useContext(StageContext);
 
     const validationRef = useRef(validation);
+    const onNextRef = useRef(onNext);
 
     useEffect(() => {
 
-        validationRef.current = validation;
+        validationRef.current = validation ?? (() => true);
+        onNextRef.current = onNext;
     });
 
     useEffect(() => {
 
-        const stableValidationRef = () => {
-
-            return validationRef.current?.() ?? false;
-        }
+        const stableValidationRef = () => validationRef.current?.() ?? false;
 
         registerValidation(index, stableValidationRef);
 
         return (() => registerValidation(index, null));
     }, [index, validation]);
+
+    useEffect(() => {
+
+        const stableOnNextRef = () => onNextRef.current?.() ?? false;
+
+        registerOnNext(index, stableOnNextRef);
+
+        return (() => registerOnNext(index, null));
+    }, [index, onNext]);
 
     return (
         currentStage === index ?
@@ -140,9 +174,10 @@ const Complete = ({children}: Pick<StageProps, 'children'>) => {
 
 const Controls = () => {
 
-    const {currentStage, setCurrentStage, totalStages, onFinish, validations} = useContext(StageContext);
+    const {currentStage, setCurrentStage, totalStages, onFinish, validations, onNextFunctions} = useContext(StageContext);
 
-    const currentValidation = validations.current[currentStage];
+    const currentValidation = validations.current[currentStage] ?? null;
+    const currentOnNext = onNextFunctions.current[currentStage] ?? null;
 
     return (
         <div
@@ -160,12 +195,8 @@ const Controls = () => {
                 variant='primary'
                 onClick={async () => {
 
-                    if (currentValidation !== null && !currentValidation()) {
-
-                        console.log(currentValidation.toString());
-                        //alert error
-                        return;
-                    }
+                    if (currentValidation !== null && !currentValidation()) return;
+                    if (currentOnNext !== null) currentOnNext();
 
                     if (currentStage < totalStages) {
 

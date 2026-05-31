@@ -96,16 +96,13 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 					switch (e.key) {
 						case 'ArrowDown':
 							e.preventDefault();
-							console.log('Down pressed');
 							setSelectedIndex(clamp(selectedIndex + 1, -1, listItems.length - 1));
 							break;
 						case 'ArrowUp':
 							e.preventDefault();
-							console.log('Up pressed');
 							setSelectedIndex(clamp(selectedIndex - 1, -1, listItems.length - 1));
 							break;
 						case 'Enter':
-							console.log('Enter Pressed');
 							if (selectedIndex < 0 || selectedIndex > itemRefs.current.length) return;
 							if (isOpen && listItems[selectedIndex] !== null) {
 								const childItem = listItems[selectedIndex];
@@ -115,7 +112,7 @@ export const FilterableSelect = <T,>(props: FilterableSelectProps<T>) => {
 							}
 							break;
 						default:
-							console.log(e.key);
+							break;
 					}
 				}}
 			/>

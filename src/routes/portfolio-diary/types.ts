@@ -11,6 +11,12 @@ export type StockData = {
     tickerNo: string;
     name: string;
     fullName?: string;
+    description?: string;
+    category: string;
+    subcategory: string;
+    boardLot: number;
+    ISIN: string;
+    currency: CurrencyKeys;
     isActive: boolean;
     createdDatetime?: Date;
     lastModifiedDatetime?: Date;
@@ -21,6 +27,12 @@ export type StockDataBE = {
     ticker_no: string;
     name: string;
     full_name?: string;
+    description?: string;
+    category: string;
+    subcategory: string;
+    board_lot: number;
+    ISIN: string;
+    currency: string;
     is_active: boolean;
     created_datetime: Date;
     last_modified_datetime: Date;
