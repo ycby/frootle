@@ -91,6 +91,9 @@ const StockMergePage = () => {
     const [survivor, setSurvivor] = useState<StockData | null>(null);
     const [rejects, setRejects] = useState<StockData[]>([]);
 
+    const limit = useRef<number>(10);
+    const offset = useRef<number>(0);
+
     const {
         addAlert
     } = useAlert();
@@ -110,7 +113,7 @@ const StockMergePage = () => {
 
     useEffect(() => {
 
-        getDuplicateData(10, 0);
+        getDuplicateData(limit.current, offset.current);
     }, []);
 
     const setSurvivorAndRejects = (data: any[], rowSelection: number[]) => {
@@ -160,8 +163,12 @@ const StockMergePage = () => {
                     </Stack>
                     <WrappedPagination
                         totalRows={totalRows.current}
-                        limit={10}
-                        onPageClick={(pageNumber: number) => getDuplicateData(10, (pageNumber - 1) * 10)}
+                        limit={limit.current}
+                        onPageClick={(pageNumber: number) => {
+
+                            offset.current = (pageNumber - 1) * limit.current + offset.current;
+                            getDuplicateData(limit.current, offset.current);
+                        }}
                     />
                 </MultistepForm.Stage>
                 <MultistepForm.Stage

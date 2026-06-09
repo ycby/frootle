@@ -88,7 +88,7 @@ const generateNavigationComponent = (element: BaseNavigationType, index: number,
                         <FiHash size={16} />
                     </div>
                     <div className='selected-nav'>
-                        <IoIosReturnLeft size={24} />
+                        <IoIosReturnLeft className='selected-nav-icon' size={24} />
                     </div>
                 </> :
                 <b>{element.navigationLabel}</b>
