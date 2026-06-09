@@ -20,6 +20,16 @@ const navigationData: BaseNavigationType[] = [
         children: []
     },
     {
+        navigationLabel: 'Stock Management',
+        children: [
+            {
+                navigationLabel: 'Duplicate Management',
+                navigationLink: '/stock-duplicates',
+                children: []
+            }
+        ]
+    },
+    {
         navigationLabel: 'Short Data',
         children: [
             {
@@ -38,7 +48,7 @@ const navigationData: BaseNavigationType[] = [
 
 const Sidebar = () => {
 
-    const [show, setShow] = useState(true);
+    const [show, setShow] = useState(false);
 
     return (
         <>
@@ -78,7 +88,7 @@ const generateNavigationComponent = (element: BaseNavigationType, index: number,
                         <FiHash size={16} />
                     </div>
                     <div className='selected-nav'>
-                        <IoIosReturnLeft size={24} />
+                        <IoIosReturnLeft className='selected-nav-icon' size={24} />
                     </div>
                 </> :
                 <b>{element.navigationLabel}</b>

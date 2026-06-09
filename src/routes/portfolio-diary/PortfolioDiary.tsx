@@ -154,6 +154,4 @@ const PortfolioDiary = () => {
     );
 }
 
-export {
-    PortfolioDiary
-}
+export default PortfolioDiary;

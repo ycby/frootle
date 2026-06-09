@@ -14,7 +14,7 @@
                 padding: var(--padding-base) 0;
                 color: #252422;
             }
-            li a:visited {
+            li a:visited, a:link {
                 color: #252422;
             }
             li .selected-nav, .active-nav {
@@ -23,6 +23,13 @@
             }
             li:not(:has(li)):hover .selected-nav {
                 display: inline-block;
+                position: relative;
+
+                .selected-nav-icon {
+                    position: absolute;
+                    top: -16px;
+                    left: 8px;
+                }
             }
             li:not(:has(li)):has(a.active) .active-nav {
                 display: inline-block;

@@ -57,7 +57,7 @@ const headers = [
 	}
 ]
 
-export default function ShortReporting() {
+export default function ShortReportingPage() {
 
 	const [data, setData] = useState<ShortData[]>([]);
 	const [chartData, setChartData] = useState<ChartPoint[]>([]);
