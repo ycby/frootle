@@ -17,6 +17,7 @@ const stockMapperFE = (sourceObj: StockDataBE): StockData => {
         ISIN: sourceObj.ISIN,
         currency: sourceObj.currency as CurrencyKeys,
         isActive: sourceObj.is_active,
+        isTracked: sourceObj.is_tracked,
         createdDatetime: sourceObj.created_datetime,
         lastModifiedDatetime: sourceObj.last_modified_datetime,
     }
@@ -37,6 +38,7 @@ const stockMapperBE = (sourceObj: StockData): Partial<StockDataBE> => {
     if (sourceObj.ISIN !== undefined) result.ISIN = sourceObj.ISIN;
     if (sourceObj.currency !== undefined) result.currency = sourceObj.currency;
     if (sourceObj.isActive !== undefined) result.is_active = sourceObj.isActive;
+    if (sourceObj.isTracked !== undefined) result.is_tracked = sourceObj.isTracked;
 
     return result;
 }

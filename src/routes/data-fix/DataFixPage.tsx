@@ -28,6 +28,9 @@ const DataFixPage = () => {
     const [fixStockData, setFixStockData] = useState<StockData | null>();
     const totalRows = useRef<number>(0);
 
+    const limit = useRef<number>(10);
+    const offset = useRef<number>(0);
+
     const {
         addAlert
     } = useAlert();
@@ -41,7 +44,7 @@ const DataFixPage = () => {
     }
     useEffect(() => {
 
-        getTickerList(10, 0);
+        getTickerList(limit.current, offset.current);
     }, []);
 
     useEffect(() => {
@@ -210,8 +213,8 @@ const DataFixPage = () => {
                                                     });
                                                     //disappear them
                                                     console.log('Successful PUT!');
-                                                    setUnparentedShortData(unparentedShortData.filter((element) => element.stockId === null || element.stockId === undefined));
-                                                    setSelectedChildrenIndex([]);
+                                                    getTickerList(limit.current, offset.current);
+                                                    setSelectedTicker('');
                                                 } else {
                                                     //set fail alert here
                                                     addAlert({

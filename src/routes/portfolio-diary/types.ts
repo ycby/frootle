@@ -18,6 +18,7 @@ export type StockData = {
     ISIN: string;
     currency: CurrencyKeys;
     isActive: boolean;
+    isTracked: boolean;
     createdDatetime?: Date;
     lastModifiedDatetime?: Date;
 }
@@ -34,6 +35,7 @@ export type StockDataBE = {
     ISIN: string;
     currency: string;
     is_active: boolean;
+    is_tracked: boolean;
     created_datetime: Date;
     last_modified_datetime: Date;
 }
